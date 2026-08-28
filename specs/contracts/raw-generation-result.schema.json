@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:raw-generation-result:0.1.0",
+  "title": "A-LifeLM raw generation result",
+  "description": "Immutable infrastructure evidence captured before action parsing or Gateway binding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "opportunity_id",
+    "context_pack_id",
+    "context_hash",
+    "raw_text",
+    "token_ids",
+    "model_profile_id",
+    "generation_policy_id",
+    "generation_policy_version",
+    "generation_seed_id",
+    "finish_reason"
+  ],
+  "properties": {
+    "opportunity_id": { "$ref": "#/$defs/opaqueId" },
+    "context_pack_id": { "$ref": "#/$defs/opaqueId" },
+    "context_hash": { "$ref": "#/$defs/digest" },
+    "raw_text": { "type": "string" },
+    "token_ids": {
+      "anyOf": [
+        { "type": "array", "items": { "type": "integer" } },
+        { "type": "null" }
+      ]
+    },
+    "model_profile_id": { "$ref": "#/$defs/opaqueId" },
+    "generation_policy_id": { "$ref": "#/$defs/opaqueId" },
+    "generation_policy_version": { "$ref": "#/$defs/version" },
+    "generation_seed_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] },
+    "finish_reason": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] }
+  },
+  "x-alifelm-invariants": [
+    "raw generation is not an ActionIntent",
+    "raw evidence is captured before parsing and Gateway identity binding",
+    "actor_id, tick, intent_id, and generation seed value are not model-supplied fields"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

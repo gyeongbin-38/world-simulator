@@ -46,6 +46,9 @@
     "contracts/idempotency.schema.json",
     "contracts/context-pack.schema.json",
     "contracts/context-policy.schema.json",
-    "contracts/action-presentation.schema.json"
+    "contracts/action-presentation.schema.json",
+    "contracts/model-profile.schema.json",
+    "contracts/generation-policy.schema.json",
+    "contracts/raw-generation-result.schema.json"
   ]
 }

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:model-profile:0.1.0",
+  "title": "A-LifeLM explicit model profile",
+  "description": "Infrastructure-only model loading metadata; never model-facing or canonical state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile_id",
+    "profile_version",
+    "model_identifier",
+    "model_revision",
+    "model_digest",
+    "tokenizer_identifier",
+    "tokenizer_digest",
+    "model_class",
+    "generation_policy_id",
+    "device",
+    "dtype",
+    "adapter_ref",
+    "trust_remote_code"
+  ],
+  "properties": {
+    "profile_id": { "$ref": "#/$defs/opaqueId" },
+    "profile_version": { "$ref": "#/$defs/version" },
+    "model_identifier": { "type": "string", "minLength": 1 },
+    "model_revision": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+    "model_digest": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+    "tokenizer_identifier": { "type": "string", "minLength": 1 },
+    "tokenizer_digest": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+    "model_class": { "type": "string", "minLength": 1 },
+    "generation_policy_id": { "$ref": "#/$defs/opaqueId" },
+    "device": { "type": "string", "minLength": 1 },
+    "dtype": { "enum": ["auto", "float32", "float16", "bfloat16"] },
+    "adapter_ref": {
+      "anyOf": [{ "$ref": "artifact-ref.schema.json" }, { "type": "null" }]
+    },
+    "trust_remote_code": { "type": "boolean" }
+  },
+  "x-alifelm-invariants": [
+    "model and tokenizer identifiers are explicit infrastructure inputs",
+    "remote code is never enabled implicitly",
+    "profile metadata is not rendered into an EXP-000 ContextPack",
+    "adapter_ref is optional and does not change canonical domain authority"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

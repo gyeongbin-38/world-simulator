@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:generation-policy:0.1.0",
+  "title": "A-LifeLM explicit generation policy",
+  "description": "Infrastructure generation controls supplied to a model runtime.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_id",
+    "version",
+    "max_new_tokens",
+    "do_sample",
+    "temperature",
+    "top_p",
+    "top_k",
+    "seed_id",
+    "stop_policy_id"
+  ],
+  "properties": {
+    "policy_id": { "$ref": "#/$defs/opaqueId" },
+    "version": { "$ref": "#/$defs/version" },
+    "max_new_tokens": { "type": "integer", "minimum": 1 },
+    "do_sample": { "type": "boolean" },
+    "temperature": { "anyOf": [{ "type": "number", "exclusiveMinimum": 0 }, { "type": "null" }] },
+    "top_p": { "anyOf": [{ "type": "number", "exclusiveMinimum": 0, "maximum": 1 }, { "type": "null" }] },
+    "top_k": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+    "seed_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] },
+    "stop_policy_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] }
+  },
+  "x-alifelm-invariants": [
+    "sampling semantics are explicit inputs and are not selected by the backend",
+    "seed identity is infrastructure metadata and is not model-facing",
+    "retry count and wall-clock timing are not generation policy fields"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    }
+  }
+}

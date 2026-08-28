@@ -12,6 +12,12 @@ license = { text = "MIT" }
 authors = [{ name = "A-LifeLM contributors" }]
 dependencies = []
 
+[project.optional-dependencies]
+model = [
+  "torch>=2.5",
+  "transformers>=4.45",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/alifelm"]
 
