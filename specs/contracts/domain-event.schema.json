@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:domain-event:0.1.0",
+  "title": "A-LifeLM DomainEvent",
+  "description": "Immutable historical fact with committed ordering metadata.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_type", "commit_tick", "commit_order", "artifact_refs"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "event_type": { "type": "string", "minLength": 1 },
+    "commit_tick": { "type": "integer", "minimum": 0 },
+    "commit_order": { "type": "integer", "minimum": 0 },
+    "artifact_refs": {
+      "type": "array",
+      "items": { "$ref": "artifact-ref.schema.json" }
+    }
+  },
+  "x-alifelm-invariant": "event order is causal only through committed ordering metadata, never wall-clock timestamps"
+}

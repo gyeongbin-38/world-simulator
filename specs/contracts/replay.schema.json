@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:replay:0.2.0",
+  "title": "A-LifeLM ReplayRequest",
+  "description": "Read-only reconstruction of an already committed run; never a fresh replication.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["replay_id", "run_id", "source_mode", "from_state_version", "to_state_version", "expected_state_hash", "model_inference", "status"],
+  "properties": {
+    "replay_id": { "$ref": "#/$defs/opaqueId" },
+    "run_id": { "$ref": "#/$defs/opaqueId" },
+    "source_mode": { "const": "COMMITTED_RUN" },
+    "from_state_version": { "type": "integer", "minimum": 0 },
+    "to_state_version": { "type": "integer", "minimum": 0 },
+    "expected_state_hash": { "$ref": "#/$defs/digest" },
+    "model_inference": { "const": false },
+    "status": { "enum": ["REQUESTED", "VERIFIED", "MISMATCH", "CORRUPT"] }
+  },
+  "x-alifelm-invariants": [
+    "replay does not call a model or create cognition opportunities",
+    "replay reads committed state/events/artifacts and verifies state hashes",
+    "replication is a separate fresh SimulationRun"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:commit-request:0.1.0",
+  "title": "A-LifeLM CommitRequest",
+  "description": "Immutable request to apply staged fragments against one expected snapshot version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "tick", "expected_state_version", "fragments"],
+  "properties": {
+    "run_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "tick": { "type": "integer", "minimum": 0 },
+    "expected_state_version": { "type": "integer", "minimum": 0 },
+    "fragments": { "type": "array", "items": { "$ref": "transition-fragment.schema.json" } }
+  }
+}

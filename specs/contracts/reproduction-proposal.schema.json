@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:reproduction-proposal:0.1.0",
+  "title": "A-LifeLM ReproductionProposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proposal_id",
+    "proposer_id",
+    "target_id",
+    "created_tick",
+    "state",
+    "expires_at_tick"
+  ],
+  "properties": {
+    "proposal_id": { "$ref": "#/$defs/opaqueId" },
+    "proposer_id": { "$ref": "#/$defs/opaqueId" },
+    "target_id": { "$ref": "#/$defs/opaqueId" },
+    "created_tick": { "$ref": "#/$defs/tick" },
+    "state": {
+      "enum": ["PENDING", "ACCEPTED", "REJECTED", "EXPIRED", "INVALIDATED"]
+    },
+    "expires_at_tick": {
+      "anyOf": [{ "$ref": "#/$defs/tick" }, { "type": "null" }]
+    }
+  },
+  "x-alifelm-invariants": [
+    "proposer_id != target_id",
+    "a child requires a proposal, matching explicit acceptance, eligibility, conflict resolution, and one commit",
+    "a multi-birth boundary conflict rejects every conflicting candidate"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

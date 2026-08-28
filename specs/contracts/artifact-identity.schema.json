@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:artifact-identity:0.2.0",
+  "title": "A-LifeLM ArtifactIdentity",
+  "description": "Content-addressed identity and durability state for immutable evidence bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact_id", "digest_algorithm", "digest", "byte_length", "media_type", "contract_id", "storage_state", "required_for_commit"],
+  "properties": {
+    "artifact_id": { "$ref": "#/$defs/opaqueId" },
+    "digest_algorithm": { "const": "sha256" },
+    "digest": { "$ref": "#/$defs/digest" },
+    "byte_length": { "type": "integer", "minimum": 0 },
+    "media_type": { "type": "string", "minLength": 1 },
+    "contract_id": { "type": "string", "minLength": 1 },
+    "storage_state": { "enum": ["STAGED", "DURABLE", "ORPHAN", "REFERENCED"] },
+    "required_for_commit": { "type": "boolean" }
+  },
+  "x-alifelm-invariants": [
+    "a required reference is commit-eligible only when exact bytes are hash-verified and DURABLE",
+    "durable but unreferenced bytes may be ORPHAN without becoming canonical",
+    "a committed reference must resolve to immutable bytes"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

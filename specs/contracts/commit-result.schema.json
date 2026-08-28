@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:commit-result:0.1.0",
+  "title": "A-LifeLM CommitResult",
+  "description": "Immutable result of the in-memory atomic commit boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["committed", "snapshot", "events", "error", "capacity_censored"],
+  "properties": {
+    "committed": { "type": "boolean" },
+    "snapshot": { "$ref": "snapshot.schema.json" },
+    "events": { "type": "array", "items": { "$ref": "domain-event.schema.json" } },
+    "error": { "anyOf": [{ "enum": ["RUN_NOT_RUNNING", "RUN_ID_MISMATCH", "TICK_MISMATCH", "STATE_VERSION_MISMATCH", "INVALID_TRANSITION"] }, { "type": "null" }] },
+    "capacity_censored": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:snapshot:0.1.0",
+  "title": "A-LifeLM Snapshot",
+  "description": "Immutable canonical state at one tick boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "tick", "state_version", "agents", "messages", "proposals", "events", "status"],
+  "properties": {
+    "run_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "tick": { "type": "integer", "minimum": 0 },
+    "state_version": { "type": "integer", "minimum": 0 },
+    "agents": { "type": "array", "items": { "$ref": "agent-state.schema.json" } },
+    "messages": { "type": "array", "items": { "$ref": "message-record.schema.json" } },
+    "proposals": { "type": "array", "items": { "$ref": "reproduction-proposal.schema.json" } },
+    "events": { "type": "array", "items": { "$ref": "domain-event.schema.json" } },
+    "status": { "enum": ["RUNNING", "COMPLETED", "CENSORED"] }
+  },
+  "x-alifelm-invariants": [
+    "the snapshot is immutable",
+    "messages and proposals committed at t are absent from S_t",
+    "dead agents are absent from the next snapshot"
+  ]
+}

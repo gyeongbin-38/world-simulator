@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:context-policy:0.3.0",
+  "title": "A-LifeLM EXP-000 ContextPolicy",
+  "description": "Versioned experimental treatment controlling visibility, history, ordering, recall, canonicalization, and action presentation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_id",
+    "version",
+    "context_schema_version",
+    "visibility",
+    "history",
+    "ordering",
+    "recall",
+    "canonicalization",
+    "action_presentation"
+  ],
+  "properties": {
+    "policy_id": { "$ref": "#/$defs/opaqueId" },
+    "version": { "$ref": "#/$defs/version" },
+    "context_schema_version": { "const": "1.0.0" },
+    "visibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_version",
+        "own_opaque_id",
+        "current_tick",
+        "own_age",
+        "active_peer_directory",
+        "delivered_messages_to_self",
+        "own_sent_message_history",
+        "incoming_pending_proposals",
+        "own_outgoing_proposals",
+        "own_committed_resolutions",
+        "exact_lifespan_or_death_tick",
+        "lineage_or_parent_ids",
+        "agent_birth_seq",
+        "causal_seeds",
+        "model_runtime_identity",
+        "peer_private_records",
+        "uncommitted_protocol_work",
+        "same_tick_peer_outputs",
+        "researcher_or_analysis_labels",
+        "sprite_or_ui_identity"
+      ],
+      "properties": {
+        "policy_version": { "$ref": "#/$defs/version" },
+        "own_opaque_id": { "const": true },
+        "current_tick": { "const": false },
+        "own_age": { "const": true },
+        "active_peer_directory": { "const": true },
+        "delivered_messages_to_self": { "const": true },
+        "own_sent_message_history": { "const": true },
+        "incoming_pending_proposals": { "const": true },
+        "own_outgoing_proposals": { "const": true },
+        "own_committed_resolutions": { "const": true },
+        "exact_lifespan_or_death_tick": { "const": false },
+        "lineage_or_parent_ids": { "const": false },
+        "agent_birth_seq": { "const": false },
+        "causal_seeds": { "const": false },
+        "model_runtime_identity": { "const": false },
+        "peer_private_records": { "const": false },
+        "uncommitted_protocol_work": { "const": false },
+        "same_tick_peer_outputs": { "const": false },
+        "researcher_or_analysis_labels": { "const": false },
+        "sprite_or_ui_identity": { "const": false }
+      }
+    },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_prior_visible_records",
+        "selection",
+        "mandatory_current_categories_outside_limit",
+        "lossy_summarization",
+        "model_written_semantic_memory"
+      ],
+      "properties": {
+        "max_prior_visible_records": { "type": "integer", "minimum": 0 },
+        "selection": { "const": "LATEST_COMMITTED_GROUPS_THEN_PRESENT_CHRONOLOGICALLY" },
+        "mandatory_current_categories_outside_limit": { "const": true },
+        "lossy_summarization": { "const": false },
+        "model_written_semantic_memory": { "const": false }
+      }
+    },
+    "ordering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_version",
+        "unordered_collection_algorithm",
+        "digest_algorithm",
+        "ordering_seed_id",
+        "ordering_seed_digest",
+        "cross_tick_order",
+        "tie_breaker"
+      ],
+      "properties": {
+        "policy_version": { "$ref": "#/$defs/version" },
+        "unordered_collection_algorithm": { "const": "ALIFELM_CONTEXT_ORDER_V1" },
+        "digest_algorithm": { "const": "sha256" },
+        "ordering_seed_id": { "$ref": "#/$defs/opaqueId" },
+        "ordering_seed_digest": { "$ref": "#/$defs/digest" },
+        "cross_tick_order": { "const": "COMMITTED_TICK_CHRONOLOGICAL" },
+        "tie_breaker": { "const": "FULL_STABLE_ITEM_KEY" }
+      }
+    },
+    "recall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "agent_triggered", "semantic_retrieval"],
+      "properties": {
+        "mode": { "const": "DISABLED" },
+        "agent_triggered": { "const": false },
+        "semantic_retrieval": { "const": false }
+      }
+    },
+    "canonicalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "digest_algorithm"],
+      "properties": {
+        "policy": { "const": "ALIFELM_CONTEXT_CANONICAL_JSON_V1" },
+        "digest_algorithm": { "const": "sha256" }
+      }
+    },
+    "action_presentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "version", "contract_digest"],
+      "properties": {
+        "policy_id": { "const": "exp000-neutral-actions" },
+        "version": { "const": "1.0.0" },
+        "contract_digest": { "$ref": "#/$defs/digest" }
+      }
+    }
+  },
+  "x-alifelm-invariants": [
+    "ContextPolicy is frozen experiment configuration and any field change changes context identity",
+    "false visibility fields remain infrastructure/researcher-only and are never rendered",
+    "history is selected in semantic records before tokenizer-specific budgeting",
+    "ordering seeds derive only from frozen causal identities and are not model-visible",
+    "EXP-000 recall and model-written semantic memory are disabled"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:transaction-outbox:0.2.0",
+  "title": "A-LifeLM TransactionOutbox",
+  "description": "A durable post-commit delivery obligation created atomically with its commit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outbox_id", "commit_id", "commit_seq", "record_type", "event_id", "status", "attempt_count", "payload_artifact_ref"],
+  "properties": {
+    "outbox_id": { "$ref": "#/$defs/opaqueId" },
+    "commit_id": { "$ref": "#/$defs/opaqueId" },
+    "commit_seq": { "type": "integer", "minimum": 1 },
+    "record_type": { "enum": ["DOMAIN_EVENT", "SNAPSHOT_PUBLICATION", "ARTIFACT_NOTIFICATION"] },
+    "event_id": {
+      "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }]
+    },
+    "status": { "enum": ["PENDING", "DELIVERED", "FAILED"] },
+    "attempt_count": { "type": "integer", "minimum": 0 },
+    "payload_artifact_ref": {
+      "anyOf": [{ "$ref": "artifact-ref.schema.json" }, { "type": "null" }]
+    }
+  },
+  "x-alifelm-invariants": [
+    "the outbox row is created in the same logical atomic commit as its commit_id",
+    "a DOMAIN_EVENT outbox row identifies its committed event_id",
+    "delivery acknowledgement cannot advance simulation time or alter canonical state",
+    "attempt_count is operational metadata and never causal identity"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    }
+  }
+}

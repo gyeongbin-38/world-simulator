@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:tool:context-router:0.1.0",
+  "title": "Deterministic architecture context route",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["query", "documents"],
+  "properties": {
+    "query": { "type": "string" },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "owner_id", "source", "path", "index_order"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1 },
+          "owner_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "source": { "enum": ["active-owner", "supporting-domain"] },
+          "path": { "type": "string", "minLength": 1 },
+          "index_order": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

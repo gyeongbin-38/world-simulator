@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:agent-state:0.1.0",
+  "title": "A-LifeLM AgentState",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agent_id",
+    "birth_tick",
+    "first_active_tick",
+    "lifespan_ticks",
+    "maturity_delay_ticks",
+    "state",
+    "refractory_until_tick"
+  ],
+  "properties": {
+    "agent_id": { "$ref": "#/$defs/opaqueId" },
+    "birth_tick": { "$ref": "#/$defs/tick" },
+    "first_active_tick": { "$ref": "#/$defs/tick" },
+    "lifespan_ticks": { "type": "integer", "minimum": 1 },
+    "maturity_delay_ticks": { "$ref": "#/$defs/tick" },
+    "state": { "enum": ["ALIVE", "DEAD"] },
+    "refractory_until_tick": {
+      "anyOf": [{ "$ref": "#/$defs/tick" }, { "type": "null" }]
+    }
+  },
+  "allOf": [
+    {
+      "x-alifelm-invariant": "first_active_tick >= birth_tick"
+    }
+  ],
+  "x-alifelm-invariant": "all baseline agents in one run use one fixed global lifespan parameter",
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:idempotency:0.2.0",
+  "title": "A-LifeLM CommitIdempotency",
+  "description": "Stable identity and lookup outcome for infrastructure retries of one logical commit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["commit_id", "run_id", "tick", "state_version_before", "previous_state_hash", "transition_digest", "retry_count", "outcome"],
+  "properties": {
+    "commit_id": { "$ref": "#/$defs/opaqueId" },
+    "run_id": { "$ref": "#/$defs/opaqueId" },
+    "tick": { "type": "integer", "minimum": 0 },
+    "state_version_before": { "type": "integer", "minimum": 0 },
+    "previous_state_hash": { "$ref": "#/$defs/digest" },
+    "transition_digest": { "$ref": "#/$defs/digest" },
+    "retry_count": { "type": "integer", "minimum": 0 },
+    "outcome": { "enum": ["NEW_COMMIT", "EXISTING_COMMIT", "IDENTITY_CONFLICT"] }
+  },
+  "x-alifelm-invariants": [
+    "same immutable request identity returns the existing committed result",
+    "same commit_id with different immutable content is an explicit conflict and is never applied",
+    "retry_count is observational metadata and is excluded from commit_id and causal seed material"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

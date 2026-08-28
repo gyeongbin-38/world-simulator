@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:durable-commit:0.2.0",
+  "title": "A-LifeLM DurableCommit",
+  "description": "Metadata binding one logical atomic state/event/outbox commit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "commit_id",
+    "commit_seq",
+    "run_id",
+    "tick",
+    "state_version_before",
+    "state_version_after",
+    "previous_state_hash",
+    "resulting_state_hash",
+    "transition_digest",
+    "events",
+    "artifact_refs",
+    "outbox_ids",
+    "commit_status"
+  ],
+  "properties": {
+    "commit_id": { "$ref": "#/$defs/opaqueId" },
+    "commit_seq": { "type": "integer", "minimum": 1 },
+    "run_id": { "$ref": "#/$defs/opaqueId" },
+    "tick": { "$ref": "#/$defs/tick" },
+    "state_version_before": { "$ref": "#/$defs/nonNegativeInteger" },
+    "state_version_after": { "$ref": "#/$defs/nonNegativeInteger" },
+    "previous_state_hash": { "$ref": "#/$defs/digest" },
+    "resulting_state_hash": { "$ref": "#/$defs/digest" },
+    "transition_digest": { "$ref": "#/$defs/digest" },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id", "event_ordinal"],
+        "properties": {
+          "event_id": { "$ref": "#/$defs/opaqueId" },
+          "event_ordinal": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "artifact_refs": {
+      "type": "array",
+      "items": { "$ref": "artifact-ref.schema.json" }
+    },
+    "outbox_ids": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/opaqueId" }
+    },
+    "commit_status": { "const": "COMMITTED" }
+  },
+  "x-alifelm-invariants": [
+    "state_version_after = state_version_before + 1",
+    "commit_seq is assigned once and equals state_version_after for baseline progression",
+    "state, required events, required outbox records, and this metadata share one logical atomic commit",
+    "event ordinals are deterministic and independent of wall-clock or completion order"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nonNegativeInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

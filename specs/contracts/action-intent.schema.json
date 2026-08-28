@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:action-intent:0.1.0",
+  "title": "A-LifeLM ActionIntent",
+  "description": "A non-authoritative model proposal; it cannot mutate canonical state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent_id", "actor_id", "tick", "kind", "payload"],
+  "properties": {
+    "intent_id": { "$ref": "#/$defs/opaqueId" },
+    "actor_id": { "$ref": "#/$defs/opaqueId" },
+    "tick": { "$ref": "#/$defs/tick" },
+    "kind": { "enum": ["SEND", "PROPOSE", "ACCEPT", "REJECT", "WAIT"] },
+    "payload": {}
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "kind": { "const": "SEND" },
+        "payload": { "$ref": "#/$defs/sendPayload" }
+      }
+    },
+    {
+      "properties": {
+        "kind": { "const": "PROPOSE" },
+        "payload": { "$ref": "#/$defs/proposePayload" }
+      }
+    },
+    {
+      "properties": {
+        "kind": { "const": "ACCEPT" },
+        "payload": { "$ref": "#/$defs/proposalPayload" }
+      }
+    },
+    {
+      "properties": {
+        "kind": { "const": "REJECT" },
+        "payload": { "$ref": "#/$defs/proposalPayload" }
+      }
+    },
+    {
+      "properties": {
+        "kind": { "const": "WAIT" },
+        "payload": { "$ref": "#/$defs/waitPayload" }
+      }
+    }
+  ],
+  "x-alifelm-invariants": [
+    "kind and payload are discriminated together",
+    "PROPOSE target_agent_id != actor_id",
+    "one baseline cognition opportunity yields at most one primary intent"
+  ],
+  "$defs": {
+    "sendPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_agent_id", "body"],
+      "properties": {
+        "target_agent_id": { "$ref": "#/$defs/opaqueId" },
+        "body": { "type": "string" }
+      }
+    },
+    "proposePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_agent_id"],
+      "properties": { "target_agent_id": { "$ref": "#/$defs/opaqueId" } }
+    },
+    "proposalPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_id"],
+      "properties": { "proposal_id": { "$ref": "#/$defs/opaqueId" } }
+    },
+    "waitPayload": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

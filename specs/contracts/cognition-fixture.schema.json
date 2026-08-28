@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:cognition-fixture:0.1.0",
+  "title": "A-LifeLM Fake CognitionFixture",
+  "description": "Minimal immutable fixture for I-02 fake cognition; not ARC-300 Context Fabric.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tick", "agent_id", "visible_agent_ids", "messages", "proposals"],
+  "properties": {
+    "tick": { "type": "integer", "minimum": 0 },
+    "agent_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "visible_agent_ids": { "type": "array", "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" } },
+    "messages": { "type": "array", "items": { "$ref": "message-record.schema.json" } },
+    "proposals": { "type": "array", "items": { "$ref": "reproduction-proposal.schema.json" } }
+  }
+}

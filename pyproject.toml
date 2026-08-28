@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "alifelm"
+version = "0.1.0"
+description = "Deterministic domain foundation for the A-LifeLM research platform"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "A-LifeLM contributors" }]
+dependencies = []
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/alifelm"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+]

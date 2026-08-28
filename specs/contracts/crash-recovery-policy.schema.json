@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:crash-recovery-policy:0.2.0",
+  "title": "A-LifeLM CrashRecoveryPolicy",
+  "description": "Failure-point policy preserving the last confirmed canonical boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["failure_point", "canonical_boundary", "model_recall", "seed_rule", "commit_resolution", "run_outcome"],
+  "properties": {
+    "failure_point": { "enum": ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"] },
+    "canonical_boundary": { "enum": ["PRIOR_SNAPSHOT", "COMMITTED_NEXT_SNAPSHOT", "EXPLICIT_CORRUPTION_FAILURE"] },
+    "model_recall": { "enum": ["NEVER", "ONLY_BEFORE_DURABLE_RAW_OUTPUT"] },
+    "seed_rule": { "const": "STABLE_EXPERIMENT_RUN_AGENT_OPPORTUNITY_IDENTITY" },
+    "commit_resolution": { "enum": ["NONE", "LOOKUP_ONLY", "SAME_COMMIT_ID_IF_ABSENT", "ROLLBACK_OR_LOOKUP"] },
+    "run_outcome": { "enum": ["RESUME", "COMMITTED_RESULT", "CENSORED", "FAILED_CORRUPTION"] }
+  },
+  "x-alifelm-invariants": [
+    "process crash is not agent death",
+    "restart timing and retry count are not causal seed material",
+    "unknown commit result is resolved by commit_id lookup before retry"
+  ]
+}

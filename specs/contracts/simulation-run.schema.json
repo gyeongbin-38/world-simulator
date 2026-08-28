@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:simulation-run:0.1.0",
+  "title": "A-LifeLM SimulationRun",
+  "description": "Mutable in-memory run handle whose canonical value is its current immutable snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "lifespan_ticks", "maturity_delay_ticks", "refractory_interval_ticks", "_snapshot", "population_capacity", "horizon"],
+  "properties": {
+    "run_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "lifespan_ticks": { "type": "integer", "minimum": 1 },
+    "maturity_delay_ticks": { "type": "integer", "minimum": 0 },
+    "refractory_interval_ticks": { "type": "integer", "minimum": 0 },
+    "_snapshot": { "$ref": "snapshot.schema.json" },
+    "population_capacity": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+    "horizon": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] }
+  },
+  "x-alifelm-invariant": "only the in-memory commit coordinator may replace the current snapshot"
+}

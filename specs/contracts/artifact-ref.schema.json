@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:artifact-ref:0.1.0",
+  "title": "A-LifeLM ArtifactRef",
+  "description": "Stable reference to immutable evidence or payload bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact_id", "digest"],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "digest": { "type": "string", "minLength": 1 }
+  }
+}

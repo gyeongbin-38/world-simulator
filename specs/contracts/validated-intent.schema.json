@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:validated-intent:0.1.0",
+  "title": "A-LifeLM ValidatedIntent",
+  "description": "Immutable valid intent tied to the snapshot version used for validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent", "validated_state_version"],
+  "properties": {
+    "intent": { "$ref": "action-intent.schema.json" },
+    "validated_state_version": { "type": "integer", "minimum": 0 }
+  }
+}

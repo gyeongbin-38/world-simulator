@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:record:0.1.0",
+  "title": "A-LifeLM record categories",
+  "oneOf": [
+    { "const": "STATE" },
+    { "const": "EVENT" },
+    { "const": "ARTIFACT" },
+    { "const": "PROTOCOL" }
+  ],
+  "x-alifelm-definitions": {
+    "STATE": "mutable current simulation truth",
+    "EVENT": "immutable historical fact associated with a committed transition",
+    "ARTIFACT": "immutable evidence or payload identified by stable identity/digest",
+    "PROTOCOL": "non-authoritative request/candidate/work object that may fail"
+  }
+}

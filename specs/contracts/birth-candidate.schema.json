@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:birth-candidate:0.1.0",
+  "title": "A-LifeLM BirthCandidate",
+  "description": "A non-authoritative candidate derived from an exact visible acceptance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposal_id", "proposer_id", "target_id", "acceptance_tick"],
+  "properties": {
+    "proposal_id": { "$ref": "#/$defs/opaqueId" },
+    "proposer_id": { "$ref": "#/$defs/opaqueId" },
+    "target_id": { "$ref": "#/$defs/opaqueId" },
+    "acceptance_tick": { "$ref": "#/$defs/tick" }
+  },
+  "x-alifelm-invariants": [
+    "proposer_id != target_id",
+    "acceptance names the exact proposal target",
+    "a proposal committed at t cannot be accepted during t"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

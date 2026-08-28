@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:message-record:0.1.0",
+  "title": "A-LifeLM MessageRecord",
+  "description": "Immutable committed SEND record, available from the next snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["message_id", "sender_id", "recipient_id", "body", "committed_tick", "available_tick"],
+  "properties": {
+    "message_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "sender_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "recipient_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "body": { "type": "string" },
+    "committed_tick": { "type": "integer", "minimum": 0 },
+    "available_tick": { "type": "integer", "minimum": 0 }
+  },
+  "x-alifelm-invariant": "available_tick = committed_tick + 1"
+}

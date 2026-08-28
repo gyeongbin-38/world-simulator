@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:context-pack:0.3.0",
+  "title": "A-LifeLM ContextPack",
+  "description": "Immutable, traceable agent-scoped context evidence bound to one cognition opportunity and one canonical snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context_pack_id",
+    "schema_version",
+    "context_hash",
+    "model_input",
+    "evidence",
+    "infrastructure"
+  ],
+  "properties": {
+    "context_pack_id": { "$ref": "#/$defs/opaqueId" },
+    "schema_version": { "const": "1.0.0" },
+    "context_hash": { "$ref": "#/$defs/digest" },
+    "model_input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stable_prefix",
+        "current_self",
+        "peer_directory",
+        "newly_delivered",
+        "visible_protocol_state",
+        "prior_history"
+      ],
+      "properties": {
+        "stable_prefix": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mechanics_profile_id", "action_presentation_policy_id", "action_presentation_version"],
+          "properties": {
+            "mechanics_profile_id": { "const": "exp000-minimal-mechanics-v1" },
+            "action_presentation_policy_id": { "const": "exp000-neutral-actions" },
+            "action_presentation_version": { "const": "1.0.0" }
+          }
+        },
+        "current_self": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["agent_id", "age"],
+          "properties": {
+            "agent_id": { "$ref": "#/$defs/opaqueId" },
+            "age": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "peer_directory": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["agent_id"],
+            "properties": {
+              "agent_id": { "$ref": "#/$defs/opaqueId" }
+            }
+          }
+        },
+        "newly_delivered": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visibleRecord" }
+        },
+        "visible_protocol_state": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visibleRecord" }
+        },
+        "prior_history": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visibleRecord" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "opportunity_id",
+        "agent_id",
+        "bound_tick",
+        "bound_state_version",
+        "bound_state_hash",
+        "context_policy_id",
+        "context_policy_version",
+        "context_policy_digest",
+        "visibility_policy_version",
+        "ordering_policy_version",
+        "ordering_seed_id",
+        "ordering_seed_digest",
+        "action_presentation_policy_id",
+        "action_presentation_version",
+        "action_presentation_digest",
+        "provenance",
+        "artifact_refs"
+      ],
+      "properties": {
+        "run_id": { "$ref": "#/$defs/opaqueId" },
+        "opportunity_id": { "$ref": "#/$defs/opaqueId" },
+        "agent_id": { "$ref": "#/$defs/opaqueId" },
+        "bound_tick": { "type": "integer", "minimum": 0 },
+        "bound_state_version": { "type": "integer", "minimum": 0 },
+        "bound_state_hash": { "$ref": "#/$defs/digest" },
+        "context_policy_id": { "$ref": "#/$defs/opaqueId" },
+        "context_policy_version": { "$ref": "#/$defs/version" },
+        "context_policy_digest": { "$ref": "#/$defs/digest" },
+        "visibility_policy_version": { "$ref": "#/$defs/version" },
+        "ordering_policy_version": { "$ref": "#/$defs/version" },
+        "ordering_seed_id": { "$ref": "#/$defs/opaqueId" },
+        "ordering_seed_digest": { "$ref": "#/$defs/digest" },
+        "action_presentation_policy_id": { "const": "exp000-neutral-actions" },
+        "action_presentation_version": { "const": "1.0.0" },
+        "action_presentation_digest": { "$ref": "#/$defs/digest" },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenance" }
+        },
+        "artifact_refs": {
+          "type": "array",
+          "items": { "$ref": "artifact-ref.schema.json" }
+        }
+      }
+    },
+    "infrastructure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_profile_id",
+        "generation_policy_id",
+        "generation_seed_id",
+        "visible_record_counts",
+        "tokenizer_profile_id",
+        "rendered_input_token_count",
+        "cache_telemetry"
+      ],
+      "properties": {
+        "model_profile_id": { "$ref": "#/$defs/opaqueId" },
+        "generation_policy_id": { "$ref": "#/$defs/opaqueId" },
+        "generation_seed_id": { "$ref": "#/$defs/opaqueId" },
+        "visible_record_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["peers", "newly_delivered", "visible_protocol_state", "prior_history"],
+          "properties": {
+            "peers": { "type": "integer", "minimum": 0 },
+            "newly_delivered": { "type": "integer", "minimum": 0 },
+            "visible_protocol_state": { "type": "integer", "minimum": 0 },
+            "prior_history": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "tokenizer_profile_id": {
+          "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }]
+        },
+        "rendered_input_token_count": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        },
+        "cache_telemetry": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cache_profile_id", "hit"],
+              "properties": {
+                "cache_profile_id": { "$ref": "#/$defs/opaqueId" },
+                "hit": { "type": "boolean" }
+              }
+            },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  },
+  "x-alifelm-invariants": [
+    "only model_input is eligible for model-specific rendering",
+    "model_input contains no current tick, lifespan, lineage, seeds, runtime identity, researcher labels, or sprite identity",
+    "every model-visible projection path resolves to provenance from committed agent-visible evidence",
+    "one source projection appears in at most one model_input collection",
+    "all packs for tick t bind to the same immutable S_t before inference",
+    "context_hash excludes infrastructure telemetry and includes policy/source/ordering identity",
+    "ContextPack is immutable evidence and never mutable AgentState or semantic memory"
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "nullableOpaqueId": {
+      "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }]
+    },
+    "visibleRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "payload"],
+      "properties": {
+        "category": {
+          "enum": [
+            "DELIVERED_MESSAGE",
+            "SENT_MESSAGE",
+            "INCOMING_PROPOSAL",
+            "OUTGOING_PROPOSAL",
+            "PROTOCOL_RESOLUTION"
+          ]
+        },
+        "payload": { "type": "object" }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "category": { "const": "DELIVERED_MESSAGE" },
+            "payload": { "$ref": "#/$defs/deliveredMessage" }
+          }
+        },
+        {
+          "properties": {
+            "category": { "const": "SENT_MESSAGE" },
+            "payload": { "$ref": "#/$defs/sentMessage" }
+          }
+        },
+        {
+          "properties": {
+            "category": { "const": "INCOMING_PROPOSAL" },
+            "payload": { "$ref": "#/$defs/incomingProposal" }
+          }
+        },
+        {
+          "properties": {
+            "category": { "const": "OUTGOING_PROPOSAL" },
+            "payload": { "$ref": "#/$defs/outgoingProposal" }
+          }
+        },
+        {
+          "properties": {
+            "category": { "const": "PROTOCOL_RESOLUTION" },
+            "payload": { "$ref": "#/$defs/protocolResolution" }
+          }
+        }
+      ]
+    },
+    "deliveredMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sender_id", "body"],
+      "properties": {
+        "sender_id": { "$ref": "#/$defs/opaqueId" },
+        "body": { "type": "string" }
+      }
+    },
+    "sentMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipient_id", "body"],
+      "properties": {
+        "recipient_id": { "$ref": "#/$defs/opaqueId" },
+        "body": { "type": "string" }
+      }
+    },
+    "incomingProposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_id", "proposer_id", "state"],
+      "properties": {
+        "proposal_id": { "$ref": "#/$defs/opaqueId" },
+        "proposer_id": { "$ref": "#/$defs/opaqueId" },
+        "state": { "const": "OPEN" }
+      }
+    },
+    "outgoingProposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_id", "target_id", "state"],
+      "properties": {
+        "proposal_id": { "$ref": "#/$defs/opaqueId" },
+        "target_id": { "$ref": "#/$defs/opaqueId" },
+        "state": { "const": "OPEN" }
+      }
+    },
+    "protocolResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_id", "counterparty_id", "result"],
+      "properties": {
+        "proposal_id": { "$ref": "#/$defs/opaqueId" },
+        "counterparty_id": { "$ref": "#/$defs/nullableOpaqueId" },
+        "result": {
+          "enum": [
+            "COMPLETED",
+            "DECLINED",
+            "EXPIRED",
+            "INVALIDATED",
+            "CONFIRMATION_NOT_APPLIED"
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_path",
+        "projection_kind",
+        "source_kind",
+        "source_id",
+        "source_state_version",
+        "commit_id",
+        "commit_tick",
+        "commit_order",
+        "artifact_refs"
+      ],
+      "properties": {
+        "model_path": {
+          "type": "string",
+          "pattern": "^/model_input/(stable_prefix|current_self|peer_directory|newly_delivered|visible_protocol_state|prior_history)(/.*)?$"
+        },
+        "projection_kind": {
+          "enum": [
+            "DELIVERED_MESSAGE",
+            "SENT_MESSAGE",
+            "INCOMING_PROPOSAL",
+            "OUTGOING_PROPOSAL",
+            "PROTOCOL_RESOLUTION",
+            "SELF_STATE",
+            "PEER_DIRECTORY_ENTRY",
+            "STABLE_PREFIX"
+          ]
+        },
+        "source_kind": { "enum": ["STATE", "EVENT", "ARTIFACT"] },
+        "source_id": { "$ref": "#/$defs/opaqueId" },
+        "source_state_version": { "type": "integer", "minimum": 0 },
+        "commit_id": { "$ref": "#/$defs/nullableOpaqueId" },
+        "commit_tick": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        },
+        "commit_order": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        },
+        "artifact_refs": {
+          "type": "array",
+          "items": { "$ref": "artifact-ref.schema.json" }
+        }
+      }
+    }
+  }
+}

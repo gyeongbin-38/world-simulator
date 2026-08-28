@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:cognition-opportunity:0.1.0",
+  "title": "A-LifeLM CognitionOpportunity",
+  "description": "One immutable opportunity derived from one bound snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["opportunity_id", "run_id", "tick", "agent_id", "snapshot", "fixture"],
+  "properties": {
+    "opportunity_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "run_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "tick": { "type": "integer", "minimum": 0 },
+    "agent_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "snapshot": { "$ref": "snapshot.schema.json" },
+    "fixture": { "$ref": "cognition-fixture.schema.json" }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:action-presentation:0.3.0",
+  "title": "A-LifeLM EXP-000 Neutral Action Presentation",
+  "description": "Single field-level owner for exact baseline model-facing action labels and neutral mechanics.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_id",
+    "version",
+    "output_contract_id",
+    "model_supplied_fields",
+    "gateway_supplied_fields",
+    "one_primary_action_per_opportunity",
+    "presentation_order",
+    "actions"
+  ],
+  "properties": {
+    "policy_id": { "const": "exp000-neutral-actions" },
+    "version": { "const": "1.0.0" },
+    "output_contract_id": { "const": "urn:alifelm:model-output:neutral-action-selection:1.0.0" },
+    "model_supplied_fields": { "const": ["action_label", "payload"] },
+    "gateway_supplied_fields": { "const": ["intent_id", "actor_id", "tick"] },
+    "one_primary_action_per_opportunity": { "const": true },
+    "presentation_order": {
+      "const": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"]
+    },
+    "actions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+      "properties": {
+        "WAIT": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model_label", "description", "payload_fields"],
+          "properties": {
+            "model_label": { "const": "NO_DIRECTED_ACTION" },
+            "description": { "const": "Submit no directed text or bilateral request in this opportunity." },
+            "payload_fields": { "const": [] }
+          }
+        },
+        "SEND": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model_label", "description", "payload_fields"],
+          "properties": {
+            "model_label": { "const": "DIRECT_TEXT" },
+            "description": { "const": "Provide text to one listed opaque agent identity." },
+            "payload_fields": { "const": ["target_agent_id", "body"] }
+          }
+        },
+        "PROPOSE": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model_label", "description", "payload_fields"],
+          "properties": {
+            "model_label": { "const": "OPEN_BILATERAL_REQUEST" },
+            "description": { "const": "Open a request with one listed opaque identity; if later confirmed and system conditions permit, one additional opaque agent may be created." },
+            "payload_fields": { "const": ["target_agent_id"] }
+          }
+        },
+        "ACCEPT": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model_label", "description", "payload_fields"],
+          "properties": {
+            "model_label": { "const": "CONFIRM_BILATERAL_REQUEST" },
+            "description": { "const": "Confirm one visible pending request addressed to this agent; system rules determine the committed result." },
+            "payload_fields": { "const": ["proposal_id"] }
+          }
+        },
+        "REJECT": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model_label", "description", "payload_fields"],
+          "properties": {
+            "model_label": { "const": "DECLINE_BILATERAL_REQUEST" },
+            "description": { "const": "Decline one visible pending request addressed to this agent." },
+            "payload_fields": { "const": ["proposal_id"] }
+          }
+        }
+      }
+    }
+  },
+  "x-alifelm-invariants": [
+    "labels describe mechanics without prescribing desirability, frequency, role, survival, cooperation, or social objective",
+    "the model supplies only action_label and payload; the Cognition Gateway binds opportunity identity, actor, and hidden tick before producing ActionIntent",
+    "the presentation contains no recall action in EXP-000",
+    "any wording, label, payload, grammar, or presentation-order change requires a new version"
+  ]
+}

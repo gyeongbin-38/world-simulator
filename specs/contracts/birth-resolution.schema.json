@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:birth-resolution:0.1.0",
+  "title": "A-LifeLM BirthResolution",
+  "description": "Immutable boundary classification with no winner among conflicting candidates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["successful", "conflicted", "conflict_reason"],
+  "properties": {
+    "successful": { "type": "array", "items": { "$ref": "birth-candidate.schema.json" } },
+    "conflicted": { "type": "array", "items": { "$ref": "birth-candidate.schema.json" } },
+    "conflict_reason": { "anyOf": [{ "const": "MULTI_BIRTH_BOUNDARY_CONFLICT" }, { "type": "null" }] }
+  },
+  "x-alifelm-invariants": [
+    "all candidates sharing a parent are conflicted",
+    "conflict classification selects no winner",
+    "conflict classification does not itself terminate the proposal"
+  ]
+}

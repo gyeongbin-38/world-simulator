@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:intent-batch:0.1.0",
+  "title": "A-LifeLM IntentBatch",
+  "description": "Closed same-tick proposals; the batch is not canonical state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tick", "intents"],
+  "properties": {
+    "tick": { "type": "integer", "minimum": 0 },
+    "intents": {
+      "type": "array",
+      "items": { "$ref": "action-intent.schema.json" }
+    }
+  },
+  "x-alifelm-invariants": [
+    "every intent uses the batch tick",
+    "intent identities are unique within the batch",
+    "at most one primary intent exists per actor in the batch"
+  ]
+}
