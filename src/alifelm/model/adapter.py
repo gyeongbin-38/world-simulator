@@ -2,13 +2,22 @@
 
 from __future__ import annotations
 
+import hashlib
 from typing import Protocol
 
 from alifelm.context.gateway import ModelActionCandidate, ModelActionParser
 from alifelm.context.orchestration import CompiledContext
 
-from .generation import GenerationPolicy, GenerationRequest, RawGenerationResult, StopHook
+from .generation import (
+    GenerationPolicy,
+    GenerationRequest,
+    RawGenerationResult,
+    StopHook,
+    PrefixAllowedTokensFn,
+    generation_identity,
+)
 from .profile import ModelProfile
+from .treatments import I0_STRICT_FREE_GENERATION, InterfaceTreatment
 
 
 class ModelRuntime(Protocol):
@@ -27,6 +36,8 @@ def generation_request_for(
     generation_seed: int | None = None,
     generator: object | None = None,
     stop_hooks: tuple[StopHook, ...] = (),
+    interface_treatment: InterfaceTreatment = I0_STRICT_FREE_GENERATION,
+    prefix_allowed_tokens_fn: PrefixAllowedTokensFn | None = None,
 ) -> GenerationRequest:
     """Bind a compiled ContextPack to an explicit infrastructure request."""
 
@@ -36,6 +47,8 @@ def generation_request_for(
         raise TypeError("profile must be a ModelProfile")
     if not isinstance(policy, GenerationPolicy):
         raise TypeError("policy must be a GenerationPolicy")
+    if not isinstance(interface_treatment, InterfaceTreatment):
+        raise TypeError("interface_treatment must be an InterfaceTreatment")
     pack = compiled.context_pack
     if compiled.opportunity.opportunity_id != pack.evidence.opportunity_id:
         raise ValueError("compiled opportunity does not match ContextPack evidence")
@@ -45,17 +58,37 @@ def generation_request_for(
         raise ValueError("ContextPack model profile does not match the request profile")
     if pack.infrastructure.generation_policy_id != policy.policy_id:
         raise ValueError("ContextPack generation policy does not match the request policy")
+    rendered_input = interface_treatment.render(compiled.rendered_input)
+    rendered_input_hash = hashlib.sha256(rendered_input).hexdigest()
     return GenerationRequest(
         opportunity_id=compiled.opportunity.opportunity_id,
+        generation_id=generation_identity(
+            context_hash=pack.context_hash,
+            profile=profile,
+            policy=policy,
+            generation_seed_id=pack.infrastructure.generation_seed_id,
+            generation_seed=generation_seed,
+            rendered_input_hash=rendered_input_hash,
+            interface_treatment_id=interface_treatment.treatment_id,
+            interface_treatment_version=interface_treatment.version,
+            interface_treatment_digest=interface_treatment.digest,
+            constraint_policy_id=interface_treatment.constraint_policy_id,
+        ),
         context_pack_id=pack.context_pack_id,
         context_hash=pack.context_hash,
-        rendered_input=compiled.rendered_input,
+        rendered_input_hash=rendered_input_hash,
+        rendered_input=rendered_input,
+        interface_treatment_id=interface_treatment.treatment_id,
+        interface_treatment_version=interface_treatment.version,
+        interface_treatment_digest=interface_treatment.digest,
+        constraint_policy_id=interface_treatment.constraint_policy_id,
         model_profile=profile,
         generation_policy=policy,
         generation_seed_id=pack.infrastructure.generation_seed_id,
         generation_seed=generation_seed,
         generator=generator,
         stop_hooks=stop_hooks,
+        prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
     )
 
 
@@ -121,10 +154,18 @@ class ContextModelRuntimeAdapter:
             raise TypeError("model runtime must return RawGenerationResult")
         if result.opportunity_id != request.opportunity_id:
             raise ValueError("raw result opportunity identity does not match request")
+        if result.generation_id != request.generation_id:
+            raise ValueError("raw result generation identity does not match request")
         if result.context_pack_id != request.context_pack_id:
             raise ValueError("raw result ContextPack identity does not match request")
         if result.context_hash != request.context_hash:
             raise ValueError("raw result context hash does not match request")
+        if result.rendered_input_hash != request.rendered_input_hash:
+            raise ValueError("raw result rendered input does not match request")
+        if result.interface_treatment_id != request.interface_treatment_id:
+            raise ValueError("raw result interface treatment does not match request")
+        if result.interface_treatment_digest != request.interface_treatment_digest:
+            raise ValueError("raw result interface digest does not match request")
         if result.model_profile_id != self.profile.profile_id:
             raise ValueError("raw result model profile does not match request")
         if result.generation_policy_id != self.generation_policy.policy_id:
@@ -133,6 +174,8 @@ class ContextModelRuntimeAdapter:
             raise ValueError("raw result generation policy version does not match request")
         if result.generation_seed_id != request.generation_seed_id:
             raise ValueError("raw result generation seed identity does not match request")
+        if result.generation_seed != request.generation_seed:
+            raise ValueError("raw result generation seed does not match request")
         self._raw_results.append(result)
         return result
 

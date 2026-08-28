@@ -7,6 +7,7 @@ freeze sampling semantics, batch agents, or write canonical state.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from contextlib import nullcontext
 from typing import Any
 
 from .generation import GenerationRequest, RawGenerationResult
@@ -125,11 +126,16 @@ class TransformersModelRuntime:
             }
             model_kwargs: dict[str, Any] = {
                 "trust_remote_code": profile.trust_remote_code,
-                "torch_dtype": _dtype_value(torch_module, profile.dtype),
             }
+            transformers_major = int(
+                str(getattr(transformers_module, "__version__", "4")).split(".", 1)[0]
+            )
+            dtype_key = "dtype" if transformers_major >= 5 else "torch_dtype"
+            model_kwargs[dtype_key] = _dtype_value(torch_module, profile.dtype)
             if profile.model_revision is not None:
-                tokenizer_kwargs["revision"] = profile.model_revision
                 model_kwargs["revision"] = profile.model_revision
+            if profile.tokenizer_revision is not None:
+                tokenizer_kwargs["revision"] = profile.tokenizer_revision
             tokenizer = tokenizer_loader.from_pretrained(
                 profile.tokenizer_identifier, **tokenizer_kwargs
             )
@@ -167,28 +173,60 @@ class TransformersModelRuntime:
             raise TypeError("injected model must provide generate")
         return runtime
 
-    def _make_generator(self, request: GenerationRequest) -> Any | None:
+    def _rng_context(self, request: GenerationRequest) -> Any:
         if request.generator is not None:
-            return request.generator
+            raise GenerationError(
+                "external generator objects are not supported by the reference backend; "
+                "use the explicit generation_seed request field"
+            )
         if request.generation_seed is None:
-            return None
-        if self._torch is None or not hasattr(self._torch, "Generator"):
-            raise GenerationError("a generation seed was supplied but PyTorch Generator is unavailable")
+            return nullcontext()
+        if self._torch is None or not hasattr(self._torch, "random"):
+            raise GenerationError(
+                "a generation seed was supplied but PyTorch RNG isolation is unavailable"
+            )
+
+        torch_module = self._torch
         device = request.model_profile.device
-        try:
-            generator = self._torch.Generator(device=device if device != "auto" else "cpu")
-            return generator.manual_seed(request.generation_seed)
-        except Exception as error:
-            raise GenerationError("failed to construct the requested generation generator") from error
+
+        class _ForkedSeed:
+            def __enter__(self):
+                devices = []
+                device_type = "cuda"
+                if device.startswith("cuda"):
+                    device_index = 0
+                    if ":" in device:
+                        device_index = int(device.split(":", 1)[1])
+                    devices = [device_index]
+                self._fork = torch_module.random.fork_rng(
+                    devices=devices, device_type=device_type
+                )
+                self._fork.__enter__()
+                torch_module.manual_seed(request.generation_seed)
+                return self
+
+            def __exit__(self, exc_type, exc_value, traceback):
+                return self._fork.__exit__(exc_type, exc_value, traceback)
+
+        return _ForkedSeed()
 
     def generate(self, request: GenerationRequest) -> RawGenerationResult:
         if not isinstance(request, GenerationRequest):
             raise TypeError("request must be a GenerationRequest")
         if request.model_profile != self.profile:
             raise ValueError("request profile does not match the loaded runtime")
+        if request.stop_hooks:
+            raise GenerationError(
+                "stop hooks are not implemented by the reference backend; "
+                "a post-generation check must not masquerade as a generation stop"
+            )
         try:
             text_input = request.rendered_input.decode("utf-8")
-            encoded = self.tokenizer(text_input, return_tensors="pt")
+            encoded = self.tokenizer(
+                text_input,
+                return_tensors="pt",
+                add_special_tokens=self.profile.add_special_tokens,
+            )
             if not isinstance(encoded, Mapping):
                 raise GenerationError("tokenizer output must be a mapping")
             model_inputs = {
@@ -203,6 +241,7 @@ class TransformersModelRuntime:
             generation_kwargs: dict[str, Any] = {
                 "max_new_tokens": request.generation_policy.max_new_tokens,
                 "do_sample": request.generation_policy.do_sample,
+                "repetition_penalty": request.generation_policy.repetition_penalty,
             }
             if request.generation_policy.temperature is not None:
                 generation_kwargs["temperature"] = request.generation_policy.temperature
@@ -210,20 +249,37 @@ class TransformersModelRuntime:
                 generation_kwargs["top_p"] = request.generation_policy.top_p
             if request.generation_policy.top_k is not None:
                 generation_kwargs["top_k"] = request.generation_policy.top_k
-            generator = self._make_generator(request)
-            if generator is not None:
-                generation_kwargs["generator"] = generator
-            outputs = self.model.generate(**model_inputs, **generation_kwargs)
+            if request.prefix_allowed_tokens_fn is not None:
+                generation_kwargs["prefix_allowed_tokens_fn"] = (
+                    request.prefix_allowed_tokens_fn
+                )
+            inference_context = (
+                self._torch.inference_mode()
+                if self._torch is not None and hasattr(self._torch, "inference_mode")
+                else nullcontext()
+            )
+            with self._rng_context(request):
+                with inference_context:
+                    outputs = self.model.generate(**model_inputs, **generation_kwargs)
             sequence = _to_int_tuple(_first_sequence(outputs))
             generated_ids = sequence[_input_length(input_ids) :]
             raw_text = self.tokenizer.decode(
-                list(generated_ids), skip_special_tokens=False
+                list(generated_ids), skip_special_tokens=True
             )
-            finish_reason = None
-            for hook in request.stop_hooks:
-                if hook(raw_text):
-                    finish_reason = "stop_hook"
-                    break
+            generation_config = getattr(self.model, "generation_config", None)
+            eos_ids = getattr(generation_config, "eos_token_id", None)
+            if isinstance(eos_ids, int):
+                eos_ids = (eos_ids,)
+            elif eos_ids is None:
+                eos_ids = ()
+            else:
+                eos_ids = tuple(eos_ids)
+            if generated_ids and generated_ids[-1] in eos_ids:
+                finish_reason = "eos_token"
+            elif len(generated_ids) >= request.generation_policy.max_new_tokens:
+                finish_reason = "length"
+            else:
+                finish_reason = "completed"
         except GenerationError:
             raise
         except Exception as error:
@@ -232,13 +288,20 @@ class TransformersModelRuntime:
             ) from error
         return RawGenerationResult(
             opportunity_id=request.opportunity_id,
+            generation_id=request.generation_id,
             context_pack_id=request.context_pack_id,
             context_hash=request.context_hash,
+            rendered_input_hash=request.rendered_input_hash,
+            interface_treatment_id=request.interface_treatment_id,
+            interface_treatment_version=request.interface_treatment_version,
+            interface_treatment_digest=request.interface_treatment_digest,
+            constraint_policy_id=request.constraint_policy_id,
             raw_text=raw_text,
             token_ids=generated_ids,
             model_profile_id=self.profile.profile_id,
             generation_policy_id=request.generation_policy.policy_id,
             generation_policy_version=request.generation_policy.version,
             generation_seed_id=request.generation_seed_id,
+            generation_seed=request.generation_seed,
             finish_reason=finish_reason,
         )

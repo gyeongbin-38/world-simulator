@@ -50,6 +50,7 @@ class ModelProfile:
     model_revision: str | None
     model_digest: str | None
     tokenizer_identifier: str
+    tokenizer_revision: str | None
     tokenizer_digest: str | None
     model_class: str
     generation_policy_id: str
@@ -57,6 +58,7 @@ class ModelProfile:
     dtype: str
     adapter_ref: ArtifactRef | None
     trust_remote_code: bool
+    add_special_tokens: bool
 
     def __post_init__(self) -> None:
         _opaque(self.profile_id, "profile_id")
@@ -70,6 +72,10 @@ class ModelProfile:
         _nullable_digest(self.model_digest, "model_digest")
         if not isinstance(self.tokenizer_identifier, str) or not self.tokenizer_identifier:
             raise ValueError("tokenizer_identifier must be explicit and non-empty")
+        if self.tokenizer_revision is not None and (
+            not isinstance(self.tokenizer_revision, str) or not self.tokenizer_revision
+        ):
+            raise ValueError("tokenizer_revision must be a non-empty string or None")
         _nullable_digest(self.tokenizer_digest, "tokenizer_digest")
         if not isinstance(self.model_class, str) or not self.model_class:
             raise ValueError("model_class must be a non-empty profile value")
@@ -82,4 +88,5 @@ class ModelProfile:
             raise TypeError("adapter_ref must be an ArtifactRef or None")
         if type(self.trust_remote_code) is not bool:
             raise TypeError("trust_remote_code must be a boolean")
-
+        if type(self.add_special_tokens) is not bool:
+            raise TypeError("add_special_tokens must be a boolean")

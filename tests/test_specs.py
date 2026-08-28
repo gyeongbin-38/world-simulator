@@ -32,6 +32,12 @@ from alifelm.kernel import (
     TransitionFragment,
     TransitionKind,
 )
+from alifelm.model import (
+    CodecValidityStatus,
+    CommitValidityStatus,
+    DomainValidityStatus,
+    InterfaceMode,
+)
 
 
 def test_contract_manifest_points_to_existing_canonical_sources(repository_root: Path) -> None:
@@ -188,3 +194,27 @@ def test_context_fabric_machine_contracts_pin_exp000_baseline(
     assert not {"survive", "mate", "family", "friend", "cooperate", "civilization"} & set(
         rendered_mechanics.split()
     )
+
+
+def test_typed_codec_diagnostic_contract_is_research_only(
+    repository_root: Path,
+) -> None:
+    contracts = repository_root / "specs" / "contracts"
+    treatment = json.loads(
+        (contracts / "interface-treatment.schema.json").read_text(encoding="utf-8")
+    )
+    diagnostic = json.loads(
+        (contracts / "typed-codec-diagnostic.schema.json").read_text(encoding="utf-8")
+    )
+
+    assert treatment["properties"]["mode"]["enum"] == [mode.value for mode in InterfaceMode]
+    assert diagnostic["properties"]["codec_status"]["enum"] == [
+        status.value for status in CodecValidityStatus
+    ]
+    assert diagnostic["properties"]["domain_status"]["enum"] == [
+        status.value for status in DomainValidityStatus
+    ]
+    assert diagnostic["properties"]["commit_status"]["enum"] == [
+        status.value for status in CommitValidityStatus
+    ]
+    assert "researcher-only" in diagnostic["x-alifelm-classification"]

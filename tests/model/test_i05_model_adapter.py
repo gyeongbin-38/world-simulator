@@ -34,6 +34,7 @@ def profile() -> ModelProfile:
         model_revision=None,
         model_digest=None,
         tokenizer_identifier="local/tokenizer",
+        tokenizer_revision=None,
         tokenizer_digest=None,
         model_class="AUTO_CAUSAL_LM",
         generation_policy_id="generation-policy",
@@ -41,6 +42,7 @@ def profile() -> ModelProfile:
         dtype="auto",
         adapter_ref=None,
         trust_remote_code=False,
+        add_special_tokens=True,
     )
 
 
@@ -53,6 +55,7 @@ def generation_policy() -> GenerationPolicy:
         temperature=None,
         top_p=None,
         top_k=None,
+        repetition_penalty=1.0,
         seed_id=None,
         stop_policy_id=None,
     )
@@ -101,14 +104,21 @@ class ScriptedRawRuntime:
         self.requests.append(request)
         return RawGenerationResult(
             opportunity_id=request.opportunity_id,
+            generation_id=request.generation_id,
             context_pack_id=request.context_pack_id,
             context_hash=request.context_hash,
+            rendered_input_hash=request.rendered_input_hash,
+            interface_treatment_id=request.interface_treatment_id,
+            interface_treatment_version=request.interface_treatment_version,
+            interface_treatment_digest=request.interface_treatment_digest,
+            constraint_policy_id=request.constraint_policy_id,
             raw_text=self.raw_text,
             token_ids=(17, 18),
             model_profile_id=request.model_profile.profile_id,
             generation_policy_id=request.generation_policy.policy_id,
             generation_policy_version=request.generation_policy.version,
             generation_seed_id=request.generation_seed_id,
+            generation_seed=request.generation_seed,
             finish_reason=None,
         )
 
@@ -128,6 +138,7 @@ def test_model_profile_and_generation_contracts_are_frozen() -> None:
             model_revision=None,
             model_digest="not-a-digest",
             tokenizer_identifier="local/tokenizer",
+            tokenizer_revision=None,
             tokenizer_digest=None,
             model_class="AUTO_CAUSAL_LM",
             generation_policy_id="generation-policy",
@@ -135,6 +146,7 @@ def test_model_profile_and_generation_contracts_are_frozen() -> None:
             dtype="auto",
             adapter_ref=None,
             trust_remote_code=False,
+            add_special_tokens=True,
         )
 
 
@@ -258,6 +270,14 @@ class FakeGenerator:
         return self
 
 
+class FakeForkRng:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        return False
+
+
 def test_one_rendered_context_produces_raw_generation_before_parsing() -> None:
     compiled = compiled_context()
     tokenizer = FakeTokenizerForGeneration()
@@ -293,10 +313,15 @@ def test_generation_policy_controls_optional_generation_arguments() -> None:
         temperature=0.7,
         top_p=0.9,
         top_k=40,
+        repetition_penalty=1.0,
         seed_id=None,
         stop_policy_id=None,
     )
-    fake_torch = SimpleNamespace(Generator=FakeGenerator)
+    seeded = []
+    fake_torch = SimpleNamespace(
+        random=SimpleNamespace(fork_rng=lambda **kwargs: FakeForkRng()),
+        manual_seed=lambda seed: seeded.append(seed),
+    )
     runtime = TransformersModelRuntime.from_components(
         profile(), tokenizer=tokenizer, model=model, torch_module=fake_torch
     )
@@ -307,10 +332,12 @@ def test_generation_policy_controls_optional_generation_arguments() -> None:
     call = model.calls[0]
     assert call["max_new_tokens"] == 9
     assert call["do_sample"] is True
+    assert call["repetition_penalty"] == 1.0
     assert call["temperature"] == 0.7
     assert call["top_p"] == 0.9
     assert call["top_k"] == 40
-    assert "generator" in call
+    assert "generator" not in call
+    assert seeded == [123]
 
 
 def test_raw_result_is_preserved_and_gateway_binds_identity() -> None:
@@ -404,6 +431,7 @@ def test_request_requires_context_profile_and_policy_identity_match() -> None:
         model_revision=None,
         model_digest=None,
         tokenizer_identifier="local/tokenizer",
+        tokenizer_revision=None,
         tokenizer_digest=None,
         model_class="AUTO_CAUSAL_LM",
         generation_policy_id="generation-policy",
@@ -411,6 +439,7 @@ def test_request_requires_context_profile_and_policy_identity_match() -> None:
         dtype="auto",
         adapter_ref=None,
         trust_remote_code=False,
+        add_special_tokens=True,
     )
     with pytest.raises(ValueError, match="model profile"):
         generation_request_for(compiled, mismatched_profile, generation_policy())

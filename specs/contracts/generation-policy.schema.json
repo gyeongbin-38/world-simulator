@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:alifelm:contract:generation-policy:0.1.0",
+  "$id": "urn:alifelm:contract:generation-policy:0.2.0",
   "title": "A-LifeLM explicit generation policy",
   "description": "Infrastructure generation controls supplied to a model runtime.",
   "type": "object",
@@ -13,6 +13,7 @@
     "temperature",
     "top_p",
     "top_k",
+    "repetition_penalty",
     "seed_id",
     "stop_policy_id"
   ],
@@ -24,6 +25,7 @@
     "temperature": { "anyOf": [{ "type": "number", "exclusiveMinimum": 0 }, { "type": "null" }] },
     "top_p": { "anyOf": [{ "type": "number", "exclusiveMinimum": 0, "maximum": 1 }, { "type": "null" }] },
     "top_k": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+    "repetition_penalty": { "type": "number", "exclusiveMinimum": 0 },
     "seed_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] },
     "stop_policy_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] }
   },

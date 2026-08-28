@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:interface-treatment:0.2.0",
+  "title": "A-LifeLM diagnostic model interface treatment",
+  "description": "Research-side I0/I1/I2/I3 treatment identity; not a canonical action or simulation-state contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["treatment_id", "version", "mode", "completion_suffix", "constraint_policy_id", "digest"],
+  "properties": {
+    "treatment_id": { "$ref": "#/$defs/opaqueId" },
+    "version": { "$ref": "#/$defs/version" },
+    "mode": { "enum": ["I0", "I1", "I2", "I3"] },
+    "completion_suffix": { "type": "string" },
+    "constraint_policy_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] },
+    "digest": { "$ref": "#/$defs/digest" }
+  },
+  "x-alifelm-invariants": [
+    "interface treatments do not change canonical action or simulation semantics",
+    "I1 is a syntax-only completion boundary",
+    "I2 is an explicit constrained-decoding treatment and not an EXP-000 baseline",
+    "I3 enforces only action-conditional structural typing and does not constrain semantic values"
+  ],
+  "$defs": {
+    "opaqueId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

@@ -17,6 +17,11 @@ model = [
   "torch>=2.5",
   "transformers>=4.45",
 ]
+model-diagnostics = [
+  "torch>=2.5",
+  "transformers>=4.45",
+  "lm-format-enforcer==0.11.3",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/alifelm"]

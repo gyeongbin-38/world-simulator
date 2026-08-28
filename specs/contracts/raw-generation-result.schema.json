@@ -1,26 +1,39 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:alifelm:contract:raw-generation-result:0.1.0",
+  "$id": "urn:alifelm:contract:raw-generation-result:0.3.0",
   "title": "A-LifeLM raw generation result",
   "description": "Immutable infrastructure evidence captured before action parsing or Gateway binding.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "opportunity_id",
+    "generation_id",
     "context_pack_id",
     "context_hash",
+    "rendered_input_hash",
+    "interface_treatment_id",
+    "interface_treatment_version",
+    "interface_treatment_digest",
+    "constraint_policy_id",
     "raw_text",
     "token_ids",
     "model_profile_id",
     "generation_policy_id",
     "generation_policy_version",
     "generation_seed_id",
+    "generation_seed",
     "finish_reason"
   ],
   "properties": {
     "opportunity_id": { "$ref": "#/$defs/opaqueId" },
+    "generation_id": { "$ref": "#/$defs/digest" },
     "context_pack_id": { "$ref": "#/$defs/opaqueId" },
     "context_hash": { "$ref": "#/$defs/digest" },
+    "rendered_input_hash": { "$ref": "#/$defs/digest" },
+    "interface_treatment_id": { "$ref": "#/$defs/opaqueId" },
+    "interface_treatment_version": { "$ref": "#/$defs/version" },
+    "interface_treatment_digest": { "$ref": "#/$defs/digest" },
+    "constraint_policy_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] },
     "raw_text": { "type": "string" },
     "token_ids": {
       "anyOf": [
@@ -32,6 +45,7 @@
     "generation_policy_id": { "$ref": "#/$defs/opaqueId" },
     "generation_policy_version": { "$ref": "#/$defs/version" },
     "generation_seed_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] },
+    "generation_seed": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
     "finish_reason": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] }
   },
   "x-alifelm-invariants": [

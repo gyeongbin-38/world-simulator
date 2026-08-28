@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:contract:cognition-evidence:0.2.0",
+  "title": "A-LifeLM real cognition evidence",
+  "description": "Research-side artifact lineage from ContextPack through raw generation, parsing, and optional Gateway binding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generation_id",
+    "context_hash",
+    "rendered_input_hash",
+    "interface_treatment_id",
+    "interface_treatment_version",
+    "interface_treatment_digest",
+    "constraint_policy_id",
+    "context_pack_ref",
+    "rendered_input_ref",
+    "raw_text_ref",
+    "raw_generation_ref",
+    "model_profile_id",
+    "model_revision",
+    "tokenizer_identifier",
+    "tokenizer_revision",
+    "generation_policy_id",
+    "generation_policy_version",
+    "generation_seed_id",
+    "generation_seed",
+    "parse_status",
+    "candidate",
+    "action_intent",
+    "rejection"
+  ],
+  "properties": {
+    "generation_id": { "$ref": "#/$defs/digest" },
+    "context_hash": { "$ref": "#/$defs/digest" },
+    "rendered_input_hash": { "$ref": "#/$defs/digest" },
+    "interface_treatment_id": { "$ref": "#/$defs/opaqueId" },
+    "interface_treatment_version": { "$ref": "#/$defs/version" },
+    "interface_treatment_digest": { "$ref": "#/$defs/digest" },
+    "constraint_policy_id": { "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }] },
+    "context_pack_ref": { "$ref": "artifact-ref.schema.json" },
+    "rendered_input_ref": { "$ref": "artifact-ref.schema.json" },
+    "raw_text_ref": { "$ref": "artifact-ref.schema.json" },
+    "raw_generation_ref": { "$ref": "artifact-ref.schema.json" },
+    "model_profile_id": { "$ref": "#/$defs/opaqueId" },
+    "model_revision": { "$ref": "#/$defs/nullableString" },
+    "tokenizer_identifier": { "type": "string", "minLength": 1 },
+    "tokenizer_revision": { "$ref": "#/$defs/nullableString" },
+    "generation_policy_id": { "$ref": "#/$defs/opaqueId" },
+    "generation_policy_version": { "$ref": "#/$defs/version" },
+    "generation_seed_id": { "$ref": "#/$defs/opaqueId" },
+    "generation_seed": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+    "parse_status": {
+      "enum": [
+        "VALID",
+        "MALFORMED_SYNTAX",
+        "UNKNOWN_ACTION",
+        "INVALID_PAYLOAD",
+        "EXTRA_FORBIDDEN_FIELD",
+        "TRUNCATED",
+        "EMPTY",
+        "BACKEND_FAILURE"
+      ]
+    },
+    "candidate": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action_label", "payload"],
+          "properties": {
+            "action_label": { "type": "string", "minLength": 1 },
+            "payload": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "action_intent": { "anyOf": [{ "$ref": "action-intent.schema.json" }, { "type": "null" }] },
+    "rejection": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["generation_id", "status", "error_type", "error_message"],
+          "properties": {
+            "generation_id": { "$ref": "#/$defs/digest" },
+            "status": { "$ref": "#/$defs/status" },
+            "error_type": { "type": "string", "minLength": 1 },
+            "error_message": { "type": "string" }
+          }
+        },
+        { "type": "null" }
+      ]
+    }
+  },
+  "x-alifelm-invariants": [
+    "raw_text_ref and raw_generation_ref resolve before parsing is attempted",
+    "invalid model output yields rejection evidence and no fabricated ActionIntent",
+    "the Cognition Gateway alone supplies actor_id, tick, and intent_id",
+    "cognition evidence is immutable ARTIFACT/PROTOCOL evidence, not canonical AgentState"
+  ],
+  "$defs": {
+    "opaqueId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "nullableString": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+    "status": {
+      "enum": [
+        "VALID",
+        "MALFORMED_SYNTAX",
+        "UNKNOWN_ACTION",
+        "INVALID_PAYLOAD",
+        "EXTRA_FORBIDDEN_FIELD",
+        "TRUNCATED",
+        "EMPTY",
+        "BACKEND_FAILURE"
+      ]
+    }
+  }
+}

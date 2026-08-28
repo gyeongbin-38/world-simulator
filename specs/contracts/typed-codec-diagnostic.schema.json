@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:typed-codec-diagnostic:1.0.0",
+  "title": "Typed Codec Diagnostic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidate",
+    "codec_status",
+    "commit_status",
+    "context_hash",
+    "domain_status",
+    "generation_id",
+    "gateway_bound_intent",
+    "planned_fragment_count",
+    "treatment_id",
+    "treatment_version"
+  ],
+  "properties": {
+    "candidate": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action_label", "payload"],
+          "properties": {
+            "action_label": {"type": "string", "minLength": 1},
+            "payload": {"type": "object"}
+          }
+        }
+      ]
+    },
+    "codec_status": {
+      "enum": ["CODEC_VALID", "MALFORMED_SYNTAX", "ACTION_PAYLOAD_TYPE_MISMATCH", "TRUNCATED", "EMPTY"]
+    },
+    "domain_status": {
+      "enum": ["DOMAIN_VALID", "UNKNOWN_TARGET", "UNKNOWN_PROPOSAL", "INELIGIBLE_REPRODUCTION", "INVALID_PARTICIPANT", "DOMAIN_REJECTED", "NOT_CODEC_VALID"]
+    },
+    "commit_status": {
+      "enum": ["COMMIT_VALID", "DOMAIN_INVALID", "BOUNDARY_CONFLICT", "PLANNING_FAILED"]
+    },
+    "context_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "generation_id": {"type": "string", "minLength": 1},
+    "gateway_bound_intent": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actor_id", "intent_id", "tick"],
+          "properties": {
+            "actor_id": {"type": "string", "minLength": 1},
+            "intent_id": {"type": "string", "minLength": 1},
+            "tick": {"type": "integer", "minimum": 0}
+          }
+        }
+      ]
+    },
+    "planned_fragment_count": {"type": "integer", "minimum": 0},
+    "treatment_id": {"const": "i05r2-i3-conditional-typed-codec"},
+    "treatment_version": {"const": "1.0.0"}
+  },
+  "x-alifelm-classification": "researcher-only diagnostic artifact; never simulation state or parser authority"
+}
