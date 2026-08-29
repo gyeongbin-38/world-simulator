@@ -49,6 +49,7 @@ from .profile import ModelProfile
 from .motor_diagnostics import (
     GROUNDING_TREATMENT_VERSION,
     SELECTOR_CODES,
+    SELECTOR_GENERATED_OBJECT_PREFIX,
     SELECTOR_PREFIX,
     SELECTOR_TREATMENT_VERSION,
     GroundingHandleMap,
@@ -116,6 +117,7 @@ __all__ = [
     "ModelProfile",
     "GROUNDING_TREATMENT_VERSION",
     "SELECTOR_CODES",
+    "SELECTOR_GENERATED_OBJECT_PREFIX",
     "SELECTOR_PREFIX",
     "SELECTOR_TREATMENT_VERSION",
     "GroundingHandleMap",

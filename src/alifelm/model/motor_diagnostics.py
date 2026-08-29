@@ -35,6 +35,7 @@ from .typed_codec import CodecValidityStatus
 
 SELECTOR_CODES = ("Q", "V", "X", "Z", "K")
 SELECTOR_PREFIX = b'\nSelector JSON:\n{"selector":"'
+SELECTOR_GENERATED_OBJECT_PREFIX = b'{"selector":"'
 SELECTOR_TREATMENT_VERSION = "1.0.0"
 GROUNDING_TREATMENT_VERSION = "1.0.0"
 
@@ -177,7 +178,9 @@ class SelectorScore:
         if self.selector not in SELECTOR_CODES or not self.token_ids:
             raise ValueError("invalid selector score")
         if not math.isfinite(self.total_log_probability) or not math.isfinite(self.mean_log_probability):
-            raise ValueError("selector probabilities must be finite")
+            raise ValueError(
+                f"selector probabilities must be finite: {self.selector}={self.total_log_probability}"
+            )
 
 
 def score_selectors(
@@ -191,7 +194,11 @@ def score_selectors(
     torch_module = runtime.torch_module
     if torch_module is None:
         raise GenerationError("selector scoring requires loaded PyTorch")
-    prefix = rendered_input + SELECTOR_PREFIX
+    # The JSON constraint starts from an empty generated sequence.  I4's
+    # existing prompt scaffold ends with a selector field prefix, but the
+    # constrained output itself begins a complete object.  Score at the real
+    # generated branch point rather than at the prompt-only scaffold.
+    prefix = rendered_input + SELECTOR_PREFIX + SELECTOR_GENERATED_OBJECT_PREFIX
     encoded = runtime.tokenizer(
         prefix.decode("utf-8"), return_tensors="pt",
         add_special_tokens=runtime.profile.add_special_tokens,
@@ -208,7 +215,46 @@ def score_selectors(
     context = torch_module.inference_mode() if hasattr(torch_module, "inference_mode") else nullcontext()
     with context:
         logits = runtime.model(input_ids=input_ids, attention_mask=torch_module.ones_like(input_ids)).logits[0, -1]
-    logp = torch_module.log_softmax(logits, dim=-1)
+    # Score diagnostics in float32 even when an adapter exposes reduced-
+    # precision logits; ranking evidence must not become -inf by underflow.
+    scoring_logits = logits.float() if hasattr(logits, "float") else logits
+    if bool(torch_module.isnan(scoring_logits).any()):
+        # OLMo2's CPU eager forward can expose NaNs at this exact prefix while
+        # its generation path initializes cache/position state correctly.
+        # One-token generation with output_scores returns the same next-token
+        # distribution without selecting or executing an action.
+        generated_prefix_ids = tuple(
+            runtime.tokenizer.encode(
+                SELECTOR_GENERATED_OBJECT_PREFIX.decode("utf-8"),
+                add_special_tokens=False,
+            )
+        )
+        prompt_length = int(input_ids.shape[-1]) - len(generated_prefix_ids)
+        prompt_ids = input_ids[:, :prompt_length]
+        selector_ids = [ids[0] for ids in tokenized.values()]
+
+        def force_generated_prefix(batch_id, sent):
+            del batch_id
+            generated_count = int(sent.shape[-1]) - prompt_length
+            if generated_count < len(generated_prefix_ids):
+                return [generated_prefix_ids[generated_count]]
+            return selector_ids
+
+        fallback_context = torch_module.inference_mode() if hasattr(torch_module, "inference_mode") else nullcontext()
+        with fallback_context:
+            generated = runtime.model.generate(
+                input_ids=prompt_ids,
+                attention_mask=torch_module.ones_like(prompt_ids),
+                max_new_tokens=len(generated_prefix_ids) + 1,
+                do_sample=False,
+                return_dict_in_generate=True,
+                output_scores=True,
+                output_logits=True,
+                prefix_allowed_tokens_fn=force_generated_prefix,
+                pad_token_id=runtime.tokenizer.pad_token_id,
+            )
+        scoring_logits = generated.logits[-1][0].float()
+    logp = torch_module.log_softmax(scoring_logits, dim=-1)
     values = []
     for selector, action in codebook.code_to_action.items():
         ids = tokenized[selector]

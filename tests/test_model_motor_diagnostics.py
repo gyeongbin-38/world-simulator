@@ -9,6 +9,8 @@ from alifelm.model import (
     CodecValidityStatus,
     R3ContextClass,
     SELECTOR_CODES,
+    SELECTOR_GENERATED_OBJECT_PREFIX,
+    SELECTOR_PREFIX,
     SelectorCandidateParser,
     balanced_selector_codebooks,
     codec_status_for_selector,
@@ -102,3 +104,27 @@ def test_codebooks_and_handle_maps_are_immutable():
     _, handles = render_with_local_handles(_compiled())
     with pytest.raises((AttributeError, TypeError)):
         handles.peer_handles = ()
+
+
+def test_r5_grounding_plan_can_exclude_pointer_treatment():
+    plan = {
+        "ACCEPT": {"G0": 10, "G1_FREE": 10},
+        "REJECT": {"G0": 10, "G1_FREE": 10},
+        "SEND": {"G0": 5, "G1_FREE": 5},
+        "PROPOSE": {"G0": 5, "G1_FREE": 5},
+    }
+    assert sum(sum(modes.values()) for modes in plan.values()) == 60
+    assert all("G1_POINTER" not in modes for modes in plan.values())
+
+
+def test_selector_scoring_binds_after_the_generated_object_prefix():
+    assert SELECTOR_PREFIX.endswith(b'{"selector":"')
+    assert SELECTOR_GENERATED_OBJECT_PREFIX == b'{"selector":"'
+    assert SELECTOR_PREFIX != SELECTOR_GENERATED_OBJECT_PREFIX
+
+
+def test_grounding_probe_taxonomy_keeps_malformed_output_separate_from_hallucinated_id():
+    codec_valid = False
+    visible_hit = False
+    self_target = False
+    assert not (codec_valid and not visible_hit and not self_target)

@@ -179,14 +179,19 @@ def _grounding_treatment(action, mode):
     )
 
 
-def run_grounding(arguments, runtime, profile, policy, context_policy, store):
+def run_grounding(arguments, runtime, profile, policy, context_policy, store, *, plan=None):
     fixture_for_action = {"SEND": R3ContextClass.QUIET, "PROPOSE": R3ContextClass.QUIET,
                           "ACCEPT": R3ContextClass.PROPOSAL_RECEIVED, "REJECT": R3ContextClass.PROPOSAL_RECEIVED}
     records = []
     proposal_audit = []
+    default_plan = {
+        action: {mode: arguments.cases for mode in ("G0", "G1_FREE", "G1_POINTER")}
+        for action in fixture_for_action
+    }
+    active_plan = plan or default_plan
     for action, context_class in fixture_for_action.items():
-        for mode in ("G0", "G1_FREE", "G1_POINTER"):
-            for case_index in range(arguments.cases):
+        for mode, case_count in active_plan.get(action, {}).items():
+            for case_index in range(case_count):
                 compiled = compile_r3_fixture(
                     context_class, case_index, policy=context_policy,
                     model_profile_id=profile.profile_id, generation_policy_id=policy.policy_id,
@@ -210,12 +215,17 @@ def run_grounding(arguments, runtime, profile, policy, context_policy, store):
                     prefix_allowed_tokens_fn=constraint,
                 ).run(treated)
                 raw = result.raw_generation.raw_text
-                evaluation_raw = raw if handles is None else map_handle_candidate(raw, handles)
+                try:
+                    raw_candidate = json.loads(raw)
+                    payload = raw_candidate["payload"]
+                    evaluation_raw = raw if handles is None else map_handle_candidate(raw, handles)
+                except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+                    raw_candidate = None
+                    payload = {}
+                    evaluation_raw = raw
                 evaluation = evaluate_typed_codec(evaluation_raw, compiled.opportunity, _diagnostic_run(compiled))
-                raw_candidate = json.loads(raw)
-                payload = raw_candidate["payload"]
                 reference_field = "proposal_id" if action in {"ACCEPT", "REJECT"} else "target_agent_id"
-                reference = payload[reference_field]
+                reference = payload.get(reference_field)
                 if mode == "G0":
                     visible = ({str(item.agent_id) for item in compiled.context_pack.model_input.peer_directory}
                                if reference_field == "target_agent_id" else
@@ -225,6 +235,7 @@ def run_grounding(arguments, runtime, profile, policy, context_policy, store):
                     visible = set(pointer_values or tuple(handle for _, handle in (handles.proposal_handles if reference_field == "proposal_id" else handles.peer_handles)))
                     self_target = reference == str(compiled.opportunity.agent_id)
                 visible_hit = reference in visible
+                codec_valid = evaluation.codec_status.value == "CODEC_VALID"
                 record = {
                     "kind": "GROUNDING", "mode": mode, "action": action,
                     "case_index": case_index, "reference": reference,
@@ -233,7 +244,7 @@ def run_grounding(arguments, runtime, profile, policy, context_policy, store):
                     "domain_status": evaluation.domain_status.value,
                     "commit_status": evaluation.commit_status.value,
                     "self_target": self_target,
-                    "placeholder_or_hallucinated": not visible_hit and not self_target,
+                    "placeholder_or_hallucinated": codec_valid and not visible_hit and not self_target,
                     "body_non_empty": bool(payload.get("body")),
                     "context_hash": result.evidence.context_hash,
                     "generation_id": result.evidence.generation_id,
