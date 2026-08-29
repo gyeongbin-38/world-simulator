@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:alifelm:contract-manifest:0.6.0",
+  "$id": "urn:alifelm:contract-manifest:0.7.0",
   "contract_set": "implementation-foundation-through-model-interface-diagnostics",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "canonical_sources": [
     "architecture/CONSTITUTION.md",
     "architecture/views/ARC-010-trust-visibility-boundaries.md",
@@ -52,6 +52,7 @@
     "contracts/raw-generation-result.schema.json",
     "contracts/cognition-evidence.schema.json",
     "contracts/interface-treatment.schema.json",
-    "contracts/typed-codec-diagnostic.schema.json"
+    "contracts/typed-codec-diagnostic.schema.json",
+    "contracts/action-label-score-diagnostic.schema.json"
   ]
 }

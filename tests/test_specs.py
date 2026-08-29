@@ -218,3 +218,12 @@ def test_typed_codec_diagnostic_contract_is_research_only(
         status.value for status in CommitValidityStatus
     ]
     assert "researcher-only" in diagnostic["x-alifelm-classification"]
+
+    action_score = json.loads(
+        (contracts / "action-label-score-diagnostic.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert action_score["properties"]["scores"]["minItems"] == 5
+    assert action_score["properties"]["scores"]["maxItems"] == 5
+    assert "researcher-only" in action_score["x-alifelm-classification"]

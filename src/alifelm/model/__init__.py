@@ -19,6 +19,16 @@ from .audit import (
     inspect_chat_template,
     inspect_generation_semantics,
 )
+from .action_diagnostics import (
+    ACTION_SCORE_PREFIX,
+    ACTION_SCORE_TREATMENT_ID,
+    ACTION_SCORE_TREATMENT_VERSION,
+    ActionLabelScore,
+    ActionLabelScoreResult,
+    action_label_score_bytes,
+    rank_action_label_scores,
+    score_action_labels,
+)
 from .evidence import (
     CognitionDryRunResult,
     CognitionEvidence,
@@ -36,12 +46,14 @@ from .generation import (
     generation_identity,
 )
 from .profile import ModelProfile
+from .r3_fixtures import R3ContextClass, compile_r3_fixture
 from .transformers_backend import GenerationError, ModelLoadError, TransformersModelRuntime
 from .treatments import (
     I0_STRICT_FREE_GENERATION,
     I1_NEUTRAL_CODEC_SCAFFOLD,
     I2_SYNTAX_CONSTRAINED_CODEC,
     I3_CONDITIONAL_TYPED_CODEC,
+    I3_BRANCH_ORDERS,
     InterfaceMode,
     InterfaceTreatment,
     ResearchDiagnosticLabel,
@@ -49,6 +61,9 @@ from .treatments import (
     action_codec_json_schema,
     build_transformers_constraint,
     diagnose_generation,
+    forced_action_codec_json_schema,
+    i3_branch_order_treatment,
+    i3_forced_branch_treatment,
     typed_action_codec_json_schema,
 )
 from .typed_codec import (
@@ -63,6 +78,14 @@ from .typed_codec import (
 __all__ = [
     "ContextModelRuntimeAdapter",
     "ChatTemplateAudit",
+    "ACTION_SCORE_PREFIX",
+    "ACTION_SCORE_TREATMENT_ID",
+    "ACTION_SCORE_TREATMENT_VERSION",
+    "ActionLabelScore",
+    "ActionLabelScoreResult",
+    "action_label_score_bytes",
+    "rank_action_label_scores",
+    "score_action_labels",
     "CognitionDryRunResult",
     "CognitionEvidence",
     "GenerationError",
@@ -71,6 +94,8 @@ __all__ = [
     "GenerationRequest",
     "ModelLoadError",
     "ModelProfile",
+    "R3ContextClass",
+    "compile_r3_fixture",
     "ModelOutputStatus",
     "ModelRuntime",
     "RawGenerationResult",
@@ -83,6 +108,7 @@ __all__ = [
     "I1_NEUTRAL_CODEC_SCAFFOLD",
     "I2_SYNTAX_CONSTRAINED_CODEC",
     "I3_CONDITIONAL_TYPED_CODEC",
+    "I3_BRANCH_ORDERS",
     "InterfaceMode",
     "InterfaceTreatment",
     "ResearchDiagnosticLabel",
@@ -90,6 +116,9 @@ __all__ = [
     "action_codec_json_schema",
     "build_transformers_constraint",
     "diagnose_generation",
+    "forced_action_codec_json_schema",
+    "i3_branch_order_treatment",
+    "i3_forced_branch_treatment",
     "typed_action_codec_json_schema",
     "CodecValidityStatus",
     "CommitValidityStatus",

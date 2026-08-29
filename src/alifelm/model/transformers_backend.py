@@ -105,6 +105,12 @@ class TransformersModelRuntime:
         self.model = model
         self._torch = torch_module
 
+    @property
+    def torch_module(self) -> Any | None:
+        """Researcher-side tensor runtime; never model-facing or domain state."""
+
+        return self._torch
+
     @classmethod
     def load(
         cls,

@@ -84,6 +84,39 @@ I3_CONDITIONAL_TYPED_CODEC = InterfaceTreatment(
 )
 
 
+I3_BRANCH_ORDERS: tuple[tuple[str, ...], ...] = (
+    ("WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"),
+    ("REJECT", "ACCEPT", "PROPOSE", "SEND", "WAIT"),
+    ("SEND", "PROPOSE", "ACCEPT", "REJECT", "WAIT"),
+    ("ACCEPT", "WAIT", "REJECT", "SEND", "PROPOSE"),
+)
+
+
+def i3_branch_order_treatment(index: int) -> InterfaceTreatment:
+    if type(index) is not int or not 0 <= index < len(I3_BRANCH_ORDERS):
+        raise ValueError("branch-order treatment index is out of range")
+    return InterfaceTreatment(
+        treatment_id=f"i05r3-i3-branch-order-{index}",
+        version="1.0.0",
+        mode=InterfaceMode.I3,
+        completion_suffix=I3_CONDITIONAL_TYPED_CODEC.completion_suffix,
+        constraint_policy_id=f"i05r3-typed-branch-order-{index}-v1",
+    )
+
+
+def i3_forced_branch_treatment(internal_action: str) -> InterfaceTreatment:
+    entry = DEFAULT_ACTION_PRESENTATION.entry(internal_action)
+    return InterfaceTreatment(
+        treatment_id=f"i05r3-forced-{internal_action.lower()}-payload",
+        version="1.0.0",
+        mode=InterfaceMode.I3,
+        completion_suffix=I3_CONDITIONAL_TYPED_CODEC.completion_suffix,
+        constraint_policy_id=(
+            f"i05r3-forced-{entry.internal_action.lower()}-typed-payload-v1"
+        ),
+    )
+
+
 def action_codec_json_schema(
     presentation: ActionPresentation = DEFAULT_ACTION_PRESENTATION,
 ) -> dict[str, Any]:
@@ -110,8 +143,16 @@ def action_codec_json_schema(
 
 def typed_action_codec_json_schema(
     presentation: ActionPresentation = DEFAULT_ACTION_PRESENTATION,
+    *,
+    action_order: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """Action-conditional structure without constraining any semantic value."""
+
+    order = action_order or presentation.presentation_order
+    if len(order) != len(presentation.presentation_order) or set(order) != set(
+        presentation.presentation_order
+    ):
+        raise ValueError("action_order must be a permutation of presentation_order")
 
     opaque_string = {
         "type": "string",
@@ -123,7 +164,7 @@ def typed_action_codec_json_schema(
         "body": {"type": "string"},
     }
     branches = []
-    for action in presentation.presentation_order:
+    for action in order:
         entry = presentation.entry(action)
         branches.append(
             {
@@ -145,6 +186,21 @@ def typed_action_codec_json_schema(
             }
         )
     return {"oneOf": branches}
+
+
+def forced_action_codec_json_schema(
+    internal_action: str,
+    presentation: ActionPresentation = DEFAULT_ACTION_PRESENTATION,
+) -> dict[str, Any]:
+    """Return one structural branch without restricting payload values."""
+
+    entry = presentation.entry(internal_action)
+    branches = typed_action_codec_json_schema(presentation)["oneOf"]
+    return next(
+        branch
+        for branch in branches
+        if branch["properties"]["action_label"]["const"] == entry.model_label
+    )
 
 
 def build_transformers_constraint(tokenizer: Any, *, schema: dict[str, Any] | None = None):
