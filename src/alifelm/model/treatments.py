@@ -18,6 +18,7 @@ class InterfaceMode(StrEnum):
     I1 = "I1"
     I2 = "I2"
     I3 = "I3"
+    I4 = "I4"
 
 
 @dataclass(frozen=True, slots=True)
