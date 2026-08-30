@@ -1,0 +1,75 @@
+study: A-LifeLM Foundation Tuning Study v1
+status: pre_registered_draft
+objective: Improve WORLD grounding/motor competence with minimal policy intervention.
+core_boundary:
+  deterministic_sensor_normalization: true
+  minimal_neural_adapter: true
+  forbidden_priors:
+  - friendship
+  - trust
+  - social_rank
+  - mate_preference
+  - cooperation_preference
+  - leadership_preference
+  - alliance_preference
+  - aggression_preference
+prior_evidence:
+  FA-v1_hidden_accuracy_pct: 98.33
+  FA-v2_hidden_accuracy_pct: 96.62
+  note: Prior runs are n=1 and not used as stable statistical estimates.
+stages:
+  stage0:
+    purpose: Validate evaluator v2 and sensor boundary
+    runs:
+    - base/eval-v2
+    - FA-v1/eval-v2
+    - FA-v1/eval-v2+sensor-normalization
+  stage1:
+    train_examples: 1024
+    dev_examples: 256
+    seeds: 3
+    optimizer_steps_target: 150-200
+    candidates:
+      A: attention-only r16 NF4 QLoRA baseline
+      B: attention-only r16 BF16 LoRA
+      C: attention-only r16 BF16 LoRA+
+      D: attention-only r16 BF16 EVA-LoRA rho=2.0
+      E: candidate D + deterministic sensor normalization
+    advance: Top 2 by mean Neural Grounding Accuracy after hard rejection gates.
+  stage2:
+    train_examples: 4096
+    seeds: 5
+    sealed_hidden: true
+    promotion_gates:
+      mean_hidden_NGA_pct_min: 99.0
+      worst_seed_hidden_NGA_pct_min: 98.5
+      min_family_accuracy_pct: 97.0
+      serialization_validity_pct_min: 99.9
+      sensor_correctness_pct: 100.0
+      retention_degradation_pp_max: 1.0
+      neutrality_failure_allowed: false
+target_modules:
+- q_proj
+- k_proj
+- v_proj
+- o_proj
+olmo_conventions:
+  audit_add_bos: true
+  use_slow_tokenizer: false
+  record_tokenizer_revision: true
+  record_prompt_template_hash: true
+first_decisive_experiment:
+  control: attention-only r16 NF4 QLoRA
+  treatment: attention-only r16 BF16 LoRA
+  held_constant:
+  - base model
+  - dataset
+  - target modules
+  - rank
+  - alpha
+  - dropout
+  - optimizer steps
+  - seed set
+  - prompt template
+  - tokenizer
+  - evaluator
