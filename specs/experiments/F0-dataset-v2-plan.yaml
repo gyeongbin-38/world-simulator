@@ -1,0 +1,78 @@
+{
+  "spec_schema_version": "1.0.0",
+  "dataset_id": "F0_DATASET_V2",
+  "status": "PRE_FREEZE_IMPLEMENTATION_READY",
+  "execution_authorized_by_this_spec": false,
+  "supersedes_dataset": false,
+  "preserves_frozen_dataset": "F0_DATASET_V1",
+  "generator": {
+    "dataset_generator_version": "F0_PROCEDURAL_GENERATOR_V2",
+    "composes_generator": "F0_PROCEDURAL_GENERATOR_V1",
+    "implementation": "src/alifelm/model/foundation_data_v2.py",
+    "freeze_tool": "tools/f0_generate_dataset_v2.py",
+    "root_seed": 35120260830,
+    "teacher_LM": false,
+    "chain_of_thought": false
+  },
+  "ownership_boundary": {
+    "neural_gradient_targets_exclude": ["VISIBLE_PEER_COUNT"],
+    "deterministic_sensor_invariants": ["VISIBLE_PEER_COUNT"],
+    "sensor_normalizer": "F0_SENSOR_NORMALIZER_V1",
+    "amendment": "docs/research/foundation/AMENDMENT-001-DATASET-V2-SENSOR-BOUNDARY.md"
+  },
+  "neural_splits": {
+    "TRAIN": 4096,
+    "DEV": 512,
+    "STRUCTURAL_HOLDOUT": 1024,
+    "TEMPLATE_HOLDOUT": 1024,
+    "DOUBLE_HOLDOUT": 1024,
+    "ADVERSARIAL_HOLDOUT": 512
+  },
+  "screening_subsets": {
+    "TRAIN": 1024,
+    "DEV": 256,
+    "selection": "STABLE_HASH_WITH_COMPLETE_PAIR_GROUPS",
+    "selection_schema": "F0_DATASET_V2_SCREENING_V1"
+  },
+  "curriculum_profiles": [
+    "EASY",
+    "MEDIUM",
+    "HARD",
+    "MINIMAL_PAIR",
+    "COUNTERFACTUAL",
+    "ADVERSARIAL"
+  ],
+  "paired_relational_families": [
+    "MESSAGE_DIRECTION",
+    "PROPOSAL_DIRECTION"
+  ],
+  "pair_rule": {
+    "schema": "F0_RELATIONAL_PAIR_V1",
+    "same_split_required": true,
+    "same_query_required": true,
+    "same_candidate_order_required": true,
+    "minimal_pair_intervention": "FLIP_ONLY_TARGET_RELATION_DIRECTION",
+    "counterfactual_interventions": [
+      "SWAP_MESSAGE_DIRECTION",
+      "SWAP_PROPOSAL_DIRECTION"
+    ]
+  },
+  "leakage_firewall": {
+    "schema": "F0_DATASET_V2_LEAKAGE_V1",
+    "cross_split_exact_instance": "FORBIDDEN",
+    "cross_split_template_instance": "FORBIDDEN",
+    "cross_split_identifier_tuple": "FORBIDDEN",
+    "cross_split_pair_sibling": "FORBIDDEN",
+    "founder_reserved_fingerprints": "STILL_FORBIDDEN",
+    "seed_separation_alone_sufficient": false
+  },
+  "sensor_invariant_suite": {
+    "count": 512,
+    "gradient_target": false,
+    "expected_correctness": 1.0
+  },
+  "artifact_root": "E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V2",
+  "freeze_command": "python tools/f0_generate_dataset_v2.py --output E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V2",
+  "verify_command": "python tools/f0_generate_dataset_v2.py --output E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V2 --verify-only",
+  "immutability_after_freeze": "NEW_DATASET_VERSION_REQUIRED_FOR_ANY_CONTENT_CHANGE"
+}
