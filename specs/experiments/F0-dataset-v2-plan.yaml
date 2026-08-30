@@ -1,5 +1,5 @@
 {
-  "spec_schema_version": "1.0.0",
+  "spec_schema_version": "1.0.1",
   "dataset_id": "F0_DATASET_V2",
   "status": "PRE_FREEZE_IMPLEMENTATION_READY",
   "execution_authorized_by_this_spec": false,
@@ -28,6 +28,12 @@
     "DOUBLE_HOLDOUT": 1024,
     "ADVERSARIAL_HOLDOUT": 512
   },
+  "family_allocation": {
+    "law": "DIVMOD_SPLIT_SIZE_ACROSS_NEURAL_FAMILIES_IN_ENUM_ORDER",
+    "maximum_count_difference_between_families": 1,
+    "direction_pair_profiles_are_within_family_quota": true,
+    "reason": "minimal/counterfactual enrichment must not dominate aggregate training frequency"
+  },
   "screening_subsets": {
     "TRAIN": 1024,
     "DEV": 256,
@@ -46,6 +52,12 @@
     "MESSAGE_DIRECTION",
     "PROPOSAL_DIRECTION"
   ],
+  "pair_allocation_within_each_pairable_family": {
+    "minimal_pair_records": "2 * floor(family_quota / 8)",
+    "counterfactual_records": "2 * floor(family_quota / 8)",
+    "remainder": "STANDARD_PROFILES_CYCLE",
+    "standard_profiles": ["EASY", "MEDIUM", "HARD", "ADVERSARIAL"]
+  },
   "pair_rule": {
     "schema": "F0_RELATIONAL_PAIR_V1",
     "same_split_required": true,
