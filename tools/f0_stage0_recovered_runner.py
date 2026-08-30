@@ -53,7 +53,10 @@ from alifelm.model.generation import (  # noqa: E402
 )
 from alifelm.model.profile import ModelProfile  # noqa: E402
 from alifelm.model.treatments import I0_STRICT_FREE_GENERATION  # noqa: E402
-from alifelm.model.transformers_backend import GenerationError  # noqa: E402
+from alifelm.model.transformers_backend import (  # noqa: E402
+    GenerationError,
+    TransformersModelRuntime,
+)
 
 
 RECOVERY_RECORD_ID = "F0_HISTORICAL_FA_V1_RECOVERY_V1"
@@ -504,25 +507,21 @@ def _load_runtime(
         add_special_tokens=True,
     )
     return (
-        TransformersRuntimeShim(profile, tokenizer, model, torch),
+        build_runtime(profile, tokenizer, model, torch),
         tokenizer,
         profile,
         tokenizer_audit,
     )
 
 
-class TransformersRuntimeShim:
-    """Small protocol-compatible holder avoiding eager optional imports."""
+def build_runtime(
+    profile: ModelProfile, tokenizer: Any, model: Any, torch_module: Any
+) -> TransformersModelRuntime:
+    """Construct the concrete runtime required by Evaluator v2's type guard."""
 
-    def __init__(self, profile: ModelProfile, tokenizer: Any, model: Any, torch_module: Any):
-        from alifelm.model.transformers_backend import TransformersModelRuntime
-
-        self.runtime = TransformersModelRuntime.from_components(
-            profile, tokenizer=tokenizer, model=model, torch_module=torch_module
-        )
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self.runtime, name)
+    return TransformersModelRuntime.from_components(
+        profile, tokenizer=tokenizer, model=model, torch_module=torch_module
+    )
 
 
 def _generation_request(profile: ModelProfile, record: Mapping[str, Any], index: int) -> GenerationRequest:

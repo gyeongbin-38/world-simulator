@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 import json
+from contextlib import nullcontext
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -123,3 +126,101 @@ def test_existing_mismatching_manifest_refuses_overwrite(tmp_path: Path) -> None
             {"status": "COMPLETE", "manifest_digest": "b" * 64},
             system="Linux",
         )
+
+
+class _FakeModel:
+    def generate(self, **_: object) -> list[list[int]]:
+        return [[1, 2, 3]]
+
+
+class _FakeTokenizer:
+    def __call__(self, *_: object, **__: object) -> dict[str, list[list[int]]]:
+        return {"input_ids": [[1]]}
+
+    def decode(self, _: list[int], skip_special_tokens: bool = True) -> str:
+        del skip_special_tokens
+        return "{}"
+
+
+class _FakeTorch:
+    @staticmethod
+    def inference_mode() -> object:
+        return nullcontext()
+
+
+def _runtime_for_unit_test(module):
+    profile = module.ModelProfile(
+        profile_id="Stage0TestRuntime",
+        profile_version="1.0.0",
+        model_identifier="base",
+        model_revision=module.BASE_REVISION,
+        model_digest=module.BASE_CHECKPOINT_SHA256,
+        tokenizer_identifier="base",
+        tokenizer_revision=module.TOKENIZER_REVISION,
+        tokenizer_digest=module.TOKENIZER_EXPECTED["tokenizer_digest"],
+        model_class="FakeModel",
+        generation_policy_id="F0Stage0Serialization",
+        device="cpu",
+        dtype="float32",
+        adapter_ref=None,
+        trust_remote_code=False,
+        add_special_tokens=True,
+    )
+    return module.build_runtime(profile, _FakeTokenizer(), _FakeModel(), _FakeTorch())
+
+
+def test_stage0_builds_concrete_runtime_for_evaluator() -> None:
+    module = _module()
+    runtime = _runtime_for_unit_test(module)
+    from alifelm.model.transformers_backend import TransformersModelRuntime
+
+    assert isinstance(runtime, TransformersModelRuntime)
+    assert not hasattr(runtime, "runtime")
+
+
+def test_scalar_evaluator_accepts_concrete_stage0_runtime(monkeypatch) -> None:
+    module = _module()
+    runtime = _runtime_for_unit_test(module)
+    from alifelm.model import foundation_eval
+    from alifelm.model.foundation_eval import CandidateSequenceScore
+
+    def fake_scores(runtime_arg, *, rendered_input, candidates):
+        assert runtime_arg is runtime
+        assert rendered_input == "visible"
+        return tuple(
+            CandidateSequenceScore(candidate, (index + 1,), 0.0, 0.0, index + 1)
+            for index, candidate in enumerate(candidates)
+        )
+
+    monkeypatch.setattr(foundation_eval, "score_foundation_candidates", fake_scores)
+    result = foundation_eval.evaluate_foundation_scalar_record(
+        runtime,
+        {
+            "example_id": "S0-TEST",
+            "semantic_family": "SELF_IDENTITY",
+            "input": "visible",
+            "choices": ["A", "B"],
+            "ground_truth": "A",
+        },
+    )
+    assert result.exact_match is True
+
+
+def test_serialization_generation_works_on_concrete_stage0_runtime() -> None:
+    module = _module()
+    runtime = _runtime_for_unit_test(module)
+    record = {
+        "example_id": "S0-SERIALIZATION",
+        "input": "Serialize supplied action.",
+    }
+    request = replace(module._generation_request(runtime.profile, record, 0), generation_seed=None)
+    generated = runtime.generate(request)
+    assert generated.raw_text == "{}"
+
+
+def test_evaluator_concrete_runtime_guard_is_unchanged() -> None:
+    from alifelm.model import foundation_eval
+
+    source = inspect.getsource(foundation_eval.score_foundation_candidates)
+    assert "isinstance(runtime, TransformersModelRuntime)" in source
+    assert "runtime must be a TransformersModelRuntime" in source
