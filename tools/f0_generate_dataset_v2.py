@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 from dataclasses import asdict
 import hashlib
 import json
@@ -23,6 +22,7 @@ from alifelm.model.foundation_data_v2 import (  # noqa: E402
     DATASET_V2_ROOT_SEED,
     LEAKAGE_SCHEMA_VERSION,
     NEURAL_FAMILIES,
+    PAIRABLE_RELATIONAL_FAMILIES,
     SCREENING_SCHEMA_VERSION,
     SCREENING_SIZES,
     V1_GENERATOR_VERSION,
@@ -32,14 +32,23 @@ from alifelm.model.foundation_data_v2 import (  # noqa: E402
     build_v2_split,
     curriculum_counts,
     family_counts,
+    relational_curriculum_coverage,
     screening_subset,
     validate_v2_split_isolation,
 )
 
 
 DEFAULT_OUTPUT_ROOT = Path("E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V2")
-MANIFEST_SCHEMA_VERSION = "1.0.0"
+MANIFEST_SCHEMA_VERSION = "1.0.1"
 SENSOR_INVARIANT_SIZE = 512
+EXPECTED_RELATIONAL_PROFILES = {
+    "EASY",
+    "MEDIUM",
+    "HARD",
+    "MINIMAL_PAIR",
+    "COUNTERFACTUAL",
+    "ADVERSARIAL",
+}
 
 
 def _record_dict(record: V2Record) -> dict[str, Any]:
@@ -59,6 +68,29 @@ def _artifact(payload: bytes, *, count: int) -> dict[str, Any]:
     return {
         "count": count,
         "file_sha256": hashlib.sha256(payload).hexdigest(),
+    }
+
+
+def _validate_split_curriculum(split: str, records: list[V2Record]) -> dict[str, Any]:
+    counts = family_counts(records)
+    delta = max(counts.values()) - min(counts.values())
+    if delta > 1:
+        raise RuntimeError(f"{split} semantic-family imbalance exceeds one: {delta}")
+
+    coverage = relational_curriculum_coverage(records)
+    # Small diagnostic builds may not have enough quota for every pair profile,
+    # but formal frozen splits do and must contain all six profiles.
+    if len(records) == V2_SPLIT_SIZES[split]:
+        for family in PAIRABLE_RELATIONAL_FAMILIES:
+            observed = set(coverage[family.value])
+            if observed != EXPECTED_RELATIONAL_PROFILES:
+                raise RuntimeError(
+                    f"{split} missing relational curriculum for {family.value}: "
+                    f"{sorted(EXPECTED_RELATIONAL_PROFILES - observed)}"
+                )
+    return {
+        "maximum_family_count_delta": delta,
+        "relational_curriculum_coverage": coverage,
     }
 
 
@@ -89,6 +121,7 @@ def build_dataset_v2() -> tuple[dict[str, bytes], dict[str, Any]]:
             "curriculum_counts": curriculum_counts(records),
             "semantic_family_counts": family_counts(records),
             "pair_group_count": len(pair_groups),
+            **_validate_split_curriculum(split, records),
             "unique_identifier_tuple_digests": len(
                 {record.identifier_tuple_digest for record in records}
             ),
@@ -126,6 +159,8 @@ def build_dataset_v2() -> tuple[dict[str, bytes], dict[str, Any]]:
                 if record.pair_group_id is not None
             ),
         }
+        if not screening_manifest[split]["pair_integrity"]:
+            raise RuntimeError(f"{split} screening subset split a pair group")
 
     sensor_records = build_sensor_invariant_records(SENSOR_INVARIANT_SIZE)
     sensor_payload = _jsonl_bytes(sensor_records)
@@ -150,6 +185,10 @@ def build_dataset_v2() -> tuple[dict[str, bytes], dict[str, Any]]:
         "root_seed": DATASET_V2_ROOT_SEED,
         "neural_semantic_families": neural_family_values,
         "deterministic_sensor_families": ["VISIBLE_PEER_COUNT"],
+        "family_allocation": {
+            "maximum_count_delta": 1,
+            "paired_profiles_inside_family_quota": True,
+        },
         "split_sizes": dict(V2_SPLIT_SIZES),
         "splits": split_manifest,
         "screening": screening_manifest,
@@ -186,9 +225,7 @@ def freeze(output_root: Path) -> dict[str, Any]:
             path = output_root / filename
             if not path.is_file() or path.read_bytes() != expected:
                 raise RuntimeError(f"frozen F0_DATASET_V2 artifact mismatch: {path}")
-        unexpected = {
-            path.name for path in output_root.iterdir()
-        } - set(files)
+        unexpected = {path.name for path in output_root.iterdir()} - set(files)
         if unexpected:
             raise RuntimeError(
                 f"unexpected F0_DATASET_V2 artifacts: {sorted(unexpected)}"
