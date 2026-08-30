@@ -53,7 +53,7 @@ FORBIDDEN_TARGET_MODULES = ("gate_proj", "up_proj", "down_proj", "lm_head")
 TOKENIZER_FILE_HASHES = {
     "tokenizer.json": "73fd5254624f39a88e3faac6a8e11300fc3c735ed37880d4f4f08db898eaecca",
     "tokenizer_config.json": "50c412c57d832057a3d5db42064c741f751e570f7c8788f037bfb0d2dd6e5f49",
-    "special_tokens_map.json": "78afb564e81260429b25f9caf24bda2521d5bdaeff5cd3fdbc01d3da2e8ce2f2",
+    "special_tokens_map.json": "78afb564e81264029b25f9caf24bda2521d5bdaeff5cd3fdbc01d3da2e8ce2f2",
     "vocab.json": "9e14712c91b37c7aab74b1306baa46ac342d620637a4b44523cdc3aec7d24195",
     "merges.txt": "b6fe424e334903f7fb84d3a106d9730455f4744b9fe3c21ee136d97a00e72502",
 }

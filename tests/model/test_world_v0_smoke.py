@@ -11,12 +11,30 @@ from alifelm.model import PeftTransformersLoader
 from alifelm.model.world_v0_smoke import (
     DeploymentExpectations,
     DeploymentPaths,
+    MODEL_CONFIG_AGGREGATE_SHA256,
+    MODEL_CONFIG_FILE_HASHES,
     SmokePreflightError,
+    TOKENIZER_DIGEST,
     TOKENIZER_FILE_HASHES,
     build_model_profile,
+    canonical_digest,
     ensure_execute_environment,
     verify_static_deployment,
 )
+
+
+def test_recovered_tokenizer_hash_map_and_aggregate_are_frozen():
+    assert TOKENIZER_FILE_HASHES == {
+        "tokenizer.json": "73fd5254624f39a88e3faac6a8e11300fc3c735ed37880d4f4f08db898eaecca",
+        "tokenizer_config.json": "50c412c57d832057a3d5db42064c741f751e570f7c8788f037bfb0d2dd6e5f49",
+        "special_tokens_map.json": "78afb564e81264029b25f9caf24bda2521d5bdaeff5cd3fdbc01d3da2e8ce2f2",
+        "vocab.json": "9e14712c91b37c7aab74b1306baa46ac342d620637a4b44523cdc3aec7d24195",
+        "merges.txt": "b6fe424e334903f7fb84d3a106d9730455f4744b9fe3c21ee136d97a00e72502",
+    }
+    assert canonical_digest(TOKENIZER_FILE_HASHES) == (
+        "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff"
+    )
+    assert canonical_digest(MODEL_CONFIG_FILE_HASHES) == MODEL_CONFIG_AGGREGATE_SHA256
 
 
 def _write_deployment(tmp_path: Path) -> tuple[DeploymentPaths, DeploymentExpectations]:
