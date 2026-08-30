@@ -33,12 +33,17 @@
     "dataset_id": "F0_DATASET_V1",
     "dataset_manifest_digest": "418873b65e9a8903a595d6a8359ce778dd588b9cedb0e3c5ac54d178528e5e18",
     "union_splits": [
+      "DEV",
       "STRUCTURAL_HOLDOUT",
       "TEMPLATE_HOLDOUT",
-      "DOUBLE_HOLDOUT",
-      "ADVERSARIAL_HOLDOUT"
+      "DOUBLE_HOLDOUT"
     ],
-    "union_count": 3584
+    "union_count": 3584,
+    "excluded_splits": [
+      "ADVERSARIAL_HOLDOUT",
+      "FOUNDER_C0_V2",
+      "C20"
+    ]
   },
   "historical_result": {
     "numerator": 3524,

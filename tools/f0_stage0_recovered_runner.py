@@ -18,7 +18,8 @@ import argparse
 from collections import Counter
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
+import platform
 import subprocess
 import sys
 from typing import Any, Iterable, Mapping
@@ -80,10 +81,15 @@ HISTORICAL_EXACT = {"numerator": 3524, "denominator": 3584}
 HISTORICAL_NEURAL_DIAGNOSTIC = {"numerator": 3344, "denominator": 3360}
 
 HIDDEN_SPLITS = (
+    "DEV",
     "STRUCTURAL_HOLDOUT",
     "TEMPLATE_HOLDOUT",
     "DOUBLE_HOLDOUT",
+)
+HISTORICAL_EXCLUDED_SPLITS = (
     "ADVERSARIAL_HOLDOUT",
+    "FOUNDER_C0_V2",
+    "C20",
 )
 ALL_SPLITS = (
     "TRAIN",
@@ -167,6 +173,17 @@ def _load_repository_dataset_manifest() -> dict[str, Any]:
 
 def verify_dataset(dataset_root: Path) -> dict[str, Any]:
     """Verify the exact V1 manifest and sealed hidden-union file hashes."""
+
+    expected_historical_union = {
+        "DEV",
+        "STRUCTURAL_HOLDOUT",
+        "TEMPLATE_HOLDOUT",
+        "DOUBLE_HOLDOUT",
+    }
+    if set(HIDDEN_SPLITS) != expected_historical_union:
+        raise Stage0ValidationError("historical union definition is not DEV plus three holdouts")
+    if "ADVERSARIAL_HOLDOUT" in HIDDEN_SPLITS:
+        raise Stage0ValidationError("ADVERSARIAL_HOLDOUT must be excluded from historical comparison")
 
     repository_manifest = _load_repository_dataset_manifest()
     artifact_manifest_path = dataset_root / "manifest.json"
@@ -360,6 +377,8 @@ def verify_contract(dataset_root: Path) -> dict[str, Any]:
             "dataset_id": DATASET_ID,
             "dataset_manifest_digest": DATASET_MANIFEST_DIGEST,
             "union_count": HISTORICAL_EXACT["denominator"],
+            "union_splits": list(HIDDEN_SPLITS),
+            "excluded_splits": list(HISTORICAL_EXCLUDED_SPLITS),
         },
     }
     for section, bindings in expected_record_bindings.items():
@@ -384,6 +403,11 @@ def verify_contract(dataset_root: Path) -> dict[str, Any]:
         raise Stage0ValidationError("historical fail result was altered")
     if recovery.get("historical_hidden_evaluation", {}).get("dataset_manifest_digest") != DATASET_MANIFEST_DIGEST:
         raise Stage0ValidationError("recovery record dataset binding mismatch")
+    hidden_evaluation = recovery["historical_hidden_evaluation"]
+    if set(hidden_evaluation["union_splits"]) != set(HIDDEN_SPLITS):
+        raise Stage0ValidationError("historical hidden union must include DEV and three holdouts")
+    if "ADVERSARIAL_HOLDOUT" in hidden_evaluation["union_splits"]:
+        raise Stage0ValidationError("ADVERSARIAL_HOLDOUT is forbidden in historical union")
     return {
         "stage0_run_id": STAGE0_RUN_ID,
         "dataset": dataset,
@@ -675,6 +699,60 @@ def _run_condition(
     }
 
 
+def validate_evidence_root(
+    output_root: Path | str, *, system: str | None = None
+) -> Path:
+    """Validate an explicit persistent evidence root for the host platform.
+
+    Windows runs retain the canonical E: policy.  Linux A40 runs may use an
+    explicitly supplied absolute persistent path; no relative or implicit
+    temporary fallback is accepted.
+    """
+
+    candidate = Path(output_root)
+    platform_name = system or platform.system()
+    if platform_name == "Windows":
+        windows_path = PureWindowsPath(str(output_root))
+        if windows_path.drive.upper() != "E:" or not windows_path.is_absolute():
+            raise Stage0ValidationError(
+                "Windows Stage 0 evidence must use an absolute E: path"
+            )
+        return candidate
+    if platform_name == "Linux":
+        if not (
+            candidate.is_absolute()
+            or PurePosixPath(str(output_root)).is_absolute()
+        ):
+            raise Stage0ValidationError(
+                "Linux Stage 0 evidence must use an explicit absolute path"
+            )
+        return candidate
+    raise Stage0ValidationError(
+        f"unsupported Stage 0 host platform for evidence policy: {platform_name}"
+    )
+
+
+def write_immutable_manifest(
+    output_root: Path | str,
+    manifest: Mapping[str, Any],
+    *,
+    system: str | None = None,
+) -> Path:
+    """Write one evidence manifest without ever overwriting a mismatch."""
+
+    validated_root = validate_evidence_root(output_root, system=system)
+    validated_root.mkdir(parents=True, exist_ok=True)
+    payload = (canonical_json(dict(manifest)) + "\n").encode("utf-8")
+    manifest_path = validated_root / "manifest.json"
+    if manifest_path.exists() and manifest_path.read_bytes() != payload:
+        raise Stage0ValidationError(
+            "existing Stage 0 manifest differs; refusing overwrite"
+        )
+    if not manifest_path.exists():
+        manifest_path.write_bytes(payload)
+    return manifest_path
+
+
 def execute_stage0(
     *,
     dataset_root: Path,
@@ -719,10 +797,7 @@ def execute_stage0(
         if sha256_file(base_model / "model.safetensors") != BASE_CHECKPOINT_SHA256:
             raise Stage0ValidationError("canonical base changed during Stage 0 evaluation")
 
-    output_root = output_root.resolve()
-    if output_root.drive.upper() != "E:":
-        raise Stage0ValidationError("Stage 0 evidence must be stored on E:")
-    output_root.mkdir(parents=True, exist_ok=True)
+    output_root = validate_evidence_root(output_root).resolve()
     core = {
         "run_id": STAGE0_RUN_ID,
         "status": "COMPLETE",
@@ -750,12 +825,7 @@ def execute_stage0(
     }
     manifest = dict(core)
     manifest["manifest_digest"] = canonical_digest(core)
-    payload = (canonical_json(manifest) + "\n").encode("utf-8")
-    manifest_path = output_root / "manifest.json"
-    if manifest_path.exists() and manifest_path.read_bytes() != payload:
-        raise Stage0ValidationError("existing Stage 0 manifest differs; refusing overwrite")
-    if not manifest_path.exists():
-        manifest_path.write_bytes(payload)
+    write_immutable_manifest(output_root, manifest)
     return manifest
 
 

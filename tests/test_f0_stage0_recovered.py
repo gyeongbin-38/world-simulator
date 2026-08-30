@@ -40,7 +40,14 @@ def test_stage0_contract_verifies_frozen_hidden_union() -> None:
     contract = module.verify_contract(DATASET_ROOT)
     assert contract["dataset"]["manifest_digest"] == module.DATASET_MANIFEST_DIGEST
     assert contract["dataset"]["hidden_union_count"] == 3584
-    assert contract["dataset"]["hidden_union_splits"] == list(module.HIDDEN_SPLITS)
+    assert contract["dataset"]["hidden_union_splits"] == [
+        "DEV",
+        "STRUCTURAL_HOLDOUT",
+        "TEMPLATE_HOLDOUT",
+        "DOUBLE_HOLDOUT",
+    ]
+    assert "DEV" in contract["dataset"]["hidden_union_splits"]
+    assert "ADVERSARIAL_HOLDOUT" not in contract["dataset"]["hidden_union_splits"]
     assert set(contract["dataset"]["splits"]) == set(module.ALL_SPLITS)
     assert len(contract["neural_families"]) == 15
     assert module.VISIBLE_COUNT_FAMILY not in contract["neural_families"]
@@ -79,3 +86,40 @@ def test_stage0_source_does_not_write_hidden_cases_to_evidence() -> None:
     source = TOOL.read_text(encoding="utf-8")
     assert '"hidden_cases_copied": False' in source
     assert '"hidden_union_splits"' in source
+
+
+def test_linux_absolute_evidence_root_is_accepted() -> None:
+    module = _module()
+    accepted = module.validate_evidence_root(
+        "/workspace/alifelm/evidence/F0_FOUNDATION_STAGE0_EVAL_V2_V1",
+        system="Linux",
+    )
+    assert accepted.as_posix().startswith("/workspace/")
+
+
+def test_linux_relative_evidence_root_is_rejected() -> None:
+    module = _module()
+    with pytest.raises(module.Stage0ValidationError, match="absolute"):
+        module.validate_evidence_root("evidence/stage0", system="Linux")
+
+
+def test_windows_e_drive_evidence_root_is_accepted() -> None:
+    module = _module()
+    assert str(
+        module.validate_evidence_root(
+            "E:/WORLD/AI_CACHE/evidence/stage0", system="Windows"
+        )
+    ).startswith("E:")
+
+
+def test_existing_mismatching_manifest_refuses_overwrite(tmp_path: Path) -> None:
+    module = _module()
+    root = tmp_path / "evidence"
+    manifest = {"status": "COMPLETE", "manifest_digest": "a" * 64}
+    module.write_immutable_manifest(root, manifest, system="Linux")
+    with pytest.raises(module.Stage0ValidationError, match="refusing overwrite"):
+        module.write_immutable_manifest(
+            root,
+            {"status": "COMPLETE", "manifest_digest": "b" * 64},
+            system="Linux",
+        )
