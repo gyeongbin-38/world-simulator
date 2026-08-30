@@ -1,7 +1,7 @@
 """Deterministic admission rules for the A0 autonomous-interface study.
 
 This module contains only preregistered cohort/treatment identities and pure
-admission arithmetic.  It does not load a model, generate text, mutate WORLD
+admission arithmetic. It does not load a model, generate text, mutate WORLD
 state, or choose an action for an agent.
 """
 
@@ -20,7 +20,7 @@ A0_CONTEXT_CLASSES = tuple(R3ContextClass)
 A0_TREATMENT_ORDER = ("I0", "I1", "I2", "I3")
 A0_ATTEMPTS_PER_TREATMENT = len(A0_CONTEXT_CLASSES) * A0_CASES_PER_CONTEXT_CLASS
 
-# Interface-capability gates only.  There is deliberately no required action
+# Interface-capability gates only. There is deliberately no required action
 # distribution, SEND/PROPOSE frequency, social score, or behavioral target.
 A0_CODEC_VALID_RATE_MIN = 0.99
 A0_DOMAIN_VALID_RATE_MIN = 0.95
@@ -29,6 +29,31 @@ A0_FIRST_TOKEN_EOS_RATE_MAX = 0.01
 A0_EVIDENCE_COMPLETE_RATE_REQUIRED = 1.0
 A0_I3_BRANCH_CANDIDATE_AGREEMENT_MIN = 0.95
 A0_I3_BRANCH_DOMAIN_RATE_SPREAD_MAX = 0.05
+
+
+def a0_gate_identity() -> dict[str, object]:
+    """Return the frozen gate constants embedded in A0 manifest identity."""
+
+    return {
+        "motor": {
+            "codec_valid_rate_min": A0_CODEC_VALID_RATE_MIN,
+            "first_token_eos_rate_max": A0_FIRST_TOKEN_EOS_RATE_MAX,
+            "evidence_complete_rate_required": A0_EVIDENCE_COMPLETE_RATE_REQUIRED,
+            "infrastructure_failures_required": 0,
+            "exact_repeat_equal_required": True,
+        },
+        "autonomous": {
+            "domain_valid_rate_min": A0_DOMAIN_VALID_RATE_MIN,
+            "context_class_domain_valid_rate_min": (
+                A0_CONTEXT_CLASS_DOMAIN_VALID_RATE_MIN
+            ),
+        },
+        "i3_branch_order": {
+            "candidate_agreement_min": A0_I3_BRANCH_CANDIDATE_AGREEMENT_MIN,
+            "domain_valid_rate_spread_max": A0_I3_BRANCH_DOMAIN_RATE_SPREAD_MAX,
+        },
+        "action_frequency_target": None,
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,7 +69,9 @@ class A0TreatmentMetrics:
     context_class_domain_valid: tuple[tuple[str, int, int], ...]
 
     def __post_init__(self) -> None:
-        if self.treatment not in A0_TREATMENT_ORDER and not self.treatment.startswith("I3_ORDER_"):
+        if self.treatment not in A0_TREATMENT_ORDER and not self.treatment.startswith(
+            "I3_ORDER_"
+        ):
             raise ValueError("unknown A0 treatment")
         if self.attempts <= 0:
             raise ValueError("attempts must be positive")
@@ -57,10 +84,16 @@ class A0TreatmentMetrics:
         ):
             if value < 0 or value > self.attempts:
                 raise ValueError(f"{name} must be within the attempt count")
-        total = sum(count for _, count, _ in self.context_class_domain_valid)
-        denominator = sum(count_total for _, _, count_total in self.context_class_domain_valid)
-        if total != self.domain_valid or denominator != self.attempts:
-            raise ValueError("context-class domain counts must partition the treatment attempts")
+        valid_total = sum(
+            count for _, count, _ in self.context_class_domain_valid
+        )
+        denominator = sum(
+            count_total for _, _, count_total in self.context_class_domain_valid
+        )
+        if valid_total != self.domain_valid or denominator != self.attempts:
+            raise ValueError(
+                "context-class domain counts must partition the treatment attempts"
+            )
 
     @property
     def codec_valid_rate(self) -> float:
@@ -80,7 +113,9 @@ class A0TreatmentMetrics:
 
     @property
     def minimum_context_class_domain_valid_rate(self) -> float:
-        return min(valid / total for _, valid, total in self.context_class_domain_valid)
+        return min(
+            valid / total for _, valid, total in self.context_class_domain_valid
+        )
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -96,9 +131,16 @@ class A0TreatmentMetrics:
             "evidence_complete_rate": self.evidence_complete_rate,
             "infrastructure_failures": self.infrastructure_failures,
             "exact_repeat_equal": self.exact_repeat_equal,
-            "minimum_context_class_domain_valid_rate": self.minimum_context_class_domain_valid_rate,
+            "minimum_context_class_domain_valid_rate": (
+                self.minimum_context_class_domain_valid_rate
+            ),
             "context_class_domain_valid": [
-                {"context_class": name, "valid": valid, "total": total, "rate": valid / total}
+                {
+                    "context_class": name,
+                    "valid": valid,
+                    "total": total,
+                    "rate": valid / total,
+                }
                 for name, valid, total in self.context_class_domain_valid
             ],
         }
@@ -123,16 +165,7 @@ def evaluate_treatment(metrics: A0TreatmentMetrics) -> dict[str, object]:
     return {
         "motor_pass": motor_pass,
         "autonomous_pass": autonomous_pass,
-        "thresholds": {
-            "codec_valid_rate_min": A0_CODEC_VALID_RATE_MIN,
-            "domain_valid_rate_min": A0_DOMAIN_VALID_RATE_MIN,
-            "context_class_domain_valid_rate_min": A0_CONTEXT_CLASS_DOMAIN_VALID_RATE_MIN,
-            "first_token_eos_rate_max": A0_FIRST_TOKEN_EOS_RATE_MAX,
-            "evidence_complete_rate_required": A0_EVIDENCE_COMPLETE_RATE_REQUIRED,
-            "infrastructure_failures_required": 0,
-            "exact_repeat_equal_required": True,
-            "action_frequency_target": None,
-        },
+        "thresholds": a0_gate_identity(),
     }
 
 
@@ -161,10 +194,20 @@ def evaluate_i3_branch_order_audit(
     """Check that typed-schema branch ordering is not driving action choice."""
 
     if len(summaries) != 4 or len(candidate_labels_by_order) != 4:
-        raise ValueError("the I3 branch audit requires exactly four preregistered orders")
-    if any(len(values) != A0_ATTEMPTS_PER_TREATMENT for values in candidate_labels_by_order):
-        raise ValueError("each I3 branch order must cover the complete A0 cohort")
-    all_core_pass = all(bool(evaluate_treatment(summary)["autonomous_pass"]) for summary in summaries)
+        raise ValueError(
+            "the I3 branch audit requires exactly four preregistered orders"
+        )
+    if any(
+        len(values) != A0_ATTEMPTS_PER_TREATMENT
+        for values in candidate_labels_by_order
+    ):
+        raise ValueError(
+            "each I3 branch order must cover the complete A0 cohort"
+        )
+    all_core_pass = all(
+        bool(evaluate_treatment(summary)["autonomous_pass"])
+        for summary in summaries
+    )
     agreeing = 0
     for index in range(A0_ATTEMPTS_PER_TREATMENT):
         values = {order[index] for order in candidate_labels_by_order}
@@ -196,7 +239,15 @@ __all__ = [
     "A0_CONTEXT_CLASSES",
     "A0_TREATMENT_ORDER",
     "A0_ATTEMPTS_PER_TREATMENT",
+    "A0_CODEC_VALID_RATE_MIN",
+    "A0_DOMAIN_VALID_RATE_MIN",
+    "A0_CONTEXT_CLASS_DOMAIN_VALID_RATE_MIN",
+    "A0_FIRST_TOKEN_EOS_RATE_MAX",
+    "A0_EVIDENCE_COMPLETE_RATE_REQUIRED",
+    "A0_I3_BRANCH_CANDIDATE_AGREEMENT_MIN",
+    "A0_I3_BRANCH_DOMAIN_RATE_SPREAD_MAX",
     "A0TreatmentMetrics",
+    "a0_gate_identity",
     "choose_minimal_treatment",
     "evaluate_i3_branch_order_audit",
     "evaluate_treatment",
