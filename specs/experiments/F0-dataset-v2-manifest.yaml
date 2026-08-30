@@ -1,0 +1,205 @@
+{
+  "manifest_schema_version": "1.0.0",
+  "dataset_id": "F0_DATASET_V2",
+  "status": "FROZEN",
+  "generator_version": "F0_PROCEDURAL_GENERATOR_V2",
+  "composed_v1_generator_version": "F0_PROCEDURAL_GENERATOR_V1",
+  "fingerprint_version": "F0_GRAPH_FINGERPRINT_V1",
+  "leakage_schema_version": "F0_DATASET_V2_LEAKAGE_V1",
+  "root_seed": 35120260830,
+  "artifact_root": "E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V2",
+  "artifact_manifest": "E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V2/manifest.json",
+  "canonical_manifest_digest": "4ed8f67689e312fc2b37976d82a4b5f6d9c4ce1a38df808d6f562a9c19b259dd",
+  "canonical_manifest_digest_law": "SHA-256(canonical JSON of manifest excluding manifest_digest)",
+  "historical_preregistration": {
+    "plan": "specs/experiments/F0-dataset-v2-plan.yaml",
+    "plan_status_preserved": "PRE_FREEZE_IMPLEMENTATION_READY",
+    "post_freeze_evidence_authority": true
+  },
+  "neural_sensor_boundary": {
+    "neural_semantic_families": [
+      "SELF_IDENTITY",
+      "PEER_IDENTITY",
+      "PEER_HANDLE_LOOKUP",
+      "MESSAGE_SENDER",
+      "MESSAGE_RECEIVER",
+      "MESSAGE_DIRECTION",
+      "PROPOSAL_ID",
+      "PROPOSAL_OWNER",
+      "PROPOSAL_DIRECTION",
+      "PROPOSAL_TARGET",
+      "INCOMING_PROPOSAL_IDENTIFICATION",
+      "OUTGOING_PROPOSAL_IDENTIFICATION",
+      "VISIBLE_VS_NOT_VISIBLE_FACT",
+      "OPAQUE_HANDLE_COPY",
+      "ALREADY_SELECTED_ACTION_SERIALIZATION"
+    ],
+    "deterministic_sensor_families": ["VISIBLE_PEER_COUNT"],
+    "sensor_normalizer": "F0_SENSOR_NORMALIZER_V1",
+    "neural_gradient_target_exclusions": ["VISIBLE_PEER_COUNT"],
+    "sensor_invariant_count": 512,
+    "sensor_gradient_target": false
+  },
+  "splits": {
+    "TRAIN": {
+      "count": 4096,
+      "file": "train.jsonl",
+      "file_sha256": "9e23b2dbb5cdf0ca866c854f9450d8d5eabaefc4211c107ffbe9f1416f0b91da",
+      "neural_family_count_range": [273, 274],
+      "maximum_family_count_delta": 1,
+      "pair_group_count": 136,
+      "curriculum_counts": {
+        "EASY": 967,
+        "MEDIUM": 953,
+        "HARD": 952,
+        "MINIMAL_PAIR": 136,
+        "COUNTERFACTUAL": 136,
+        "ADVERSARIAL": 952
+      }
+    },
+    "DEV": {
+      "count": 512,
+      "file": "dev.jsonl",
+      "file_sha256": "08ad4fa2decde3864c7f049b577f8630d4c1171fa5d1c987b55d4176a0180d1d",
+      "neural_family_count_range": [34, 35],
+      "maximum_family_count_delta": 1,
+      "pair_group_count": 16,
+      "curriculum_counts": {
+        "EASY": 127,
+        "MEDIUM": 127,
+        "HARD": 114,
+        "MINIMAL_PAIR": 16,
+        "COUNTERFACTUAL": 16,
+        "ADVERSARIAL": 112
+      }
+    },
+    "STRUCTURAL_HOLDOUT": {
+      "count": 1024,
+      "file": "structural_holdout.jsonl",
+      "file_sha256": "392bacd5ee492f41bfc91259e94d87c91d924acc00c2e2ad0422584797c64c0e",
+      "neural_family_count_range": [68, 69],
+      "maximum_family_count_delta": 1,
+      "pair_group_count": 32,
+      "curriculum_counts": {
+        "EASY": 243,
+        "MEDIUM": 239,
+        "HARD": 239,
+        "MINIMAL_PAIR": 32,
+        "COUNTERFACTUAL": 32,
+        "ADVERSARIAL": 239
+      }
+    },
+    "TEMPLATE_HOLDOUT": {
+      "count": 1024,
+      "file": "template_holdout.jsonl",
+      "file_sha256": "dbb311d78739ab902dabac86d9a55921ba530d7da55e5e082243406ba2bd1f7e",
+      "neural_family_count_range": [68, 69],
+      "maximum_family_count_delta": 1,
+      "pair_group_count": 32,
+      "curriculum_counts": {
+        "EASY": 243,
+        "MEDIUM": 239,
+        "HARD": 239,
+        "MINIMAL_PAIR": 32,
+        "COUNTERFACTUAL": 32,
+        "ADVERSARIAL": 239
+      }
+    },
+    "DOUBLE_HOLDOUT": {
+      "count": 1024,
+      "file": "double_holdout.jsonl",
+      "file_sha256": "588841b262ce1cc6db99d2a5b7661260784d31ba1dff52a9a154f5572259a260",
+      "neural_family_count_range": [68, 69],
+      "maximum_family_count_delta": 1,
+      "pair_group_count": 32,
+      "curriculum_counts": {
+        "EASY": 243,
+        "MEDIUM": 239,
+        "HARD": 239,
+        "MINIMAL_PAIR": 32,
+        "COUNTERFACTUAL": 32,
+        "ADVERSARIAL": 239
+      }
+    },
+    "ADVERSARIAL_HOLDOUT": {
+      "count": 512,
+      "file": "adversarial_holdout.jsonl",
+      "file_sha256": "ef3d2d00c7d6d9992c9a16fb1819edd71fdd0e84ba7da30975be7965fbd95978",
+      "neural_family_count_range": [34, 35],
+      "maximum_family_count_delta": 1,
+      "pair_group_count": 16,
+      "curriculum_counts": {
+        "EASY": 127,
+        "MEDIUM": 127,
+        "HARD": 114,
+        "MINIMAL_PAIR": 16,
+        "COUNTERFACTUAL": 16,
+        "ADVERSARIAL": 112
+      }
+    }
+  },
+  "screening_subsets": {
+    "TRAIN": {
+      "count": 1024,
+      "file": "screening_train.jsonl",
+      "file_sha256": "f83520cd675368a99796bcb9227eff465ccec6b0d62d07d8579985324de4c52a",
+      "pair_integrity": true
+    },
+    "DEV": {
+      "count": 256,
+      "file": "screening_dev.jsonl",
+      "file_sha256": "24c8bfba0119bba959e05d543053e4d35fbd7dc69e53ffb9a1e464256ae4253e",
+      "pair_integrity": true
+    },
+    "selection_only": true
+  },
+  "sensor_invariants": {
+    "count": 512,
+    "file": "sensor_invariants.jsonl",
+    "file_sha256": "82551f554cf75d0456953d7b7806270e0568db8edbe18d5f7cdd928d380f7d2a",
+    "gradient_target": false
+  },
+  "leakage": {
+    "exact_instance_cross_split_violations": 0,
+    "template_instance_cross_split_violations": 0,
+    "identifier_tuple_cross_split_violations": 0,
+    "pair_sibling_cross_split_violations": 0,
+    "founder_reserved_fingerprint_collisions": 0,
+    "exact_text_duplicates": 0,
+    "cross_split_violations": 0,
+    "template_violations": 0
+  },
+  "policy_leakage": {
+    "count": 0,
+    "status": "PASS"
+  },
+  "validation": {
+    "examples_total": 8192,
+    "ambiguous": 0,
+    "policy_examples": 0,
+    "sensor_invariant_count": 512,
+    "targeted_tests": {
+      "tests/model/test_foundation_evaluator_v2.py": "12 passed",
+      "tests/model/test_foundation_sensor_v1.py": "5 passed",
+      "tests/model/test_foundation_dataset_v2.py": "7 passed"
+    },
+    "regression_tests": {
+      "tests/test_f0_dataset_and_raw_baselines.py": "5 passed",
+      "tests/test_f0_neutral_foundation.py": "31 passed",
+      "tests/test_f0_final_pretraining_patch.py": "8 passed",
+      "tests/model": "88 passed",
+      "full_repository": "317 passed"
+    },
+    "docs_lint": "PASS",
+    "compileall": "PASS",
+    "git_diff_check": "PASS",
+    "temporary_dry_run": "PASS",
+    "canonical_generation": "PASS",
+    "independent_verify_only": "PASS"
+  },
+  "teacher_LM": false,
+  "chain_of_thought": false,
+  "screening_is_selection_only": true,
+  "sealed_founder_evaluations_unchanged": true,
+  "immutability_after_freeze": "NEW_DATASET_VERSION_REQUIRED_FOR_ANY_CONTENT_CHANGE"
+}
