@@ -1,9 +1,9 @@
 {
   "spec_schema_version": "1.0.0",
   "admission_id": "FOUNDER_MODEL_ADMISSION_V1",
-  "status": "FUTURE_BOUNDED_PROTOCOL",
+  "status": "ACTIVE_BOUNDED_PROTOCOL",
   "semantic_owner": "ARC-350",
-  "scope": "COMPREHENSION_AND_REFERENCE_GROUNDING_ONLY",
+  "scope": "COMPREHENSION_REFERENCE_MOTOR_AND_AUTONOMOUS_INTERFACE_ADMISSION",
   "candidate_order": [
     "allenai/OLMo-2-0425-1B-Instruct",
     "VillanovaAI/Villanova-2B-2603",
@@ -41,6 +41,27 @@
       "REPRODUCTION_PROPOSAL_HANDLE_GROUNDING"
     ],
     "critical_failure_policy": "ANY_CRITICAL_CORE_ERROR_FAILS_FOUNDER_ADMISSION"
+  },
+  "MOTOR": {
+    "role": "LIVE_CONTEXT_CODEC_ADMISSION",
+    "protocol": "specs/experiments/A0-autonomous-interface-admission-v1.yaml",
+    "protocol_status": "PRE_REGISTERED_NOT_EXECUTED",
+    "selection_rule": "LEAST_INTERVENING_INTERFACE_PASSING_MOTOR_GATE",
+    "action_frequency_target": null,
+    "does_not_retrain_foundation": true
+  },
+  "AUTONOMOUS": {
+    "role": "VALID_DOMAIN_ACTION_FROM_REAL_CONTEXTPACK_WITHOUT_SOCIAL_OBJECTIVE",
+    "protocol": "specs/experiments/A0-autonomous-interface-admission-v1.yaml",
+    "protocol_status": "PRE_REGISTERED_NOT_EXECUTED",
+    "requires_motor_gate": true,
+    "action_distribution_is_observation_not_gate": true,
+    "founder_freeze_after_A0": false
+  },
+  "FOUNDER_FREEZE": {
+    "status": "NOT_ESTABLISHED",
+    "requires": ["C0", "C20", "MOTOR", "AUTONOMOUS"],
+    "rule": "A0 completion alone does not mutate this status; immutable evidence must be reviewed and an explicit result record committed"
   },
   "non_prescriptive_grounding": [
     "MESSAGE_RECEIVED_DOES_NOT_IMPLY_SEND",

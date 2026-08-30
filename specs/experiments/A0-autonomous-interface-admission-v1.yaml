@@ -1,0 +1,135 @@
+{
+  "spec_schema_version": "1.0.0",
+  "admission_id": "A0_AUTONOMOUS_INTERFACE_ADMISSION_V1",
+  "status": "PRE_REGISTERED_NOT_EXECUTED",
+  "role": ["MOTOR_GATE_EVIDENCE", "AUTONOMOUS_GATE_EVIDENCE"],
+  "scientific_scope": "INTERFACE_CAPABILITY_ONLY",
+  "motivation": {
+    "discovery_evidence": {
+      "classification": "DISCOVERY_ONLY_NOT_IN_A0_DENOMINATOR",
+      "world_v0_smoke_manifest_digest": "717bdd81c388c47beb7d5e2777867762b7cd223e61a50f7195840c72315ccf89",
+      "observation": "6/6 real A40 cognition attempts produced token 100257 as the first generated token and ended with eos_token under I0"
+    },
+    "foundation_boundary": "F0 trains grounding and already-selected-action serialization; it intentionally does not train action selection policy"
+  },
+  "frozen_scientific_identity": {
+    "base_model_repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "base_model_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "tokenizer_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "adapter_config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d"
+  },
+  "runtime": {
+    "device_class": "NVIDIA_A40",
+    "dtype": "bfloat16",
+    "model_loads_per_execution": 1,
+    "generation_policy_id": "A0_GREEDY_DIRECT_COMPLETION_V1",
+    "do_sample": false,
+    "max_new_tokens": 128,
+    "generation_seed_id": "A0_GREEDY_SEED_V1",
+    "generation_seed": 35020260831,
+    "retry": false,
+    "fallback": false,
+    "repair": false,
+    "chat_template": false
+  },
+  "cohort": {
+    "fixture_owner": "src/alifelm/model/r3_fixtures.py",
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "cases_per_context_class": 16,
+    "contexts_per_treatment": 80,
+    "same_compiled_context_objects_reused_across_primary_treatments": true,
+    "behavior_directives_in_context": false,
+    "canonical_state_commits": 0
+  },
+  "primary_treatments": {
+    "order_of_minimality": ["I0", "I1", "I2", "I3"],
+    "I0": {
+      "completion_suffix": "",
+      "constraint": null
+    },
+    "I1": {
+      "completion_suffix": "\\nAction selection JSON:\\n",
+      "constraint": null
+    },
+    "I2": {
+      "completion_suffix": "\\nAction selection JSON:\\n",
+      "constraint": "SYNTAX_ONLY_ACTION_JSON"
+    },
+    "I3": {
+      "completion_suffix": "\\nAction selection JSON:\\n",
+      "constraint": "ACTION_CONDITIONAL_TYPED_JSON"
+    }
+  },
+  "promotion_rule": {
+    "method": "FIRST_MINIMAL_TREATMENT_PASSING_BOTH_GATES",
+    "motor_gate": {
+      "codec_valid_rate_min": 0.99,
+      "first_token_eos_rate_max": 0.01,
+      "evidence_complete_rate_required": 1.0,
+      "infrastructure_failures_required": 0,
+      "exact_repeat_equal_required": true
+    },
+    "autonomous_gate": {
+      "requires_motor_gate": true,
+      "domain_valid_rate_min": 0.95,
+      "minimum_per_context_class_domain_valid_rate": 0.90
+    },
+    "explicitly_not_gated": [
+      "action_distribution",
+      "NO_DIRECTED_ACTION_rate",
+      "DIRECT_TEXT_rate",
+      "OPEN_BILATERAL_REQUEST_rate",
+      "CONFIRM_BILATERAL_REQUEST_rate",
+      "DECLINE_BILATERAL_REQUEST_rate",
+      "social_desirability",
+      "interestingness"
+    ]
+  },
+  "i3_branch_order_audit": {
+    "trigger": "I3_IS_MINIMAL_PRIMARY_TREATMENT_PASSING_BOTH_GATES",
+    "orders": [
+      ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+      ["REJECT", "ACCEPT", "PROPOSE", "SEND", "WAIT"],
+      ["SEND", "PROPOSE", "ACCEPT", "REJECT", "WAIT"],
+      ["ACCEPT", "WAIT", "REJECT", "SEND", "PROPOSE"]
+    ],
+    "each_order_must_pass_primary_gates": true,
+    "candidate_choice_agreement_rate_min": 0.95,
+    "domain_valid_rate_spread_max": 0.05,
+    "failure_effect": "I3_NOT_ADMITTED"
+  },
+  "secondary_diagnostics": {
+    "not_used_for_primary_promotion": true,
+    "available_if_primary_study_fails_or_reveals_bias": [
+      "I05R3_ACTION_LABEL_SEQUENCE_SCORE",
+      "I05R4_BALANCED_OPAQUE_SELECTOR_CODEBOOKS",
+      "FORCED_GROUNDING_HANDLE_DIAGNOSTICS"
+    ],
+    "rule": "Any new treatment or changed threshold requires A0 v2 and must not retroactively change A0 v1"
+  },
+  "scientific_firewall": {
+    "no_social_objective": true,
+    "no_personality_prompt": true,
+    "no_trust_prior": true,
+    "no_friend_enemy_label": true,
+    "no_mate_score": true,
+    "no_action_frequency_target": true,
+    "no_main_EXP000_behavior_used_to_choose_interface": true,
+    "NO_DIRECTED_ACTION_is_a_valid_agent_action": true,
+    "EOS_is_not_reinterpreted_as_NO_DIRECTED_ACTION": true
+  },
+  "post_result": {
+    "admission_pass_does_not_equal_founder_freeze": true,
+    "required_next_step": "REVIEW_A0_EVIDENCE_THEN_UPDATE_FOUNDER_ADMISSION_RECORD",
+    "if_no_treatment_passes": "STOP_AND_AUTHOR_A0_V2_BEFORE_ANY_INTERFACE_CHANGE"
+  }
+}
