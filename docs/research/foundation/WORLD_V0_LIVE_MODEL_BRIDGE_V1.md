@@ -1,11 +1,12 @@
 # WORLD v0 Live Model Bridge Design v1
 
-Status: DESIGN-ONLY / IMPLEMENTATION NOT YET ADMITTED
+Status: IMPLEMENTED / GPU ADMISSION PENDING
 
-This document specifies the missing live model bridge for WORLD v0. It does
-not change EXP-000 laws, the ContextPack contract, the action presentation,
-or the deterministic kernel. The bridge is an implementation boundary around
-the existing model proposal path.
+This document specifies the first CPU-tested live model bridge for WORLD v0.
+GPU admission remains pending. It does not change EXP-000 laws, the
+ContextPack contract, the action presentation, or the deterministic kernel.
+The bridge is an implementation boundary around the existing model proposal
+path.
 
 ## Causal path
 
@@ -120,21 +121,14 @@ No shared mutable decoder state, cache bleed, or adapter switching may make
 the result depend on completion order. A malformed member must be recorded as
 rejected without changing the other members or turning into a default action.
 
-## Implementation gap list
+## Remaining implementation gap list before GPU admission
 
-1. Replace the orchestration module’s fake-runtime wording with an admitted
-   live bridge class that implements `CandidateModelRuntime`.
-2. Add a run-scoped immutable runtime loader for canonical base + FA-v1 and a
-   startup hash/identity check.
-3. Add live-path durable raw-generation/evidence persistence before parsing.
-4. Define typed rejection collection at P4 so malformed output cannot be
-   silently converted or accidentally committed.
-5. Bind generation provenance (model, adapter, tokenizer, policy, seed,
-   context hash) to each evidence record.
-6. Add single-request versus batch equivalence tests before enabling batching.
-7. Add crash/retry and completion-order tests proving no causal drift.
-8. Add a headless integration wiring the bridge through the existing
-   `DeterministicKernel`, `LawValidator`, and commit coordinator.
+1. Run the exact accepted OLMo + FA-v1 configuration in a real headless A40
+   smoke; no GPU run has been performed by this slice.
+2. Verify deployment-specific model/tokenizer/adapter file digests against the
+   run manifest before admission.
+3. Add single-request versus batch equivalence tests before enabling batching.
+4. Add a durable-store crash/resume test for the live evidence path.
 
 ## Test plan before implementation admission
 
@@ -155,14 +149,13 @@ rejected without changing the other members or turning into a default action.
 
 ## Recommended next commit sequence
 
-1. `feat: add world v0 live candidate runtime bridge` — runtime loader,
-   request/evidence sink, strict rejection collection, and no policy fallback.
-2. `test: prove live bridge causal and evidence boundaries` — P3/P4,
-   visibility, identity, malformed, order, and crash tests.
-3. `docs: admit world v0 live bridge` — update the implementation status only
-   after the tests and headless vertical slice pass.
+1. `ops: run world v0 live bridge A40 smoke` — use the frozen FA-v1/base
+   identities and a headless run manifest.
+2. `test: prove live bridge deployment admission` — file-digest, crash/resume,
+   and runtime determinism checks.
+3. `docs: record world v0 GPU admission` — update status only after the A40
+   smoke passes without causal or evidence failures.
 
 No population policy, mate preference, interaction reward, or neural heredity
 is part of these slices. The bridge only connects model proposals to the
 existing deterministic validation/commit boundary.
-

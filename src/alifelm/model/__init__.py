@@ -10,6 +10,7 @@ from .adapter import (
     ModelRuntime,
     generation_request_for,
     parse_raw_generation,
+    validate_raw_generation_result,
 )
 from .audit import (
     ChatTemplateAudit,
@@ -31,12 +32,16 @@ from .action_diagnostics import (
 )
 from .evidence import (
     CognitionDryRunResult,
+    CognitionEvidencePreparation,
     CognitionEvidence,
     ModelOutputStatus,
     RealCognitionDryRunner,
     RejectedModelOutput,
     cognition_evidence_bytes,
     raw_generation_bytes,
+    prepare_cognition_evidence,
+    finalize_cognition_evidence,
+    build_cognition_evidence,
 )
 from .generation import (
     GenerationPolicy,
@@ -44,6 +49,12 @@ from .generation import (
     RawGenerationResult,
     StopHook,
     generation_identity,
+)
+from .live_runtime import (
+    LiveCandidateRuntime,
+    LiveRuntimeIdentity,
+    WORLD_V0_FA_V1_IDENTITY,
+    validate_live_runtime_identity,
 )
 from .profile import ModelProfile
 from .motor_diagnostics import (
@@ -98,6 +109,9 @@ from .typed_codec import (
 
 __all__ = [
     "ContextModelRuntimeAdapter",
+    "LiveCandidateRuntime",
+    "LiveRuntimeIdentity",
+    "WORLD_V0_FA_V1_IDENTITY",
     "ChatTemplateAudit",
     "ACTION_SCORE_PREFIX",
     "ACTION_SCORE_TREATMENT_ID",
@@ -108,6 +122,7 @@ __all__ = [
     "rank_action_label_scores",
     "score_action_labels",
     "CognitionDryRunResult",
+    "CognitionEvidencePreparation",
     "CognitionEvidence",
     "GenerationError",
     "GenerationPolicy",
@@ -174,4 +189,9 @@ __all__ = [
     "cognition_evidence_bytes",
     "raw_generation_bytes",
     "parse_raw_generation",
+    "validate_raw_generation_result",
+    "prepare_cognition_evidence",
+    "finalize_cognition_evidence",
+    "build_cognition_evidence",
+    "validate_live_runtime_identity",
 ]

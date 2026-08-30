@@ -54,6 +54,7 @@ class TickResult:
     commit_result: CommitResult
     context_packs: tuple = ()
     context_artifact_refs: tuple = ()
+    cognition_attempts: tuple = ()
 
 
 class DeterministicKernel:
@@ -88,6 +89,7 @@ class DeterministicKernel:
         opportunities = self.scheduler.enumerate(snapshot)
         context_packs: tuple = ()
         context_artifact_refs: tuple = ()
+        cognition_attempts: tuple = ()
         if self.context_pipeline is not None:
             # P3 completes every ContextPack (and optional durable evidence)
             # before P4 invokes any candidate runtime.
@@ -99,6 +101,7 @@ class DeterministicKernel:
                 item.context_pack for item in context_result.compiled_contexts
             )
             context_artifact_refs = context_result.artifact_refs
+            cognition_attempts = context_result.attempts
         else:
             by_agent = {
                 opportunity.agent_id: opportunity for opportunity in opportunities
@@ -167,6 +170,7 @@ class DeterministicKernel:
             commit_result=commit_result,
             context_packs=context_packs,
             context_artifact_refs=context_artifact_refs,
+            cognition_attempts=cognition_attempts,
         )
 
 

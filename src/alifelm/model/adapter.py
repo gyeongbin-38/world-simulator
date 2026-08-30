@@ -28,6 +28,51 @@ class ModelRuntime(Protocol):
     def generate(self, request: GenerationRequest) -> RawGenerationResult: ...
 
 
+def validate_raw_generation_result(
+    request: GenerationRequest,
+    result: RawGenerationResult,
+    profile: ModelProfile,
+    policy: GenerationPolicy,
+) -> None:
+    """Fail closed when a backend returns evidence for another request.
+
+    A mismatch is an infrastructure-integrity failure.  It is deliberately
+    kept separate from parser failures, which represent model output.
+    """
+
+    if not isinstance(request, GenerationRequest):
+        raise TypeError("request must be a GenerationRequest")
+    if not isinstance(result, RawGenerationResult):
+        raise TypeError("model runtime must return RawGenerationResult")
+    if not isinstance(profile, ModelProfile):
+        raise TypeError("profile must be a ModelProfile")
+    if not isinstance(policy, GenerationPolicy):
+        raise TypeError("policy must be a GenerationPolicy")
+    if request.model_profile != profile:
+        raise ValueError("request profile does not match configured profile")
+    if request.generation_policy != policy:
+        raise ValueError("request policy does not match configured policy")
+    checks = (
+        (result.opportunity_id, request.opportunity_id, "opportunity identity"),
+        (result.generation_id, request.generation_id, "generation identity"),
+        (result.context_pack_id, request.context_pack_id, "ContextPack identity"),
+        (result.context_hash, request.context_hash, "context hash"),
+        (result.rendered_input_hash, request.rendered_input_hash, "rendered input"),
+        (result.interface_treatment_id, request.interface_treatment_id, "interface treatment identity"),
+        (result.interface_treatment_version, request.interface_treatment_version, "interface treatment version"),
+        (result.interface_treatment_digest, request.interface_treatment_digest, "interface treatment digest"),
+        (result.constraint_policy_id, request.constraint_policy_id, "constraint policy identity"),
+        (result.model_profile_id, profile.profile_id, "model profile identity"),
+        (result.generation_policy_id, policy.policy_id, "generation policy identity"),
+        (result.generation_policy_version, policy.version, "generation policy version"),
+        (result.generation_seed_id, request.generation_seed_id, "generation seed identity"),
+        (result.generation_seed, request.generation_seed, "generation seed"),
+    )
+    for actual, expected, label in checks:
+        if actual != expected:
+            raise ValueError(f"raw result {label} does not match request")
+
+
 def generation_request_for(
     compiled: CompiledContext,
     profile: ModelProfile,
@@ -150,32 +195,9 @@ class ContextModelRuntimeAdapter:
             stop_hooks=self.stop_hooks,
         )
         result = self.runtime.generate(request)
-        if not isinstance(result, RawGenerationResult):
-            raise TypeError("model runtime must return RawGenerationResult")
-        if result.opportunity_id != request.opportunity_id:
-            raise ValueError("raw result opportunity identity does not match request")
-        if result.generation_id != request.generation_id:
-            raise ValueError("raw result generation identity does not match request")
-        if result.context_pack_id != request.context_pack_id:
-            raise ValueError("raw result ContextPack identity does not match request")
-        if result.context_hash != request.context_hash:
-            raise ValueError("raw result context hash does not match request")
-        if result.rendered_input_hash != request.rendered_input_hash:
-            raise ValueError("raw result rendered input does not match request")
-        if result.interface_treatment_id != request.interface_treatment_id:
-            raise ValueError("raw result interface treatment does not match request")
-        if result.interface_treatment_digest != request.interface_treatment_digest:
-            raise ValueError("raw result interface digest does not match request")
-        if result.model_profile_id != self.profile.profile_id:
-            raise ValueError("raw result model profile does not match request")
-        if result.generation_policy_id != self.generation_policy.policy_id:
-            raise ValueError("raw result generation policy does not match request")
-        if result.generation_policy_version != self.generation_policy.version:
-            raise ValueError("raw result generation policy version does not match request")
-        if result.generation_seed_id != request.generation_seed_id:
-            raise ValueError("raw result generation seed identity does not match request")
-        if result.generation_seed != request.generation_seed:
-            raise ValueError("raw result generation seed does not match request")
+        validate_raw_generation_result(
+            request, result, self.profile, self.generation_policy
+        )
         self._raw_results.append(result)
         return result
 

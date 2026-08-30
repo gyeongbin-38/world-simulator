@@ -20,6 +20,7 @@ from .orchestration import (
     ContextArtifactStore,
     ContextCognitionPipeline,
     ContextCognitionResult,
+    CognitionAttempt,
 )
 from .provenance import expected_model_paths, validate_context_provenance
 from .render import ModelFacingRenderer, render_model_input, render_model_input_bytes
@@ -86,6 +87,7 @@ __all__ = [
     "ContextArtifactStore",
     "ContextCognitionPipeline",
     "ContextCognitionResult",
+    "CognitionAttempt",
     "ContextCompiler",
     "ContextEvidence",
     "ContextPack",
