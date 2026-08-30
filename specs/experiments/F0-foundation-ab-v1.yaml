@@ -1,0 +1,123 @@
+{
+  "spec_schema_version": "1.0.0",
+  "experiment_id": "F0_FOUNDATION_AB_V1",
+  "status": "PRETRAINING_RESOURCE_GATE",
+  "scientific_question": "Does base-weight precision or quantization during otherwise identical Foundation adaptation materially affect neural grounding?",
+  "independent_variable": "BASE_WEIGHT_PRECISION_OR_QUANTIZATION_DURING_ADAPTATION",
+  "legacy_evidence": {
+    "record": "specs/experiments/F0-historical-fa-v1-legacy.yaml",
+    "status": "UNVERIFIABLE_LEGACY",
+    "formal_comparison_allowed": false
+  },
+  "dataset": {
+    "dataset_id": "F0_DATASET_V2",
+    "artifact_root": "E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V2",
+    "manifest_digest": "4ed8f67689e312fc2b37976d82a4b5f6d9c4ce1a38df808d6f562a9c19b259dd",
+    "train_file": "train.jsonl",
+    "train_file_sha256": "9e23b2dbb5cdf0ca866c854f9450d8d5eabaefc4211c107ffbe9f1416f0b91da",
+    "train_count": 4096,
+    "visible_peer_count_gradient_targets": 0
+  },
+  "base": {
+    "repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "local_path": "E:/WORLD/AI_MODELS/OLMo-2-0425-1B-Instruct-BF16",
+    "checkpoint_file": "model.safetensors",
+    "checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "immutable": true
+  },
+  "evaluation_contract": {
+    "evaluator_id": "F0_FOUNDATION_EVALUATOR_V2",
+    "evaluator_version": "2.0.0",
+    "sensor_normalizer_id": "F0_SENSOR_NORMALIZER_V1",
+    "sensor_normalizer_version": "1.0.0",
+    "neural_family_count": 15,
+    "sensor_only_family": "VISIBLE_PEER_COUNT",
+    "candidate_scoring": "TEACHER_FORCED_MEAN_TOKEN_LOG_PROBABILITY",
+    "serialization_schema_and_semantics_separate": true,
+    "deterministic": true
+  },
+  "common_training": {
+    "epochs": 1,
+    "sequence_length": 256,
+    "microbatch": 1,
+    "gradient_accumulation": 8,
+    "effective_batch": 8,
+    "optimizer": "torch.optim.AdamW",
+    "learning_rate": 0.0002,
+    "weight_decay": 0.0,
+    "warmup_steps": 0,
+    "scheduler": "CONSTANT",
+    "gradient_clipping": null,
+    "gradient_checkpointing": true,
+    "shuffle": {
+      "enabled": true,
+      "algorithm": "torch.randperm with a CPU torch.Generator",
+      "workers": 0,
+      "reseed_each_epoch": "seed + epoch_index",
+      "paired_order_identical_between_treatments": true
+    },
+    "seed_derivation": "first 31 bits of SHA-256(F0_FOUNDATION_AB_V1|35120260830|SEED|replicate_index)",
+    "seeds": [292255390, 1166218024, 698950225],
+    "loss": {
+      "renderer": "record.input.rstrip() + newline + Answer: + newline",
+      "prompt_tokens": "MASKED_MINUS_100",
+      "ground_truth_tokens": "ACTIVE",
+      "eos_token": "ACTIVE",
+      "chain_of_thought": false
+    },
+    "lora": {
+      "implementation": "PEFT_VANILLA_LORA",
+      "r": 16,
+      "alpha": 32,
+      "dropout": 0.0,
+      "bias": "none",
+      "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
+      "forbidden_target_modules": ["gate_proj", "up_proj", "down_proj", "lm_head"],
+      "forbidden_variants": ["EVA", "LORA_PLUS", "PISSA", "LORA_GA", "DORA", "RSLORA"]
+    }
+  },
+  "treatments": {
+    "A_NF4_QLORA": {
+      "treatment_id": "F0_AB_A_NF4_QLORA",
+      "base_quantization": "NF4_4BIT",
+      "double_quantization": true,
+      "compute_dtype": "FP16"
+    },
+    "B_BF16_LORA": {
+      "treatment_id": "F0_AB_B_BF16_LORA",
+      "base_quantization": null,
+      "base_dtype": "BF16",
+      "compute_dtype": "BF16"
+    }
+  },
+  "symmetry_rule": "NO_TREATMENT_SPECIFIC_CHANGE_TO_SEQUENCE_LENGTH_MICROBATCH_ACCUMULATION_OPTIMIZER_DATA_ORDER_OR_OBJECTIVE",
+  "formal_run_required_provenance": [
+    "experiment_id",
+    "treatment_id",
+    "git_commit_sha",
+    "worktree_status",
+    "dataset_manifest_digest",
+    "split_file_hashes",
+    "base_revision",
+    "base_checkpoint_sha256",
+    "tokenizer_revision",
+    "tokenizer_and_config_digest",
+    "evaluator_version",
+    "sensor_normalizer_version",
+    "seed",
+    "training_config",
+    "package_versions",
+    "cuda_and_gpu",
+    "adapter_config",
+    "adapter_sha256",
+    "checkpoint_hashes",
+    "start_and_end_timestamps",
+    "exit_status",
+    "training_loss_trajectory",
+    "evaluation_metrics",
+    "evidence_artifact_hashes"
+  ],
+  "training_authorized": false,
+  "authorization_rule": "BOTH_TREATMENTS_MUST_PASS_THE_SAME_SEQUENCE_256_MICROBATCH_1_FORWARD_BACKWARD_RESOURCE_GATE"
+}

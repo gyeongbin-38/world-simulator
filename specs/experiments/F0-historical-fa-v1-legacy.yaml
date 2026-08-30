@@ -1,0 +1,38 @@
+{
+  "record_schema_version": "1.0.0",
+  "record_id": "F0_HISTORICAL_FA_V1_LEGACY_V1",
+  "status": "UNVERIFIABLE_LEGACY",
+  "scientific_role": "EXPLORATORY_HISTORICAL_CONTEXT_ONLY",
+  "rounded_historical_observation_pct": 98.33,
+  "exact_98_3259_verified": false,
+  "adapter_artifact_available": false,
+  "run_manifest_available": false,
+  "adapter_to_result_binding_available": false,
+  "bounded_recovery": {
+    "attempted": true,
+    "completed_date": "2026-08-30",
+    "result": "PARTIAL_ONLY",
+    "searched_roots": [
+      "E:/WORLD",
+      "E:/WORLD/AI_CACHE",
+      "E:/WORLD/AI_CACHE/evidence",
+      "E:/WORLD/AI_CACHE/artifacts",
+      "E:/WORLD/AI_MODELS",
+      "accessible local shell history"
+    ]
+  },
+  "prohibited_uses": [
+    "FORMAL_BASELINE",
+    "PAIRED_COMPARISON",
+    "IMPROVEMENT_OR_REGRESSION_EVIDENCE",
+    "STATISTICAL_RESULT",
+    "SUBSTITUTE_CHECKPOINT"
+  ],
+  "substitution_forbidden": [
+    "FA_V0",
+    "SMOLLM3_ARTIFACTS",
+    "RECONSTRUCTED_FROM_REMEMBERED_SETTINGS"
+  ],
+  "preregistration_documents_modified": false,
+  "future_rule": "NEW_CONTROLLED_RUNS_MUST_BIND_EXACT_ADAPTER_AND_RUN_PROVENANCE"
+}

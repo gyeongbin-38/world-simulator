@@ -1,0 +1,124 @@
+{
+  "record_schema_version": "1.0.0",
+  "record_id": "F0_FOUNDATION_AB_RESOURCE_GATE_V1",
+  "experiment_id": "F0_FOUNDATION_AB_V1",
+  "status": "BLOCKED_RESOURCE",
+  "decision_date": "2026-08-30",
+  "dataset": {
+    "dataset_id": "F0_DATASET_V2",
+    "manifest_digest": "4ed8f67689e312fc2b37976d82a4b5f6d9c4ce1a38df808d6f562a9c19b259dd",
+    "content_modified": false,
+    "train_count": 4096,
+    "visible_peer_count_neural_targets": 0
+  },
+  "base": {
+    "repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "checkpoint_unchanged": true
+  },
+  "audit": {
+    "status": "PASS",
+    "evidence": "E:/WORLD/AI_CACHE/evidence/f0-foundation-ab-gate-v1/environment-tokenizer-sensor.json",
+    "evidence_file_sha256": "162bee7e46716a024f04a3d5989dbd08380001c7371dd980c66cd485a7aa1b4c",
+    "evidence_digest": "866c8e57d7ec4c51be7d61264f28b1ba9db96687d5fdc5f8f52532fbaa05f8dd",
+    "evaluator": "F0_FOUNDATION_EVALUATOR_V2@2.0.0",
+    "sensor": "F0_SENSOR_NORMALIZER_V1@1.0.0",
+    "sensor_correct": 512,
+    "sensor_count": 512,
+    "sensor_accuracy": 1.0,
+    "target_module_counts": {
+      "q_proj": 16,
+      "k_proj": 16,
+      "v_proj": 16,
+      "o_proj": 16
+    }
+  },
+  "tokenizer": {
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "implementation": "TokenizersBackend_FAST",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "config_digest": "eeed26d20a24ad35479aa33b690b196096c5f98fee8bc43d816c3bd314987c38",
+    "bos_token_id": 100257,
+    "eos_token_id": 100257,
+    "pad_token_id": 100277,
+    "add_special_tokens": true,
+    "direct_encode_adds_bos": false,
+    "direct_ids_equal_with_and_without_special_tokens": true,
+    "chat_template_applied_for_foundation_completion": false,
+    "chat_template_would_add_bos": true,
+    "answer_boundary": "\\nAnswer:\\n",
+    "paired_treatment_rule": "IDENTICAL_INPUT_IDS_AND_LABEL_MASKS"
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce GTX 1050",
+    "compute_capability": "6.1",
+    "physical_vram_bytes": 3221094400,
+    "cuda_build": "11.8",
+    "torch": "2.7.1+cu118",
+    "transformers": "5.16.1",
+    "peft": "0.20.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "common_smoke": {
+    "sequence_length": 256,
+    "microbatch": 1,
+    "formal_gradient_accumulation": 8,
+    "gradient_checkpointing": true,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0,
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
+    "forward": true,
+    "backward": true,
+    "optimizer_step": false,
+    "adapter_saved": false
+  },
+  "treatments": {
+    "A_NF4_QLORA": {
+      "result": "FORWARD_BACKWARD_PASS",
+      "safe_physical_vram_fit": true,
+      "precision": "NF4_4BIT_DOUBLE_QUANT_FP16_COMPUTE",
+      "peak_vram_allocated_bytes": 2671169536,
+      "peak_vram_reserved_bytes": 3093299200,
+      "physical_vram_headroom_bytes": 127795200,
+      "process_ram_bytes": 952139776,
+      "forward_backward_seconds": 11.94468450002023,
+      "trainable_parameters": 4194304,
+      "evidence": "E:/WORLD/AI_CACHE/evidence/f0-foundation-ab-gate-v1/smoke-a_nf4_qlora.json",
+      "evidence_file_sha256": "261151c456502a9c5dc584ce29328e628c890221aa6e9c034b60e97eec9abb1f",
+      "evidence_digest": "6b5660df82872b83c2add7ac071a5c5929a502b39e9145cbd13c376b3a6ad920"
+    },
+    "B_BF16_LORA": {
+      "result": "FORWARD_BACKWARD_PASS_WITH_VRAM_OVERSUBSCRIPTION",
+      "safe_physical_vram_fit": false,
+      "precision": "UNQUANTIZED_BF16",
+      "peak_vram_allocated_bytes": 3375053824,
+      "peak_vram_reserved_bytes": 3464495104,
+      "physical_vram_headroom_bytes": -243400704,
+      "process_ram_bytes": 1280806912,
+      "forward_backward_seconds": 19.812191400007578,
+      "trainable_parameters": 4194304,
+      "evidence": "E:/WORLD/AI_CACHE/evidence/f0-foundation-ab-gate-v1/smoke-b_bf16_lora.json",
+      "evidence_file_sha256": "9c3d0e4e5c8b9b6257b83d100a5a28d4436006743c11f4db14cc1a225a76e83c",
+      "evidence_digest": "8bc8595fa102c79f8aa54e4758c444a45a63c8eae8a8c0573a6ed2ceb563520c"
+    }
+  },
+  "resource_interpretation": {
+    "physical_vram_fit_law": "peak_reserved_vram_bytes <= physical_vram_bytes",
+    "bf16_oversubscription_bytes": 243400704,
+    "optimizer_state_not_yet_allocated": true,
+    "formal_training_fit_claim_allowed": false,
+    "treatments_locally_symmetric": false,
+    "automatic_asymmetric_fallback_allowed": false
+  },
+  "clean_unadapted_baseline": {
+    "status": "NOT_FROZEN_RESOURCE_STOP",
+    "metrics_available": false,
+    "reason": "The required canonical BF16 Evaluator-v2 baseline is not practical on this local resource envelope, and substituting a quantized evaluation runtime was not preregistered.",
+    "sensor_correctness_available_separately": true,
+    "partial_or_quantized_result_must_not_be_reported_as_formal_baseline": true
+  },
+  "training_authorized": false,
+  "unblock_requirement": "RUN_BOTH_TREATMENTS_AND_THE_COMMON_EVALUATION_RUNTIME_ON_A_RESOURCE_ENVELOPE_WITH_SAFE_HEADROOM_WITHOUT_CHANGING_COMMON_CONFIGURATION"
+}
