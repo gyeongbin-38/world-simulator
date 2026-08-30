@@ -1,0 +1,76 @@
+{
+  "record_schema_version": "1.0.0",
+  "record_id": "F0_FOUNDATION_STAGE0_RESULT_V1",
+  "status": "RECOVERED_STAGE0_RESULT_PROVENANCE",
+  "execution": {
+    "git_commit": "874abe147c5129ec9209ab06e96c9f6d77875aad",
+    "run_id": "F0_FOUNDATION_STAGE0_EVAL_V2_V1",
+    "manifest_digest": "f46dda9d18ece93fb9c3045ea963eba5d1474d6ad99bc253fe497852227fa3d9",
+    "gpu_evaluation_executed": true,
+    "hidden_examples_copied_to_repository": false
+  },
+  "artifact_inputs": {
+    "base_model_repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "base_model_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "evaluator": "F0_FOUNDATION_EVALUATOR_V2@2.0.0",
+    "sensor_normalizer": "F0_SENSOR_NORMALIZER_V1@1.0.0"
+  },
+  "operational_result": {
+    "s0_a": {
+      "metric": "15_FAMILY_NEURAL_NGA",
+      "correct": 2142,
+      "total": 3360,
+      "value": 0.6375
+    },
+    "s0_b": {
+      "metric": "15_FAMILY_NEURAL_NGA",
+      "correct": 3348,
+      "total": 3360,
+      "value": 0.9964285714285714,
+      "serialization_schema_valid": 220,
+      "serialization_semantic_correct": 220,
+      "serialization_total": 224,
+      "candidate_ties": 0,
+      "tokenization_boundary_failures": 0,
+      "evaluator_failures": 0
+    },
+    "s0_c": {
+      "metric": "15_FAMILY_NEURAL_NGA_WITH_SENSOR_BOUNDARY",
+      "neural_result_same_as": "S0_B",
+      "sensor_family": "VISIBLE_PEER_COUNT",
+      "sensor_correct": 224,
+      "sensor_total": 224,
+      "sensor_correctness": 1.0
+    },
+    "operational_14_family_grounding": {
+      "correct": 3128,
+      "total": 3136,
+      "value": 0.9974489795918368,
+      "worst_family": "PROPOSAL_OWNER",
+      "worst_family_accuracy": 0.9866071428571429
+    }
+  },
+  "historical_comparison": {
+    "historical_result": {
+      "correct": 3524,
+      "total": 3584,
+      "value": 0.9832589285714286,
+      "status": "FAIL_SYNTHETIC_HIDDEN_ADMISSION"
+    },
+    "post_hoc_old_evaluator_neural_diagnostic": {
+      "correct": 3344,
+      "total": 3360,
+      "value": 0.9952380952380953,
+      "admission_result": false
+    },
+    "original_evaluator": "GREEDY_DIRECT_ANSWER",
+    "historical_status_rewritten": false
+  },
+  "sealing": {
+    "hidden_case_contents_in_repository": false,
+    "append_only": true,
+    "historical_records_edited": false
+  }
+}

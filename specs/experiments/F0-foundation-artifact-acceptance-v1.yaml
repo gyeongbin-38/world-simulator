@@ -1,0 +1,66 @@
+{
+  "record_schema_version": "1.0.0",
+  "record_id": "F0_FOUNDATION_ARTIFACT_ACCEPTANCE_V1",
+  "status": "FOUNDATION_ARTIFACT_OPERATIONAL_ACCEPTANCE",
+  "artifact_status": "ACCEPTED_FOR_WORLD_V0_EXPERIMENTAL_USE",
+  "training_recipe_formal_promotion": "NOT_ESTABLISHED",
+  "scientific_scope": "ONE_FROZEN_INSTRUMENT_FOR_WORLD_V0_EXPERIMENTAL_USE",
+  "artifact": {
+    "role": "RECOVERED_FA_V1_ADAPTER",
+    "base_model_repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "base_model_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec"
+  },
+  "stage0_evidence": {
+    "run_id": "F0_FOUNDATION_STAGE0_EVAL_V2_V1",
+    "manifest_digest": "f46dda9d18ece93fb9c3045ea963eba5d1474d6ad99bc253fe497852227fa3d9",
+    "evaluator_id": "F0_FOUNDATION_EVALUATOR_V2",
+    "evaluator_version": "2.0.0",
+    "sensor_normalizer_id": "F0_SENSOR_NORMALIZER_V1",
+    "sensor_normalizer_version": "1.0.0",
+    "dataset_id": "F0_DATASET_V1",
+    "dataset_manifest_digest": "418873b65e9a8903a595d6a8359ce778dd588b9cedb0e3c5ac54d178528e5e18"
+  },
+  "operational_metrics": {
+    "neural_grounding_family_count": 14,
+    "neural_grounding_correct": 3128,
+    "neural_grounding_total": 3136,
+    "neural_grounding_nga": 0.9974489795918368,
+    "worst_grounding_family": "PROPOSAL_OWNER",
+    "worst_grounding_family_accuracy": 0.9866071428571429,
+    "sensor_invariant": "VISIBLE_PEER_COUNT",
+    "sensor_correct": 224,
+    "sensor_total": 224,
+    "sensor_correctness": 1.0,
+    "evaluator_failures": 0,
+    "candidate_ties": 0,
+    "tokenization_boundary_failures": 0,
+    "serialization_diagnostic": {
+      "family": "ALREADY_SELECTED_ACTION_SERIALIZATION",
+      "schema_valid": 220,
+      "semantic_correct": 220,
+      "total": 224,
+      "schema_validity": 0.9821428571428571,
+      "semantic_correctness": 0.9821428571428571
+    }
+  },
+  "acceptance_policy": {
+    "world_v0_use": true,
+    "founder_freeze": false,
+    "canonical_runtime_promotion": false,
+    "parent_selection": false,
+    "training_recipe_promotion_requires": [
+      "MULTI_SEED_REPRODUCIBILITY",
+      "RETENTION_GATE",
+      "NEUTRALITY_GATE",
+      "COMPLETE_RUN_PROVENANCE"
+    ]
+  },
+  "historical_status": {
+    "legacy_fa_v1_status": "UNVERIFIABLE_LEGACY",
+    "stage0_recovery_status": "RECOVERED_FORMAL_PROVENANCE",
+    "historical_admission_rewritten": false
+  },
+  "immutability": "APPEND_ONLY_NEW_RECORD_REQUIRED_FOR_ANY_ACCEPTANCE_CHANGE"
+}
