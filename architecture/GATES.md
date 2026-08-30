@@ -55,11 +55,41 @@ Exit intent:
 - UI can fail/disconnect without changing simulation;
 - rendering/layout remains non-causal unless an explicit physical experiment says otherwise.
 
+## Founder admission and post-freeze branches
+
+Founder model admission is sequential:
+
+```text
+C0 -> C20 -> Motor -> Autonomous -> Founder Freeze
+```
+
+After Founder Freeze, work branches without a dependency between M2 and N0:
+
+```text
+Branch A
+  resolve remaining baseline architecture blockers, including SELF_SEND
+  -> M2 using EXP-000 NullGenome
+  -> headless EXP-000 baseline validation
+
+Branch B
+  N0 heredity operator/backend admission
+```
+
+N0 is not a prerequisite for M2. A neural-heredity experiment requires both a
+validated headless EXP-000 baseline and an admitted N0 operator/backend.
+
 ## N0 — Neural Heredity
 
-Author only before parameter/adaptor inheritance.
+**Status: ARCHITECTURE CLOSED / IMPLEMENTATION-READY**
 
-Exit intent:
-- genetic and cultural inheritance are separable;
-- no parent transcript leakage;
-- crossover/mutation are versioned treatments.
+ARC-350 and SEQ-351 freeze the model-independent neural-heredity foundation.
+The bounded operator admission remains future work and does not enable heredity
+in EXP-000 or block M2.
+
+Exit result:
+- genetic and cultural inheritance are separate;
+- parent transcript/private history and observer metrics are excluded;
+- C0 compatibility, symmetric operators, mutation, RNG, CAS/commit, PEFT, and
+  GGUF derivation boundaries are versioned;
+- H1 and H2 admission is validity/viability based and cannot become performance
+  selection.

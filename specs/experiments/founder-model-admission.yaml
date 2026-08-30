@@ -1,0 +1,69 @@
+{
+  "spec_schema_version": "1.0.0",
+  "admission_id": "FOUNDER_MODEL_ADMISSION_V1",
+  "status": "FUTURE_BOUNDED_PROTOCOL",
+  "semantic_owner": "ARC-350",
+  "scope": "COMPREHENSION_AND_REFERENCE_GROUNDING_ONLY",
+  "candidate_order": [
+    "allenai/OLMo-2-0425-1B-Instruct",
+    "VillanovaAI/Villanova-2B-2603",
+    "YuLan-Mini-Instruct 2.4B"
+  ],
+  "gate_order": ["C0", "C20", "MOTOR", "AUTONOMOUS", "FOUNDER_FREEZE"],
+  "C0": {
+    "role": "PRE_SCREEN",
+    "corpus_id": "FOUNDER_C0_V2",
+    "corpus_spec": "specs/experiments/founder-c0-v2.yaml",
+    "probe_count": 10,
+    "factual_correct_minimum": 9,
+    "reference_structure_valid_required": 10,
+    "malformed_maximum": 0,
+    "critical_core_accuracy_required": 1.0,
+    "critical_core_error_policy": "FAIL_REGARDLESS_OF_AGGREGATE"
+  },
+  "C20": {
+    "role": "FULL_CONTEXT_ADMISSION",
+    "corpus_id": "FOUNDER_C20_V1",
+    "corpus_version": "1.0.0",
+    "source_artifact": "E:/WORLD/AI_CACHE/evidence/i05r6c/validated_context.json",
+    "source_artifact_sha256": "35338d7c1a0ab7d330775316bcd220f55530c3d98d60d4990ee3189e9fa322b1",
+    "probe_count": 20,
+    "overall_factual_accuracy_minimum": "0.90",
+    "critical_core_accuracy_required": "1.00",
+    "critical_core_probe_tags": [
+      "SELF_IDENTITY",
+      "PEER_IDENTITY_REFERENCE",
+      "TARGET_REFERENCE",
+      "INCOMING_PROPOSAL_OWNERSHIP",
+      "OUTGOING_PROPOSAL_OWNERSHIP",
+      "PROPOSAL_DIRECTION",
+      "PROPOSAL_TARGET",
+      "REPRODUCTION_PROPOSAL_HANDLE_GROUNDING"
+    ],
+    "critical_failure_policy": "ANY_CRITICAL_CORE_ERROR_FAILS_FOUNDER_ADMISSION"
+  },
+  "non_prescriptive_grounding": [
+    "MESSAGE_RECEIVED_DOES_NOT_IMPLY_SEND",
+    "PROPOSAL_RECEIVED_DOES_NOT_IMPLY_ACCEPT_OR_REJECT"
+  ],
+  "forbidden_interpretations": [
+    "behavioral_preference",
+    "social_desirability",
+    "mate_preference",
+    "action_frequency_target",
+    "fitness_score"
+  ],
+  "post_freeze_dependencies": {
+    "M2": {
+      "requires_N0": false,
+      "genome_mode": "NULL_GENOME",
+      "next": "HEADLESS_EXP000_BASELINE_VALIDATION"
+    },
+    "N0": {
+      "branch": "INDEPENDENT_OPERATOR_AND_BACKEND_ADMISSION"
+    },
+    "NEURAL_HEREDITY_EXPERIMENT": {
+      "requires": ["VALIDATED_HEADLESS_EXP000_BASELINE", "ADMITTED_N0_OPERATOR_AND_BACKEND"]
+    }
+  }
+}

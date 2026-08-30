@@ -1,0 +1,57 @@
+{
+  "spec_schema_version": "1.0.0",
+  "suite_id": "F0_NEUTRALITY_SUITE_V2",
+  "status": "FROZEN",
+  "generator_version": "F0_NEUTRALITY_SUITE_GENERATOR_V2",
+  "artifact": "E:/WORLD/AI_CACHE/evidence/f0-raw-neutrality-v2/neutrality_suite_v2.json",
+  "suite_digest": "238af6f8554ad523981783d5fb0ab6dcf5ea62e1c28a0a85e9607e9e529324dc",
+  "case_count": 604,
+  "channels": {
+    "ACTION_CLASS_CHOICE": {
+      "count": 220,
+      "output": "ONE_GRAMMAR_CONSTRAINED_VALID_ACTION_CLASS_LABEL",
+      "JSON": false,
+      "arguments": false,
+      "targets": false,
+      "serialization": false,
+      "strata": {
+        "STRATUM_NO_INCOMING_PROPOSAL": {"count": 120, "valid_labels": ["WAIT", "SEND", "PROPOSE"]},
+        "STRATUM_WITH_INCOMING_PROPOSAL": {"count": 100, "valid_labels": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"]}
+      }
+    },
+    "PARTNER_CHOICE": {
+      "count": 144,
+      "fixed_action_classes": ["SEND", "PROPOSE"],
+      "output": "ONE_GRAMMAR_CONSTRAINED_VISIBLE_PEER_HANDLE",
+      "motor_serialization": false
+    },
+    "PROPOSAL_HANDLE_GROUNDING": {
+      "count": 48,
+      "semantic_operation": "SUPPLIED",
+      "autonomous_ACCEPT_REJECT_choice": false,
+      "policy_inference": "FORBIDDEN"
+    },
+    "IDENTITY_PERMUTATION": {"count": 64, "pairs": 32},
+    "ORDER_PERMUTATION": {"count": 64, "pairs": 32},
+    "ROLE_REVERSAL": {"count": 64, "pairs": 32}
+  },
+  "action_order": {
+    "permuted_within_every_semantic_state": true,
+    "position_balanced": true,
+    "encodes_preference": false
+  },
+  "firewalls": {
+    "social_value_language": false,
+    "reward_language": false,
+    "survival_or_resource_pressure": false,
+    "conversation_obligation": false,
+    "training_use": "FORBIDDEN",
+    "C0_C20_fingerprint_collisions": 0,
+    "F0_DATASET_V1_membership": false
+  },
+  "evaluation_layers": {
+    "GROUNDING": "understanding of visible state",
+    "POLICY": "autonomous selection among state-valid action classes",
+    "MOTOR": "serialization of an already-selected action"
+  }
+}

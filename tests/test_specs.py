@@ -122,6 +122,8 @@ def test_schema_enums_and_action_payload_discriminator_match_python(repository_r
     assert phase_schema["enum"] == [phase.value for phase in TICK_PHASES]
     assert tuple(TickPhase) == TICK_PHASES
 
+    assert "SEND target_agent_id != actor_id" in action_schema["x-alifelm-invariants"]
+
     transition_schema = json.loads(
         (repository_root / "specs/contracts/transition-fragment.schema.json").read_text(
             encoding="utf-8"

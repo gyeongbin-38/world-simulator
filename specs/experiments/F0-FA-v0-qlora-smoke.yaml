@@ -1,0 +1,158 @@
+{
+  "spec_schema_version": "1.0.0",
+  "execution_id": "F0_FA_V0_QLORA_SMOKE_V1",
+  "status": "EXECUTED_PASS_LOCAL",
+  "scientific_role": "LOCAL_HARDWARE_AND_SOFTWARE_FEASIBILITY_ONLY",
+  "ordered_preconditions": [
+    {
+      "phase": 1,
+      "id": "C20_FINGERPRINT_FREEZE",
+      "status": "PASS",
+      "reservation_set_id": "F0_RESERVED_EVALUATION_FINGERPRINTS_V1",
+      "reservation_aggregate_sha256": "c6f41dde65dbab224d41d3bfcbc8018e122a131828a3f3b1e3eea5842f0ed07b"
+    },
+    {
+      "phase": 2,
+      "id": "OLMO_PROVENANCE_AND_MODULE_PIN",
+      "status": "PASS"
+    },
+    {
+      "phase": 3,
+      "id": "QLORA_SMOKE",
+      "status": "PASS_LOCAL"
+    }
+  ],
+  "model": {
+    "repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "config_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "tokenizer_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "license": "Apache-2.0",
+    "source_declared_base_model": "allenai/OLMo-2-0425-1B-RLVR1",
+    "source_declared_posttraining": [
+      "OLMo-specific Tulu 3 supervised fine-tuning",
+      "DPO on allenai/olmo-2-0425-1b-preference-mix",
+      "RLVR on allenai/RLVR-MATH"
+    ],
+    "canonical_local_path": "E:/WORLD/AI_MODELS/OLMo-2-0425-1B-Instruct-BF16",
+    "checkpoint_file": "model.safetensors",
+    "checkpoint_size": 2969854224,
+    "checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "architecture_class": "Olmo2ForCausalLM",
+    "model_type": "olmo2",
+    "hidden_size": 2048,
+    "layer_count": 16,
+    "attention_heads": 16,
+    "key_value_heads": 16,
+    "parameter_count": 1484916736,
+    "dtype": "BF16"
+  },
+  "FA_v0": {
+    "method": "VANILLA_LORA",
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0,
+    "bias": "none",
+    "target_scope": "ATTENTION_PROJECTIONS_ONLY",
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
+    "canonical_module_patterns": [
+      "model.layers.{0..15}.self_attn.q_proj",
+      "model.layers.{0..15}.self_attn.k_proj",
+      "model.layers.{0..15}.self_attn.v_proj",
+      "model.layers.{0..15}.self_attn.o_proj"
+    ],
+    "q_projection": "model.layers.{0..15}.self_attn.q_proj",
+    "k_projection": "model.layers.{0..15}.self_attn.k_proj",
+    "v_projection": "model.layers.{0..15}.self_attn.v_proj",
+    "o_projection": "model.layers.{0..15}.self_attn.o_proj",
+    "MLP_included": false,
+    "forbidden_variants": ["DoRA", "rsLoRA", "LoftQ", "PiSSA", "AdaLoRA"]
+  },
+  "training": {
+    "quantization": "4_BIT_NF4",
+    "bnb_4bit_use_double_quant": true,
+    "compute_dtype": "FP16",
+    "base_weights_frozen": true,
+    "microbatch": 1,
+    "gradient_accumulation": 8,
+    "gradient_checkpointing": true,
+    "optimizer": "torch.optim.AdamW",
+    "learning_rate": 0.0002,
+    "weight_decay": 0,
+    "optimizer_steps": 10,
+    "loss": "COMPLETION_ANSWER_ONLY",
+    "input_token_label": -100,
+    "chain_of_thought": false,
+    "sequence_fallback_ladder": [256, 192, 128],
+    "fallback_trigger": "CUDA_OOM_OR_UNAMBIGUOUS_ACTIVATION_MEMORY_EXHAUSTION_ONLY"
+  },
+  "smoke_data": {
+    "formal_F0_dataset": false,
+    "disposable": true,
+    "count": 80,
+    "root_seed": 350,
+    "seed_derivation": "first 64 bits of SHA-256(F0_SMOKE_DATA_V1|root_seed|index)",
+    "allowed_scope": "PERCEPTION_AND_REFERENCE_GROUNDING_ONLY",
+    "action_serialization_examples": false,
+    "policy_choice_examples": false,
+    "reservation_set_id": "F0_RESERVED_EVALUATION_FINGERPRINTS_V1",
+    "fingerprint_digest": "1120e8c3c5efca8dedd2bb446c21e4fa89d4e947ecfef27cc98e5995c3445a96"
+  },
+  "environment": {
+    "python_environment": "E:/WORLD/AI_CACHE/envs/f0-qlora",
+    "required_write_volume": "E:",
+    "versions": {
+      "python": "3.12.13",
+      "torch": "2.7.1+cu118",
+      "cuda_build": "11.8",
+      "transformers": "5.16.1",
+      "peft": "0.20.0",
+      "bitsandbytes": "0.50.2",
+      "accelerate": "1.14.0",
+      "trl": null
+    },
+    "gpu": "NVIDIA GeForce GTX 1050",
+    "compute_capability": "6.1",
+    "NF4_primitive_forward_backward": "PASS",
+    "NF4_double_quant_verified": true
+  },
+  "immutability": {
+    "checkpoint_digest_before": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "checkpoint_digest_after": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "checkpoint_unchanged": true,
+    "smoke_adapter_saved": false,
+    "evidence_classification": ["NON_ADMITTED", "SMOKE_ONLY", "DISPOSABLE"]
+  },
+  "result": {
+    "status": "PASS_LOCAL",
+    "sequence_selected": 256,
+    "forward": true,
+    "backward": true,
+    "optimizer_steps": 10,
+    "initial_loss": 2.6342933177948,
+    "final_loss": 0.30592167377471924,
+    "loss_finite": true,
+    "peak_VRAM_allocated_bytes": 2696466944,
+    "peak_VRAM_reserved_bytes": 3099590656,
+    "peak_process_RAM_bytes": 978849792,
+    "mean_optimizer_step_seconds": 104.27476349999779,
+    "total_smoke_seconds": 1053.2190800000099,
+    "canonical_base_parameter_count": 1484916736,
+    "trainable_parameter_count": 2097152,
+    "total_parameter_count_with_adapter": 1487013888,
+    "trainable_percent": 0.1410310970814551,
+    "base_frozen": true,
+    "LoRA_changed": true,
+    "reserved_collision_count": 0,
+    "policy_example_count": 0,
+    "evidence_ref": "E:/WORLD/AI_CACHE/evidence/f0-qlora-smoke/F0_FA_V0_QLORA_SMOKE_V1.json",
+    "evidence_sha256": "2dad466bdde7c040ddd211db10d60e481458a47f45bc8abae731e07d88d57bec"
+  },
+  "forbidden_claims": [
+    "ADAPTATION_WORKS",
+    "OLMO_PASSES_C0",
+    "RANK_8_IS_SUFFICIENT",
+    "INTERACTION_INCREASES",
+    "SOCIAL_QUALITY_IMPROVES"
+  ]
+}

@@ -213,6 +213,13 @@ def test_peer_private_history_never_leaks() -> None:
     assert "SECRET_PRIVATE_MESSAGE" not in render_model_input(pack.model_input)
 
 
+def test_peer_directory_excludes_self_from_send_targets() -> None:
+    pack = compile_pack(snapshot(), "A")
+    peer_ids = {entry.agent_id for entry in pack.model_input.peer_directory}
+    assert AgentId("A") not in peer_ids
+    assert peer_ids == {AgentId("B"), AgentId("C")}
+
+
 def test_hidden_lineage_never_leaks() -> None:
     ref = ArtifactRef(ArtifactId("SECRET_PARENT_X"), "1" * 64)
     pack = compile_pack(snapshot(), source_artifact_refs=(ref,))

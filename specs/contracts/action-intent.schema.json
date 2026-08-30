@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:alifelm:contract:action-intent:0.1.0",
+  "$id": "urn:alifelm:contract:action-intent:0.2.0",
   "title": "A-LifeLM ActionIntent",
   "description": "A non-authoritative model proposal; it cannot mutate canonical state.",
   "type": "object",
@@ -47,6 +47,7 @@
   ],
   "x-alifelm-invariants": [
     "kind and payload are discriminated together",
+    "SEND target_agent_id != actor_id",
     "PROPOSE target_agent_id != actor_id",
     "one baseline cognition opportunity yields at most one primary intent"
   ],

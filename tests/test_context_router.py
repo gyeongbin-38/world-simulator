@@ -24,6 +24,14 @@ def test_supporting_document_is_routable_from_index(repository_root: Path) -> No
     assert route.documents[0].path == (repository_root / "docs" / "DOCS_POLICY.md").resolve()
 
 
+def test_self_send_decision_is_routable_from_index(repository_root: Path) -> None:
+    route = ContextRouter(repository_root).route("self send addressing")
+    assert len(route.documents) == 1
+    assert route.documents[0].path == (
+        repository_root / "architecture" / "decisions" / "ADR-300-001-self-send-addressing.md"
+    ).resolve()
+
+
 def test_unknown_query_does_not_fall_back_to_loading_everything(repository_root: Path) -> None:
     with pytest.raises(RoutingError):
         ContextRouter(repository_root).route("unrelated phrase with no owner match")
@@ -35,6 +43,7 @@ def test_unknown_query_does_not_fall_back_to_loading_everything(repository_root:
         ("agent context fabric", ["ARC-300"]),
         ("ContextCompiler compilation", ["DF-310"]),
         ("exact context recall", ["SEQ-320"]),
+        ("neural heredity genome", ["ARC-350"]),
     ],
 )
 def test_context_fabric_owner_routes_are_minimal(

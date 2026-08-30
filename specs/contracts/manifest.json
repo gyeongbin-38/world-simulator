@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:alifelm:contract-manifest:0.7.0",
-  "contract_set": "implementation-foundation-through-model-interface-diagnostics",
-  "version": "0.7.0",
+  "$id": "urn:alifelm:contract-manifest:0.10.0",
+  "contract_set": "implementation-foundation-through-f0-pretraining-freeze",
+  "version": "0.10.0",
   "canonical_sources": [
     "architecture/CONSTITUTION.md",
     "architecture/views/ARC-010-trust-visibility-boundaries.md",
@@ -15,6 +15,8 @@
     "architecture/views/ARC-270-durable-commit-replay-boundary.md",
     "architecture/views/SEQ-250-crash-recovery-resume.md",
     "architecture/views/SEQ-320-exact-context-recall.md",
+    "architecture/views/ARC-350-neural-heredity.md",
+    "architecture/views/SEQ-351-genome-artifact-commit.md",
     "architecture/views/DF-260-research-lineage.md",
     "architecture/views/DF-310-context-compilation.md"
   ],
@@ -53,6 +55,29 @@
     "contracts/cognition-evidence.schema.json",
     "contracts/interface-treatment.schema.json",
     "contracts/typed-codec-diagnostic.schema.json",
-    "contracts/action-label-score-diagnostic.schema.json"
+    "contracts/action-label-score-diagnostic.schema.json",
+    "domain/genome.schema.yaml",
+    "protocol/inheritance-operator.schema.yaml",
+    "protocol/genome-evidence.schema.yaml"
+  ],
+  "architecture_manifest": "architecture/MANIFEST.yaml",
+  "decision_records": [
+    "architecture/decisions/ADR-300-001-self-send-addressing.md",
+    "architecture/decisions/ADR-350-001-canonical-adapter-genome.md",
+    "architecture/decisions/ADR-350-002-same-base-symmetric-neural-inheritance.md",
+    "architecture/decisions/ADR-350-003-external-genetics-dependencies.md"
+  ],
+  "admission_specs": [
+    "experiments/founder-model-admission.yaml",
+    "experiments/N0-heredity-operator-admission.yaml",
+    "experiments/founder-c0-v2.yaml"
+  ],
+  "experiment_specs": [
+    "experiments/F0-neutral-foundation-adaptation.yaml",
+    "experiments/F0-FA-v0-qlora-smoke.yaml"
+  ],
+  "evaluation_specs": [
+    "experiments/F0-retention-sentinel.yaml",
+    "experiments/F0-reserved-evaluation-fingerprints.yaml"
   ]
 }

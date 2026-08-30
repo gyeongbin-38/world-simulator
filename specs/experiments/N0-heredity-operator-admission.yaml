@@ -1,0 +1,333 @@
+{
+  "spec_schema_version": "1.0.0",
+  "admission_id": "N0_HEREDITY_OPERATOR_ADMISSION_V1",
+  "status": "FUTURE_BOUNDED_PROTOCOL",
+  "semantic_owner": "ARC-350",
+  "sequence_owner": "SEQ-351",
+  "dependency": {
+    "requires_founder_freeze": true,
+    "blocks_M2": false,
+    "M2_genome_mode": "NULL_GENOME",
+    "neural_heredity_experiment_requires": [
+      "VALIDATED_HEADLESS_EXP000_BASELINE",
+      "ADMITTED_N0_OPERATOR_AND_BACKEND"
+    ]
+  },
+  "scope": {
+    "controls": [
+      "H0_NULL",
+      "H0_RESET_ZERO"
+    ],
+    "operators": [
+      "H1_SYMMETRIC_DELTA_BLEND",
+      "H2_RANDOM_DELTA_CROSSOVER"
+    ],
+    "mutation_operator": "M1_SPARSE_GAUSSIAN_MUTATION",
+    "compatibility": "C0_EXACT_BASE_ONLY",
+    "h2_mask_granularity": "MODULE",
+    "canonical_factor_dtype": "IEEE754_FLOAT32_LE",
+    "effective_delta_codec": "ALIFELM_EFFECTIVE_DELTA_V1",
+    "rank_policy": "FIXED_MANIFEST_RANK",
+    "reference_backend": "EXACT_ID_VERSION_ENVIRONMENT_DIGEST_REQUIRED"
+  },
+  "admission_result": {
+    "values": ["PASS", "FAIL", "NOT_RUN"],
+    "rule": "H1 and H2 are admitted or rejected independently; H0_NULL and H0_RESET_ZERO remain distinct controls.",
+    "no_best_operator": true
+  },
+  "forbidden_selection_inputs": [
+    "benchmark_score",
+    "intelligence_score",
+    "language_quality",
+    "social_performance",
+    "reproduction_rate",
+    "researcher_preference",
+    "fitness",
+    "completion_order"
+  ],
+  "required_fixtures": [
+    "one immutable official BF16 base checkpoint with digest",
+    "one NullGenome module-off control fixture",
+    "two immutable C0 AdapterGenome fixtures",
+    "one ZERO_ADAPTER sentinel fixture",
+    "one manifest-pinned reference construction backend",
+    "one PEFTAdapterBackend implementation",
+    "one pinned canonical PEFT-to-GGUF-LoRA converter",
+    "one deterministic compact Context fixture",
+    "one deterministic Motor action fixture",
+    "fault injection at CAS and P11 boundaries"
+  ],
+  "test_id_patterns": [
+    "N0-CONTRACT-*",
+    "N0-COMPAT-*",
+    "N0-DETERMINISM-*",
+    "N0-SYMMETRY-*",
+    "N0-HASH-*",
+    "N0-CAS-*",
+    "N0-CRASH-*",
+    "N0-MUTATION-*",
+    "N0-PEFT-*",
+    "N0-GGUF-*",
+    "N0-ISOLATION-*",
+    "N0-VIABILITY-*",
+    "N0-LEAKAGE-*"
+  ],
+  "tests": [
+    {
+      "id": "N0-CONTRACT-001",
+      "requirement": "Only a successful eligible bilateral BirthPlan may invoke GenomeInheritance.",
+      "pass": "Direct invocation from an unselected or ineligible pair fails without artifact or state change."
+    },
+    {
+      "id": "N0-CONTRACT-002",
+      "requirement": "Parent genomes and immutable base parameters are unchanged.",
+      "pass": "Pre/post canonical hashes and base parameter hashes match."
+    },
+    {
+      "id": "N0-CONTRACT-003",
+      "requirement": "Proposal and acceptance roles are metadata only.",
+      "pass": "Role reversal with identical genetic identities produces identical realized child effective genotype."
+    },
+    {
+      "id": "N0-CONTRACT-004",
+      "requirement": "H0_NULL disables heredity and produces NullGenome with no parameter inheritance.",
+      "pass": "Control output has the NullGenome discriminator and no adapter artifact."
+    },
+    {
+      "id": "N0-CONTRACT-005",
+      "requirement": "H0_RESET_ZERO invokes GenomeInheritance but ignores parental neural deltas and mutation.",
+      "pass": "Control output is the canonical base-bound ZERO_ADAPTER with effective delta zero and recorded parental contribution NONE."
+    },
+    {
+      "id": "N0-COMPAT-001",
+      "requirement": "C0 exact base/schema/topology/target modules is accepted for H1 and H2.",
+      "pass": "Validation succeeds before construction."
+    },
+    {
+      "id": "N0-COMPAT-002",
+      "requirement": "Different base digest is C1 and forbidden.",
+      "pass": "Validation fails closed before RNG consumption or CAS write."
+    },
+    {
+      "id": "N0-COMPAT-003",
+      "requirement": "Different architecture or tensor shape is C2 and forbidden.",
+      "pass": "Validation fails closed without projection or partial merge."
+    },
+    {
+      "id": "N0-COMPAT-004",
+      "requirement": "Tokenizer, adapter schema, rank/scaling, and ordered target-module mismatches fail closed.",
+      "pass": "Every mismatch is explicit and produces no child artifact."
+    },
+    {
+      "id": "N0-DETERMINISM-001",
+      "requirement": "Identical parents, operator spec, mutation spec, causal RNG inputs, and reference backend reproduce one genome.",
+      "pass": "Genome record, canonical bytes, effective digest, evidence, and metrics are identical."
+    },
+    {
+      "id": "N0-DETERMINISM-002",
+      "requirement": "Infrastructure retry reconstructs the same genome.",
+      "pass": "Retry count, process restart, and worker identity do not change any canonical output."
+    },
+    {
+      "id": "N0-DETERMINISM-003",
+      "requirement": "Named RNG streams are independent.",
+      "pass": "Crossover draw count changes cannot shift mutation mask/noise or decomposition streams."
+    },
+    {
+      "id": "N0-SYMMETRY-001",
+      "requirement": "H1 is invariant to API parent order.",
+      "pass": "inherit(A,B,seed) and inherit(B,A,seed) have equal realized effective-delta bytes."
+    },
+    {
+      "id": "N0-SYMMETRY-002",
+      "requirement": "H2 is invariant to API parent order through canonical genetic ordering.",
+      "pass": "The same module mask and realized effective-delta bytes result under argument reversal."
+    },
+    {
+      "id": "N0-HASH-001",
+      "requirement": "Canonical normalized factor state has stable SHA-256 identity.",
+      "pass": "Save/reload/re-extract produces the same canonical artifact digest."
+    },
+    {
+      "id": "N0-HASH-002",
+      "requirement": "Effective-delta ordering and identity are stable.",
+      "pass": "Backend key insertion order and adapter names cannot change the effective-delta digest."
+    },
+    {
+      "id": "N0-HASH-003",
+      "requirement": "ZERO_ADAPTER sentinel identity equals its materialized zero effective state.",
+      "pass": "Sentinel and materialized-zero effective-delta digests match while NullGenome remains semantically distinct."
+    },
+    {
+      "id": "N0-CAS-001",
+      "requirement": "Canonical non-sentinel genome bytes are durable and verified before P11.",
+      "pass": "CAS resolve returns exact bytes and SHA-256 before CommitRequest acceptance."
+    },
+    {
+      "id": "N0-CAS-002",
+      "requirement": "A precommit orphan is safe.",
+      "pass": "Fault after CAS put leaves S_t unchanged and retry deduplicates the artifact."
+    },
+    {
+      "id": "N0-CAS-003",
+      "requirement": "A committed missing or mismatched required artifact is forbidden.",
+      "pass": "P11 rejects the reference and publishes no child."
+    },
+    {
+      "id": "N0-CRASH-001",
+      "requirement": "Crash during construction leaves no canonical child.",
+      "pass": "Restart reads S_t and reconstructs from the original causal identity."
+    },
+    {
+      "id": "N0-CRASH-002",
+      "requirement": "Crash after artifact publication and before P11 is idempotent.",
+      "pass": "Restart reuses the same artifact/genome/commit identities."
+    },
+    {
+      "id": "N0-CRASH-003",
+      "requirement": "Unknown P11 outcome resolves by commit identity.",
+      "pass": "Exactly one child, lineage set, genome event, and outbox set exists."
+    },
+    {
+      "id": "N0-CRASH-004",
+      "requirement": "Crash after P11 and before publish does not create a second birth.",
+      "pass": "Restart republishes the committed S_(t+1)."
+    },
+    {
+      "id": "N0-MUTATION-001",
+      "requirement": "M1 p=0 is identity at the ideal target level.",
+      "pass": "No target element changes and no noise values are consumed."
+    },
+    {
+      "id": "N0-MUTATION-002",
+      "requirement": "M1 mask is deterministic.",
+      "pass": "The same mutation-mask stream reproduces the exact selected flat indices."
+    },
+    {
+      "id": "N0-MUTATION-003",
+      "requirement": "M1 Gaussian noise is deterministic on the pinned reference backend.",
+      "pass": "The same noise stream reproduces exact binary32 mutated target bytes."
+    },
+    {
+      "id": "N0-MUTATION-004",
+      "requirement": "p and sigma are manifest-pinned and performance-independent.",
+      "pass": "No runtime or analysis input can alter parameters."
+    },
+    {
+      "id": "N0-PEFT-001",
+      "requirement": "PEFTAdapterBackend creates/materializes ZERO_ADAPTER.",
+      "pass": "All target deltas are exact zero and base parameters are unchanged."
+    },
+    {
+      "id": "N0-PEFT-002",
+      "requirement": "PEFTAdapterBackend validates rank, target modules, shapes, dtype, scaling, base, architecture, and tokenizer binding.",
+      "pass": "Valid fixture loads and each mismatch fails closed."
+    },
+    {
+      "id": "N0-PEFT-003",
+      "requirement": "Canonical state extraction normalizes backend names and ordering.",
+      "pass": "Equivalent load names produce one normalized key sequence."
+    },
+    {
+      "id": "N0-PEFT-004",
+      "requirement": "Child adapter saves and reloads.",
+      "pass": "Canonical bytes and schema remain valid after reload."
+    },
+    {
+      "id": "N0-PEFT-005",
+      "requirement": "Reloaded factors reconstruct the recorded child effective delta.",
+      "pass": "Effective-delta digest and recorded factorization metrics match."
+    },
+    {
+      "id": "N0-PEFT-006",
+      "requirement": "Base is immutable and canonical storage remains separate.",
+      "pass": "No base parameter changed and no merged-base artifact is registered as a genome."
+    },
+    {
+      "id": "N0-PEFT-007",
+      "requirement": "H0_RESET_ZERO is behaviorally equivalent to base/zero-adapter execution under the determinism contract.",
+      "pass": "Identical context, seed, runtime policy, and immutable base produce the same inference result with H0_RESET_ZERO and the admitted base/zero-adapter reference path."
+    },
+    {
+      "id": "N0-GGUF-001",
+      "requirement": "Canonical PEFT adapter deterministically derives a GGUF LoRA under a pinned converter policy.",
+      "pass": "Metadata records source genome, converter identity/version, policy version, and output digest."
+    },
+    {
+      "id": "N0-GGUF-002",
+      "requirement": "Derived GGUF LoRA loads over the compatible GGUF base.",
+      "pass": "Runtime accepts the adapter without changing canonical PEFT bytes."
+    },
+    {
+      "id": "N0-GGUF-003",
+      "requirement": "GGUF is not an inheritance input.",
+      "pass": "No operator or mutation API accepts quantized weights."
+    },
+    {
+      "id": "N0-GGUF-004",
+      "requirement": "Derived runtime artifacts are regenerable.",
+      "pass": "Deleting only the derived artifact permits re-derivation from canonical genotype and pinned converter."
+    },
+    {
+      "id": "N0-ISOLATION-001",
+      "requirement": "Adapter/cache state cannot bleed between active genomes.",
+      "pass": "A/B/A inference yields matching A outputs under identical context, seed, genome A, and runtime determinism contract."
+    },
+    {
+      "id": "N0-VIABILITY-001",
+      "requirement": "Child model comprehends the compact Context fixture.",
+      "pass": "The versioned minimum comprehension assertion passes; no quality ranking is produced."
+    },
+    {
+      "id": "N0-VIABILITY-002",
+      "requirement": "Child model produces a valid Motor action through an admitted ModelActionInterface transport.",
+      "pass": "ActionIntent is structurally/reference valid; no fitness score is produced."
+    },
+    {
+      "id": "N0-LEAKAGE-001",
+      "requirement": "GenomeInheritance cannot read benchmark, phenotype, relationship, private agent, or ContextPack fields.",
+      "pass": "Dependency and API audit finds no such inputs."
+    },
+    {
+      "id": "N0-LEAKAGE-002",
+      "requirement": "Genome events/evidence/metrics are RESEARCHER_ONLY.",
+      "pass": "Context compilation fixture contains no genome field or derived metric."
+    },
+    {
+      "id": "N0-LEAKAGE-003",
+      "requirement": "Child receives no parent transcript, summary, private history, phenotype, relationship metric, or benchmark result.",
+      "pass": "Newborn Context fixture contains none of those sources."
+    },
+    {
+      "id": "N0-LEAKAGE-004",
+      "requirement": "No performance result selects parents or changes birth eligibility/probability.",
+      "pass": "Reproduction service dependencies and committed outcomes are unchanged by observer data."
+    },
+    {
+      "id": "N0-LEAKAGE-005",
+      "requirement": "No performance result selects or tunes H1, H2, M1 p, M1 sigma, or rank.",
+      "pass": "All values come only from the frozen ExperimentManifest."
+    },
+    {
+      "id": "N0-LEAKAGE-006",
+      "requirement": "Resource intervention is not coupled to heredity.",
+      "pass": "N0 operator, eligibility, evidence, and Context fixtures contain no resource/fitness semantics."
+    },
+    {
+      "id": "N0-LEAKAGE-007",
+      "requirement": "EXP-000 behavior remains unchanged.",
+      "pass": "Existing EXP-000 contract, kernel, persistence, context, and model-interface tests pass without changed runtime sources."
+    }
+  ],
+  "viability_interpretation": "Minimum functionality only; never a reproductive, genetic, or operator-selection fitness metric.",
+  "out_of_scope": [
+    "founder model admission execution",
+    "population evolution",
+    "model download or benchmark",
+    "cross-architecture reproduction",
+    "within-life learning",
+    "resource mechanics",
+    "operator performance ranking",
+    "Godot or Observatory implementation"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "manifest_schema_version": "1.0.0",
+  "dataset_id": "F0_DATASET_V1",
+  "status": "FROZEN",
+  "generator_version": "F0_PROCEDURAL_GENERATOR_V1",
+  "symbolic_solver_version": "F0_SYMBOLIC_SOLVER_V1",
+  "fingerprint_version": "F0_GRAPH_FINGERPRINT_V1",
+  "root_seed": 35020260830,
+  "split_seed_derivation": "SHA-256(F0_SPLIT_SEED_V1|root_seed|split|index)",
+  "reservation_set_id": "F0_RESERVED_EVALUATION_FINGERPRINTS_V1",
+  "artifact_root": "E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V1",
+  "artifact_manifest": "E:/WORLD/AI_CACHE/artifacts/F0_DATASET_V1/manifest.json",
+  "manifest_digest": "418873b65e9a8903a595d6a8359ce778dd588b9cedb0e3c5ac54d178528e5e18",
+  "splits": {
+    "TRAIN": {"count": 4096, "file": "train.jsonl", "file_sha256": "96a482037821b7676e7e2904d583403fee78c4c76cf92af5b578c35906bba9f3", "aggregate_split_digest": "c6ae98a5b45aab376880cafbdd17580f8b81b5b69924991a1b70602dc7500ac5"},
+    "DEV": {"count": 512, "file": "dev.jsonl", "file_sha256": "67092247884e79b38acb2dc7a7b5a8a24dd2ec1fd7ac3ef8d7944d8f237b8230", "aggregate_split_digest": "b1f2798334710a91c03cf7bf1ea8bca2c39b8d9b90415f9704716b1c7b01d4cf"},
+    "STRUCTURAL_HOLDOUT": {"count": 1024, "file": "structural_holdout.jsonl", "file_sha256": "e554686352de95aa843967c8571b21a3c1f0e76a18b41a63df6e6be0afa99f82", "aggregate_split_digest": "40a4b393ed18b713c0aa3430e6073d8858dbcc8af9c96da0ff334527ac34abba"},
+    "TEMPLATE_HOLDOUT": {"count": 1024, "file": "template_holdout.jsonl", "file_sha256": "e44d0e2f368de76e080f8375e7e62406f092b44f764cd5ef114c733b4b6bc594", "aggregate_split_digest": "076f52f6c4c50b35c1037e550764f80ae7202d6bf6be57c29a4b0c17772da364"},
+    "DOUBLE_HOLDOUT": {"count": 1024, "file": "double_holdout.jsonl", "file_sha256": "fb94a8ec40c538591bd720f644fc53e7bb7b217b460eca2acd9a5a4eb2888a69", "aggregate_split_digest": "773394685bdc0ba99103e64adc3c0ac242a010646665d0c2fa4fc7753d12c543"},
+    "ADVERSARIAL_HOLDOUT": {"count": 512, "file": "adversarial_holdout.jsonl", "file_sha256": "84dca1474577c5a272f84a0e72d741b91ae25afc68217b292526585bf2c48718", "aggregate_split_digest": "ebfdfc71908bf5b924a21483e7eec4061a1298804ffe4876d7444c174e2ee702"}
+  },
+  "validation": {
+    "examples_total": 8192,
+    "ambiguous": 0,
+    "policy_examples": 0,
+    "reserved_collisions": 0,
+    "exact_text_duplicates": 0,
+    "cross_split_violations": 0,
+    "template_violations": 0
+  },
+  "semantic_family_distribution": "EXACTLY_512_PER_FAMILY_AGGREGATE",
+  "hard_negative_coverage": [
+    "SAME_PEER_MULTIPLE_RECORDS",
+    "SAME_TARGET_DIFFERENT_DIRECTION",
+    "MULTIPLE_INCOMING_ONE_OUTGOING",
+    "MULTIPLE_OUTGOING_WITH_INCOMING_DISTRACTOR",
+    "FIRST_ITEM_DISTRACTOR",
+    "LAST_ITEM_DISTRACTOR",
+    "NEARBY_OPAQUE_HANDLES",
+    "SAME_NUMERIC_SUFFIX_ACROSS_ENTITY_TYPES",
+    "REORDERED_RECORDS",
+    "IRRELEVANT_MESSAGES_AMONG_PROPOSALS",
+    "SELF_PEER_ROLE_REVERSAL",
+    "PROPOSAL_TARGET_REUSED_BY_DISTRACTOR",
+    "VARIABLE_PEER_COUNT",
+    "VARIABLE_PROPOSAL_COUNT"
+  ],
+  "teacher_LM": false,
+  "chain_of_thought": false,
+  "formal_training_count_excludes_smoke_data": true,
+  "immutability": "NEW_DATASET_VERSION_REQUIRED_FOR_ANY_CONTENT_CHANGE"
+}

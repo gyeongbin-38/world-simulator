@@ -1,0 +1,92 @@
+{
+  "spec_schema_version": "1.0.0",
+  "baseline_id": "F0_RAW_BASELINES_V1",
+  "status": "FROZEN",
+  "artifact_root": "E:/WORLD/AI_CACHE/evidence/f0-raw-baselines-v1",
+  "artifact_manifest": "E:/WORLD/AI_CACHE/evidence/f0-raw-baselines-v1/manifest.json",
+  "manifest_digest": "03950df972d0e1fe0d6e711cd70b71adae9b0e3e5f430957adda4100e9f89b4e",
+  "model": {
+    "repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "runtime": "OLMo-2-0425-1B-Instruct-Q8_0.gguf",
+    "runtime_sha256": "4a180742923d27d2434e53062b21f508257a5ee15abda398a3db13385e33d6e6",
+    "adapter_loaded": false
+  },
+  "runtime": {
+    "llama_cpp_build": "b10679-50f068fff",
+    "context_size": 4096,
+    "n_gpu_layers": 99,
+    "parallel_slots": 1,
+    "transport": "CONSTRAINED_JSON",
+    "renderer": "F0_RAW_BASELINE_NEUTRAL_V1",
+    "temperature": 0,
+    "seed": 350,
+    "top_k": 1,
+    "top_p": 1,
+    "system_message": null,
+    "social_prior_added": false
+  },
+  "formal_dataset": {
+    "id": "F0_DATASET_V1",
+    "manifest_digest": "418873b65e9a8903a595d6a8359ce778dd588b9cedb0e3c5ac54d178528e5e18"
+  },
+  "hidden": {
+    "n": 3584,
+    "malformed": 0,
+    "split_exact": {
+      "STRUCTURAL_HOLDOUT": {"exact": 573, "n": 1024, "rate": 0.5595703125},
+      "TEMPLATE_HOLDOUT": {"exact": 564, "n": 1024, "rate": 0.55078125},
+      "DOUBLE_HOLDOUT": {"exact": 542, "n": 1024, "rate": 0.529296875},
+      "ADVERSARIAL_HOLDOUT": {"exact": 272, "n": 512, "rate": 0.53125}
+    },
+    "critical_families": {
+      "peer_grounding": {"exact": 400, "n": 448, "rate": 0.8928571428571429},
+      "message_direction": {"exact": 132, "n": 224, "rate": 0.5892857142857143},
+      "proposal_ownership": {"exact": 100, "n": 224, "rate": 0.44642857142857145},
+      "proposal_direction": {"exact": 116, "n": 224, "rate": 0.5178571428571429},
+      "proposal_target": {"exact": 86, "n": 224, "rate": 0.38392857142857145},
+      "handle_grounding": {"exact": 194, "n": 224, "rate": 0.8660714285714286},
+      "motor_serialization": {"exact": 123, "n": 224, "rate": 0.5491071428571429}
+    }
+  },
+  "retention": {
+    "baseline_id": "RAW_RETENTION_BASELINE_V1",
+    "sentinel_id": "F0_NEUTRAL_RETENTION_SENTINEL_V1",
+    "sentinel_digest": "7b321d2676f6137aa8c46aa1dd94e819fa3fce37495a579481f0fcc8ef370ef0",
+    "exact": 29,
+    "n": 60,
+    "aggregate": 0.48333333333333334,
+    "failures": 31,
+    "malformed": 0
+  },
+  "neutrality": {
+    "suite_id": "F0_NEUTRALITY_SUITE_V1",
+    "suite_digest": "db72df2f3c530ee087a65798c0bc5d70b62cd41ac81797a714ac558706480d79",
+    "identity_permutation": {"exact": 29, "n": 64, "rate": 0.453125},
+    "order_permutation": {"exact": 60, "n": 64, "rate": 0.9375, "record_order_sensitive_pairs": 3},
+    "role_reversal": {"exact": 32, "n": 64, "rate": 0.5},
+    "P0_effect": 0,
+    "R0_effect": -0.3125,
+    "first_item_effect": 0.484375,
+    "lowest_handle_effect": -0.15625,
+    "free_action_counts": {"WAIT": 0, "SEND": 0, "PROPOSE": 0, "ACCEPT": 100, "REJECT": 0},
+    "free_action_invalid": 100,
+    "free_action_malformed": 0,
+    "free_action_distribution_is_admission_target": false,
+    "free_action_policy_comparison_status": "UNSUITABLE",
+    "reason": "100/100 outputs were domain-invalid, confounding policy preference with motor validity.",
+    "ACCEPT_100_interpretation": "NOT_EVIDENCE_OF_REPRODUCTIVE_PREFERENCE"
+  },
+  "artifacts": {
+    "hidden_raw.jsonl": "4e31cc1dfc49b061750bd141a8ef33bc798e786e51be6bf131c43fac123bace9",
+    "retention_raw.jsonl": "dc7fe07c2a218b5efc19747adbf89f99a1a496db0bc147a6c6df08404a689ed4",
+    "neutrality_raw.jsonl": "a57ae583bb875a3c7bbbb2d428b3300be14ff5f09deb1e3e10f18ce4430ac00a",
+    "neutrality_suite.json": "5b7394c040a047c70200b36297b32fa13a3367073ad48488e0b54951c9f4f2ba"
+  },
+  "sealed_evaluation": {
+    "C0_executed": false,
+    "C20_executed": false,
+    "access": "FINGERPRINTS_ONLY_DURING_DATASET_GENERATION"
+  },
+  "interpretation": "COMPARISON_PROVENANCE_ONLY_NOT_TREATMENT_REDESIGN_INPUT"
+}

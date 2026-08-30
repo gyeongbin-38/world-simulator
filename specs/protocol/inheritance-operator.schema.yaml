@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:protocol:inheritance-operator:1.0.0",
+  "title": "A-LifeLM N0 InheritanceOperatorSpec",
+  "description": "Manifest-pinned operator law consumed only after bilateral parent selection and world eligibility.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operator_id",
+    "operator_version",
+    "declared_symmetric",
+    "compatibility_requirement",
+    "parent_order_policy",
+    "effective_delta_codec",
+    "rank_policy",
+    "reference_construction_backend",
+    "parameters",
+    "mutation",
+    "rng_policy"
+  ],
+  "properties": {
+    "operator_id": {
+      "enum": ["H0_NULL", "H0_RESET_ZERO", "H1_SYMMETRIC_DELTA_BLEND", "H2_RANDOM_DELTA_CROSSOVER"]
+    },
+    "operator_version": { "$ref": "#/$defs/version" },
+    "declared_symmetric": { "const": true },
+    "compatibility_requirement": {
+      "enum": ["NOT_APPLICABLE_NULL_CONTROL", "EXPERIMENT_BASE_EXACT_RESET_CONTROL", "C0_EXACT_BASE"]
+    },
+    "parent_order_policy": { "const": "EFFECTIVE_DIGEST_ARTIFACT_DIGEST_GENOME_ID_ASC_V1" },
+    "effective_delta_codec": { "$ref": "#/$defs/versionedIdentity" },
+    "rank_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "child_rank", "factorization", "factorization_metrics_required"],
+      "properties": {
+        "policy_id": { "const": "FIXED_MANIFEST_RANK" },
+        "child_rank": { "type": "integer", "minimum": 1 },
+        "factorization": { "const": "BALANCED_TRUNCATED_SVD_V1" },
+        "factorization_metrics_required": {
+          "const": ["target_l2_norm", "reconstruction_residual_l2", "discarded_singular_value_l2"]
+        }
+      }
+    },
+    "reference_construction_backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["backend_id", "backend_version", "environment_digest", "authority"],
+      "properties": {
+        "backend_id": { "const": "N0_REFERENCE_GENOME_CONSTRUCTION_BACKEND" },
+        "backend_version": { "$ref": "#/$defs/version" },
+        "environment_digest": { "$ref": "#/$defs/digest" },
+        "authority": { "const": "CANONICAL_CONSTRUCTION_ONLY_ON_EXACT_PIN" }
+      }
+    },
+    "parameters": { "type": "object" },
+    "mutation": { "$ref": "#/$defs/mutationSpec" },
+    "rng_policy": { "$ref": "#/$defs/rngPolicy" }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "operator_id": { "const": "H0_NULL" },
+        "compatibility_requirement": { "const": "NOT_APPLICABLE_NULL_CONTROL" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "maxProperties": 0
+        },
+        "mutation": { "$ref": "#/$defs/noMutation" }
+      }
+    },
+    {
+      "properties": {
+        "operator_id": { "const": "H0_RESET_ZERO" },
+        "compatibility_requirement": { "const": "EXPERIMENT_BASE_EXACT_RESET_CONTROL" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["child_representation", "effective_delta", "parental_neural_contribution"],
+          "properties": {
+            "child_representation": { "const": "ZERO_ADAPTER_SENTINEL" },
+            "effective_delta": { "const": "ZERO" },
+            "parental_neural_contribution": { "const": "NONE" }
+          }
+        },
+        "mutation": { "$ref": "#/$defs/noMutation" }
+      }
+    },
+    {
+      "properties": {
+        "operator_id": { "const": "H1_SYMMETRIC_DELTA_BLEND" },
+        "compatibility_requirement": { "const": "C0_EXACT_BASE" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["alpha"],
+          "properties": { "alpha": { "const": "0.5" } }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operator_id": { "const": "H2_RANDOM_DELTA_CROSSOVER" },
+        "compatibility_requirement": { "const": "C0_EXACT_BASE" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mask_granularity", "canonical_parent_zero_probability"],
+          "properties": {
+            "mask_granularity": { "const": "MODULE" },
+            "canonical_parent_zero_probability": { "const": "0.5" }
+          }
+        }
+      }
+    }
+  ],
+  "x-alifelm-operation": {
+    "signature": "InheritanceOperator.apply(parent_a, parent_b, operator_spec, deterministic_rng) -> InheritanceResult",
+    "preconditions": [
+      "parents were selected only by a committed bilateral reproduction event",
+      "world eligibility and same-boundary conflict resolution already succeeded",
+      "H0_RESET_ZERO selected parents execute on the exact experiment base but contribute no neural delta",
+      "H1/H2 parents satisfy C0_EXACT_BASE before RNG is consumed",
+      "parent and base artifacts are immutable"
+    ],
+    "forbidden_inputs": [
+      "benchmark_score",
+      "fitness",
+      "researcher_phenotype",
+      "relationship_analysis",
+      "private_agent_state",
+      "proposal_acceptance_role_as_genetic_weight",
+      "wall_time",
+      "completion_order",
+      "retry_count"
+    ],
+    "result_schema": "#/$defs/inheritanceResult"
+  },
+  "$defs": {
+    "inheritanceResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["child_genome", "operator_evidence", "operator_metrics", "canonical_artifact_refs"],
+      "properties": {
+        "child_genome": { "$ref": "../domain/genome.schema.yaml" },
+        "operator_evidence": { "type": "object" },
+        "operator_metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target_l2_norm",
+            "reconstruction_residual_l2",
+            "discarded_singular_value_l2",
+            "changed_parameter_count"
+          ],
+          "properties": {
+            "target_l2_norm": { "$ref": "#/$defs/canonicalNonNegativeDecimal" },
+            "reconstruction_residual_l2": { "$ref": "#/$defs/canonicalNonNegativeDecimal" },
+            "discarded_singular_value_l2": { "$ref": "#/$defs/canonicalNonNegativeDecimal" },
+            "changed_parameter_count": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "canonical_artifact_refs": {
+          "type": "array",
+          "items": { "$ref": "../contracts/artifact-ref.schema.json" }
+        }
+      }
+    },
+    "mutationSpec": {
+      "oneOf": [
+        { "$ref": "#/$defs/noMutation" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["operator_id", "operator_version", "parameters"],
+          "properties": {
+            "operator_id": { "const": "M1_SPARSE_GAUSSIAN_MUTATION" },
+            "operator_version": { "$ref": "#/$defs/version" },
+            "parameters": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["mask_granularity", "p", "sigma", "normal_mapping_policy"],
+              "properties": {
+                "mask_granularity": { "const": "ELEMENT" },
+                "p": { "$ref": "#/$defs/canonicalProbability" },
+                "sigma": { "$ref": "#/$defs/canonicalNonNegativeDecimal" },
+                "normal_mapping_policy": { "const": "REFERENCE_BACKEND_NORMAL_V1" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "noMutation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operator_id", "operator_version", "parameters"],
+      "properties": {
+        "operator_id": { "type": "null" },
+        "operator_version": { "type": "null" },
+        "parameters": { "type": "null" }
+      }
+    },
+    "rngPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "version", "kdf", "required_inputs", "substreams", "forbidden_sources"],
+      "properties": {
+        "policy_id": { "const": "ALIFELM_GENOME_RNG_V1" },
+        "version": { "const": "1.0.0" },
+        "kdf": { "const": "HKDF-SHA-256" },
+        "required_inputs": {
+          "const": [
+            "root_seed",
+            "replication_id",
+            "child_birth_seq",
+            "sorted_parent_genome_digests",
+            "genome_policy_version",
+            "inheritance_operator_id",
+            "inheritance_operator_version",
+            "mutation_operator_id",
+            "mutation_operator_version"
+          ]
+        },
+        "substreams": {
+          "const": [
+            "GENOME_CROSSOVER",
+            "GENOME_MUTATION_MASK",
+            "GENOME_MUTATION_NOISE",
+            "GENOME_DECOMPOSITION"
+          ]
+        },
+        "forbidden_sources": {
+          "const": [
+            "python_global_random",
+            "numpy_global_random",
+            "torch_global_rng",
+            "uuid_randomness",
+            "wall_time",
+            "thread_or_completion_order",
+            "retry_count",
+            "process_entropy"
+          ]
+        }
+      }
+    },
+    "versionedIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "const": "ALIFELM_EFFECTIVE_DELTA_V1" },
+        "version": { "const": "1.0.0" }
+      }
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalNonNegativeDecimal": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "canonicalProbability": {
+      "type": "string",
+      "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+    }
+  }
+}

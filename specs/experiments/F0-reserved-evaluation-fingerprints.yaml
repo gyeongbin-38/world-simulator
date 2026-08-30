@@ -1,0 +1,238 @@
+{
+  "spec_schema_version": "1.0.0",
+  "reservation_set_id": "F0_RESERVED_EVALUATION_FINGERPRINTS_V1",
+  "status": "FROZEN",
+  "fingerprint_version": "F0_GRAPH_FINGERPRINT_V1",
+  "algorithm": "SHA-256 over canonical JSON normalized structural topology",
+  "normalization_preserves": [
+    "semantic_query_family",
+    "entity_role_topology",
+    "edge_direction_topology",
+    "ownership_topology",
+    "target_relation_topology",
+    "distractor_topology",
+    "answer_role_topology"
+  ],
+  "normalization_removes": [
+    "opaque_identity_spelling",
+    "record_order",
+    "choice_order",
+    "surface_formatting"
+  ],
+  "implementation": "src/alifelm/model/foundation_data.py:evaluation_probe_fingerprint",
+  "sources": [
+    {
+      "corpus_id": "FOUNDER_C0_V2",
+      "version": "2.0.0",
+      "corpus_sha256": "05d07269265de5eb75a141a16543543adfebb8c01fccab23857f75b797069340",
+      "probe_count": 10
+    },
+    {
+      "corpus_id": "FOUNDER_C20_V1",
+      "version": "1.0.0",
+      "source_artifact": "E:/WORLD/AI_CACHE/evidence/i05r6c/validated_context.json",
+      "source_artifact_sha256": "35338d7c1a0ab7d330775316bcd220f55530c3d98d60d4990ee3189e9fa322b1",
+      "probe_count": 20
+    }
+  ],
+  "reservations": {
+    "FOUNDER_C0_V2": [
+      {
+        "probe_id": "VC00",
+        "semantic_query_family": "PEER_IDENTITY",
+        "source_probe_sha256": "6af1d3fb1ea0e1b7ad340804081f6336d4162f0b97615649eba98f575e069773",
+        "fingerprint": "11f7bd7faa7fa52842d14e62144913f492ecd0d0164defc636e9ba81dbc35c0b"
+      },
+      {
+        "probe_id": "VC02R",
+        "semantic_query_family": "VISIBLE_PEER_HANDLE_CARDINALITY",
+        "source_probe_sha256": "dbfa83f2322fd43912d0ddf7cc0c33d7f2db8775bce32c3125607ff3f67405fb",
+        "fingerprint": "e0ad46140503fc4e4217d780ccaab5f135698a4d1cc789ee6e9664d5320b8444"
+      },
+      {
+        "probe_id": "VC09",
+        "semantic_query_family": "INCOMING_PROPOSAL_COUNT",
+        "source_probe_sha256": "154d4d85bc629980d3ab9dc28ca21a136852ce3ed0e21021293bb38f3107caa9",
+        "fingerprint": "74481ef162ea4901f9c9a86b970da800e8379143279039e34554d9db325c98dd"
+      },
+      {
+        "probe_id": "VC12",
+        "semantic_query_family": "PROPOSAL_DIRECTION",
+        "source_probe_sha256": "10a65ed570a9dfd79503641580295120e783a4a176aa15e367a9eaa110aef542",
+        "fingerprint": "bbfecc3fd91726d737109cd53aaeafa415c19013980b4c9e3bd8d9259f112f2c"
+      },
+      {
+        "probe_id": "VC15",
+        "semantic_query_family": "PEER_HANDLE_LOOKUP",
+        "source_probe_sha256": "16b223a3d5035db520d23d5104179dca95cedbb1d4c50e2ee389fc50a9522a39",
+        "fingerprint": "4e2513ab6d6bc313f4d2bf8b791efd9b7a92f97737868051b4d797b479eaf51a"
+      },
+      {
+        "probe_id": "VC01",
+        "semantic_query_family": "PEER_IDENTITY",
+        "source_probe_sha256": "c5ab51257abcff4175616bedfb914f519bface8ee8a722ce0b4ce6f1d7a939ad",
+        "fingerprint": "11f7bd7faa7fa52842d14e62144913f492ecd0d0164defc636e9ba81dbc35c0b"
+      },
+      {
+        "probe_id": "VC11",
+        "semantic_query_family": "PROPOSAL_TARGET",
+        "source_probe_sha256": "470dd4cbad5b61d23cd9e2b4861320b5bedee401479bebd31e36339c9eb8297b",
+        "fingerprint": "3fbb5d0c11c5e3cbc874c7afa547c7d1d764c6526431c371e6b861b104fb64a5"
+      },
+      {
+        "probe_id": "VC05",
+        "semantic_query_family": "VISIBLE_MESSAGE_BODY",
+        "source_probe_sha256": "3579df5b42fc9793115da52c4a8f814ba65664a779535fc88eb1acfd7f3f7cf9",
+        "fingerprint": "9a7de1f02fccf735a238f246d910755d4ca2a5e85f0f4e9e58947dabb9c69b88"
+      },
+      {
+        "probe_id": "VC10",
+        "semantic_query_family": "OUTGOING_PROPOSAL_IDENTIFICATION",
+        "source_probe_sha256": "6121d4a3e24a8c98a8136d29e0142e89fb252b017f79e5dcb898a751ecc8b1e6",
+        "fingerprint": "5b4628931f8f59383203f6e82ff763a21eca5d7d024ba5edead54a5842fc2e0a"
+      },
+      {
+        "probe_id": "VC16",
+        "semantic_query_family": "VISIBLE_PEER_HANDLE_CARDINALITY",
+        "source_probe_sha256": "b3726679b5e524d716e37c62a355f3579fb3564b54c933e08ab7511138a71eac",
+        "fingerprint": "2811689ae9f1a6da9761651374ef9f16629077ebda372174e56bbbcc6ea502e5"
+      }
+    ],
+    "FOUNDER_C20_V1": [
+      {
+        "probe_id": "VC00",
+        "semantic_query_family": "PEER_IDENTITY",
+        "source_probe_sha256": "6af1d3fb1ea0e1b7ad340804081f6336d4162f0b97615649eba98f575e069773",
+        "fingerprint": "11f7bd7faa7fa52842d14e62144913f492ecd0d0164defc636e9ba81dbc35c0b"
+      },
+      {
+        "probe_id": "VC01",
+        "semantic_query_family": "PEER_IDENTITY",
+        "source_probe_sha256": "c5ab51257abcff4175616bedfb914f519bface8ee8a722ce0b4ce6f1d7a939ad",
+        "fingerprint": "11f7bd7faa7fa52842d14e62144913f492ecd0d0164defc636e9ba81dbc35c0b"
+      },
+      {
+        "probe_id": "VC02",
+        "semantic_query_family": "IMPLICIT_PEER_DIRECTORY_SELECTION",
+        "source_probe_sha256": "c352896e226d6728c229e7677c19b4e345bdbcc0c83abdf2f4a435bfd9415b18",
+        "fingerprint": "90f298ae0381c3491ec50091f0e88c6164432c2b3ff1284d33aa2808047ccf87"
+      },
+      {
+        "probe_id": "VC03",
+        "semantic_query_family": "MESSAGE_SENDER",
+        "source_probe_sha256": "faa69b5a1523fea398f69769e416a67bd31be72e0fee7062d3eea1b6f49bcc11",
+        "fingerprint": "567f4b07932a5348e01f0b50dee4ca28d710759b0af4edad196bb8d6063d66b0"
+      },
+      {
+        "probe_id": "VC04",
+        "semantic_query_family": "MESSAGE_SENDER",
+        "source_probe_sha256": "ea667489aa2388883daa6e621366638f892b6086385c68f0950138a214a2d8bc",
+        "fingerprint": "c459b3cefd778e0f7a5fc4ce06a8578c0f5ec69cf6821f46dfa8f1fe0445bb9e"
+      },
+      {
+        "probe_id": "VC05",
+        "semantic_query_family": "VISIBLE_MESSAGE_BODY",
+        "source_probe_sha256": "3579df5b42fc9793115da52c4a8f814ba65664a779535fc88eb1acfd7f3f7cf9",
+        "fingerprint": "9a7de1f02fccf735a238f246d910755d4ca2a5e85f0f4e9e58947dabb9c69b88"
+      },
+      {
+        "probe_id": "VC06",
+        "semantic_query_family": "VISIBLE_MESSAGE_BODY_LITERAL",
+        "source_probe_sha256": "444456e8d0a54ed10196906117d12f9f154d7d61d8d1f4e153c0be9b1fffb1c0",
+        "fingerprint": "66922c7e9f5689bcfde6577cb7a390bb9d5e0091cf0e47cefd76637916113f89"
+      },
+      {
+        "probe_id": "VC07",
+        "semantic_query_family": "INCOMING_PROPOSAL_IDENTIFICATION",
+        "source_probe_sha256": "fff5001ea3d6338700d321680b31fe6caae58b1f5e91208d2abbad5bbeb69502",
+        "fingerprint": "318729c80f682f28e59d05c1280d9709fda8cf55dec51786b8ab678564336a11"
+      },
+      {
+        "probe_id": "VC08",
+        "semantic_query_family": "INCOMING_PROPOSAL_IDENTIFICATION",
+        "source_probe_sha256": "86bdde9901955f00b25f006fcf10b3600d86e29f16619c56d60d1e0cd41eced1",
+        "fingerprint": "318729c80f682f28e59d05c1280d9709fda8cf55dec51786b8ab678564336a11"
+      },
+      {
+        "probe_id": "VC09",
+        "semantic_query_family": "INCOMING_PROPOSAL_COUNT",
+        "source_probe_sha256": "154d4d85bc629980d3ab9dc28ca21a136852ce3ed0e21021293bb38f3107caa9",
+        "fingerprint": "74481ef162ea4901f9c9a86b970da800e8379143279039e34554d9db325c98dd"
+      },
+      {
+        "probe_id": "VC10",
+        "semantic_query_family": "OUTGOING_PROPOSAL_IDENTIFICATION",
+        "source_probe_sha256": "6121d4a3e24a8c98a8136d29e0142e89fb252b017f79e5dcb898a751ecc8b1e6",
+        "fingerprint": "5b4628931f8f59383203f6e82ff763a21eca5d7d024ba5edead54a5842fc2e0a"
+      },
+      {
+        "probe_id": "VC11",
+        "semantic_query_family": "PROPOSAL_TARGET",
+        "source_probe_sha256": "470dd4cbad5b61d23cd9e2b4861320b5bedee401479bebd31e36339c9eb8297b",
+        "fingerprint": "3fbb5d0c11c5e3cbc874c7afa547c7d1d764c6526431c371e6b861b104fb64a5"
+      },
+      {
+        "probe_id": "VC12",
+        "semantic_query_family": "PROPOSAL_DIRECTION",
+        "source_probe_sha256": "10a65ed570a9dfd79503641580295120e783a4a176aa15e367a9eaa110aef542",
+        "fingerprint": "bbfecc3fd91726d737109cd53aaeafa415c19013980b4c9e3bd8d9259f112f2c"
+      },
+      {
+        "probe_id": "VC13",
+        "semantic_query_family": "HISTORY_MESSAGE_RECEIVER",
+        "source_probe_sha256": "cf73fd9ccc22c0ef35defea244153ff8ea413ab05056b089a212be4b27417fd9",
+        "fingerprint": "b0deb4b463dc58c65108b54743e8ec9ffaca23fe16337d25152864e6c065163c"
+      },
+      {
+        "probe_id": "VC14",
+        "semantic_query_family": "HISTORY_MESSAGE_BODY",
+        "source_probe_sha256": "5a01c6b8274c3d7ffdd85eba4f97bbaa4dc6ff2249bd5e2a7d7736e0d5c0bd30",
+        "fingerprint": "377c65b8efc5d2bc92020699e8da3a1d573067dbf1203382d3d66f0356761cac"
+      },
+      {
+        "probe_id": "VC15",
+        "semantic_query_family": "PEER_HANDLE_LOOKUP",
+        "source_probe_sha256": "16b223a3d5035db520d23d5104179dca95cedbb1d4c50e2ee389fc50a9522a39",
+        "fingerprint": "4e2513ab6d6bc313f4d2bf8b791efd9b7a92f97737868051b4d797b479eaf51a"
+      },
+      {
+        "probe_id": "VC16",
+        "semantic_query_family": "VISIBLE_PEER_HANDLE_CARDINALITY",
+        "source_probe_sha256": "b3726679b5e524d716e37c62a355f3579fb3564b54c933e08ab7511138a71eac",
+        "fingerprint": "2811689ae9f1a6da9761651374ef9f16629077ebda372174e56bbbcc6ea502e5"
+      },
+      {
+        "probe_id": "VC17",
+        "semantic_query_family": "VISIBLE_PEER_HANDLE_CARDINALITY",
+        "source_probe_sha256": "e580acb3f2ac6e60b697bcf6c10dc0f9ca1b51d25cc1f0b74ed2706d497db1df",
+        "fingerprint": "cc8edf2abd92c8a858c4e79db81d1c50041f3a3fed88b4e8b3c9040f49ea287a"
+      },
+      {
+        "probe_id": "VC18",
+        "semantic_query_family": "PROPOSAL_OWNER",
+        "source_probe_sha256": "0ce42c91a893422778b4b44559e20c680c4292fae6f95057b7af5f4320d252d4",
+        "fingerprint": "9916ba317e9c72d3b39748c2e2a838c59719772eb504c5efe3385074810b5fa6"
+      },
+      {
+        "probe_id": "VC19",
+        "semantic_query_family": "PROPOSAL_OWNER",
+        "source_probe_sha256": "0e44712b835ad17b61e81267a4282e48e464f3031ba4cc9eb777e839e3d90289",
+        "fingerprint": "7682581a73f87b043bc34cc28373137a663a124e1bfb8cd722a72660873171f5"
+      }
+    ]
+  },
+  "aggregate_digest_law": {
+    "algorithm": "SHA-256",
+    "serialization": "UTF-8 RFC-8259 JSON; sorted object keys; compact separators; arrays preserve order",
+    "payload_fields": [
+      "reservation_set_id",
+      "fingerprint_version",
+      "sources",
+      "reservations"
+    ]
+  },
+  "aggregate_sha256": "c6f41dde65dbab224d41d3bfcbc8018e122a131828a3f3b1e3eea5842f0ed07b",
+  "probe_count": 30,
+  "unique_fingerprint_count": 19,
+  "training_generation_policy": "FAIL_CLOSED_ON_ANY_RESERVED_FINGERPRINT"
+}

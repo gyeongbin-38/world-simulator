@@ -1,0 +1,36 @@
+{
+  "spec_schema_version": "1.0.0",
+  "suite_id": "F0_NEUTRALITY_SUITE_V1",
+  "status": "FROZEN",
+  "role": "RAW_VS_FOUNDATION_OBSERVER_DIAGNOSTIC_ONLY",
+  "artifact": "E:/WORLD/AI_CACHE/evidence/f0-raw-baselines-v1/neutrality_suite.json",
+  "suite_digest": "db72df2f3c530ee087a65798c0bc5d70b62cd41ac81797a714ac558706480d79",
+  "free_action_policy_comparison_status": "UNSUITABLE",
+  "free_action_policy_comparison_reason": "All 100 RAW free-action outputs had domain-invalid argument combinations, so action-class counts are confounded by motor and ActionIntent-validity failure.",
+  "ACCEPT_100_interpretation": "MUST_NOT_BE_INTERPRETED_AS_REPRODUCTIVE_PREFERENCE",
+  "other_diagnostics_status": "RETAINED_AS_HISTORICAL_EVIDENCE_WHERE_NOT_CONFOUNDED",
+  "case_count": 356,
+  "families": {
+    "IDENTITY_PERMUTATION": 64,
+    "ORDER_PERMUTATION": 64,
+    "ROLE_REVERSAL": 64,
+    "HANDLE_BIAS": 64,
+    "FREE_ACTION_DISTRIBUTION": 100
+  },
+  "free_action": {
+    "actions": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+    "balanced_action_order_permutation": true,
+    "positive_or_negative_social_wording": false,
+    "reward_or_value_framing": false,
+    "preferred_peer": false,
+    "survival_pressure": false,
+    "reproduction_pressure": false,
+    "interaction_quota": false,
+    "required_distribution": null,
+    "report": ["ACTION_COUNTS", "ACTION_PROPORTIONS", "95_PERCENT_WILSON_INTERVALS", "PARTNER_CONCENTRATION", "INVALID_RATE", "MALFORMED_RATE"]
+  },
+  "bias_diagnostics": ["P0", "R0", "FIRST_ITEM", "LOWEST_NUMBERED_HANDLE", "RECORD_ORDER_SENSITIVITY"],
+  "training_use": "FORBIDDEN",
+  "admission_role": "COMPARISON_EVIDENCE_ONLY",
+  "social_prior_added": false
+}

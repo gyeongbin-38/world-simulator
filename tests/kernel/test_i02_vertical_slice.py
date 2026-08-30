@@ -126,6 +126,22 @@ def test_message_visible_next_tick() -> None:
     assert next_result.snapshot_before.tick == Tick(1)
 
 
+def test_self_send_is_rejected_without_message_commit() -> None:
+    run = make_run("A")
+    _, result = run_with(
+        run,
+        {
+            (Tick(0), AgentId("A")): make_intent(
+                "self-send", "A", 0, ActionKind.SEND, SendAction(AgentId("A"), "loop")
+            )
+        },
+    )
+
+    assert result.validated_intents == ()
+    assert run.snapshot.messages == ()
+    assert not any(event.event_type == "MessageCommitted" for event in run.snapshot.events)
+
+
 def test_newborn_not_active_same_tick() -> None:
     run = make_run("A", "B")
     kernel, proposal_id = create_proposal(run)

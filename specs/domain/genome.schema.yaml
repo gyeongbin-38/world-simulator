@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alifelm:domain:genome:1.0.0",
+  "title": "A-LifeLM N0 Genome",
+  "description": "Exact N0 field authority for model-independent NullGenome and AdapterGenome values.",
+  "oneOf": [
+    { "$ref": "#/$defs/nullGenome" },
+    { "$ref": "#/$defs/adapterGenome" }
+  ],
+  "x-alifelm-owner": "ARC-350",
+  "x-alifelm-domain-hierarchy": [
+    "Genome",
+    "Genome/NullGenome",
+    "Genome/AdapterGenome",
+    "Genome/MetaGenome:FUTURE",
+    "Genome/WeightGenome:FUTURE"
+  ],
+  "$defs": {
+    "nullGenome": {
+      "title": "NullGenome",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "genome_type",
+        "genome_id",
+        "genome_schema_version",
+        "neural_heredity_enabled"
+      ],
+      "properties": {
+        "genome_type": { "const": "NULL_GENOME" },
+        "genome_id": { "const": "NULL_GENOME" },
+        "genome_schema_version": { "$ref": "#/$defs/version" },
+        "neural_heredity_enabled": { "const": false }
+      },
+      "x-alifelm-invariants": [
+        "NullGenome means neural heredity is disabled",
+        "NullGenome is not a ZERO_ADAPTER sentinel",
+        "EXP-000 continues to use NullGenome"
+      ]
+    },
+    "adapterGenome": {
+      "title": "AdapterGenome",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "genome_type",
+        "neural_heredity_enabled",
+        "genome_id",
+        "genome_record_digest",
+        "genome_schema_version",
+        "base_model_ref",
+        "base_model_digest",
+        "architecture_signature",
+        "tokenizer_digest",
+        "adapter_schema_version",
+        "adapter_rank",
+        "target_modules",
+        "adapter_scaling_metadata",
+        "representation_kind",
+        "canonical_artifact_ref",
+        "canonical_artifact_digest",
+        "effective_delta_digest",
+        "generation",
+        "parent_genome_a",
+        "parent_genome_b",
+        "birth_event_ref",
+        "inheritance_operator_id",
+        "inheritance_operator_version",
+        "mutation_operator_id",
+        "mutation_operator_version",
+        "rng_derivation_ref",
+        "created_by"
+      ],
+      "properties": {
+        "genome_type": { "const": "ADAPTER_GENOME" },
+        "neural_heredity_enabled": { "const": true },
+        "genome_id": { "$ref": "#/$defs/opaqueId" },
+        "genome_record_digest": { "$ref": "#/$defs/digest" },
+        "genome_schema_version": { "$ref": "#/$defs/version" },
+        "base_model_ref": { "type": "string", "minLength": 1 },
+        "base_model_digest": { "$ref": "#/$defs/digest" },
+        "architecture_signature": { "$ref": "#/$defs/digest" },
+        "tokenizer_digest": { "$ref": "#/$defs/digest" },
+        "adapter_schema_version": { "$ref": "#/$defs/version" },
+        "adapter_rank": { "type": "integer", "minimum": 1 },
+        "target_modules": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/modulePath" }
+        },
+        "adapter_scaling_metadata": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/moduleScaling" }
+        },
+        "representation_kind": {
+          "enum": ["ZERO_ADAPTER_SENTINEL", "CANONICAL_PEFT_LORA"]
+        },
+        "canonical_artifact_ref": {
+          "anyOf": [
+            { "$ref": "../contracts/artifact-ref.schema.json" },
+            { "type": "null" }
+          ]
+        },
+        "canonical_artifact_digest": { "$ref": "#/$defs/digest" },
+        "effective_delta_digest": { "$ref": "#/$defs/digest" },
+        "generation": { "type": "integer", "minimum": 0 },
+        "parent_genome_a": {
+          "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+        },
+        "parent_genome_b": {
+          "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+        },
+        "birth_event_ref": {
+          "anyOf": [{ "$ref": "#/$defs/opaqueId" }, { "type": "null" }]
+        },
+        "inheritance_operator_id": {
+          "anyOf": [
+            { "enum": ["H0_RESET_ZERO", "H1_SYMMETRIC_DELTA_BLEND", "H2_RANDOM_DELTA_CROSSOVER"] },
+            { "type": "null" }
+          ]
+        },
+        "inheritance_operator_version": {
+          "anyOf": [{ "$ref": "#/$defs/version" }, { "type": "null" }]
+        },
+        "mutation_operator_id": {
+          "anyOf": [{ "const": "M1_SPARSE_GAUSSIAN_MUTATION" }, { "type": "null" }]
+        },
+        "mutation_operator_version": {
+          "anyOf": [{ "$ref": "#/$defs/version" }, { "type": "null" }]
+        },
+        "rng_derivation_ref": {
+          "anyOf": [
+            { "$ref": "../contracts/artifact-ref.schema.json" },
+            { "type": "null" }
+          ]
+        },
+        "created_by": { "enum": ["FOUNDER", "INHERITANCE"] }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "representation_kind": { "const": "ZERO_ADAPTER_SENTINEL" } },
+            "required": ["representation_kind"]
+          },
+          "then": {
+            "properties": { "canonical_artifact_ref": { "type": "null" } }
+          },
+          "else": {
+            "properties": {
+              "canonical_artifact_ref": { "$ref": "../contracts/artifact-ref.schema.json" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "created_by": { "const": "FOUNDER" } },
+            "required": ["created_by"]
+          },
+          "then": {
+            "properties": {
+              "generation": { "const": 0 },
+              "parent_genome_a": { "type": "null" },
+              "parent_genome_b": { "type": "null" },
+              "birth_event_ref": { "type": "null" },
+              "inheritance_operator_id": { "type": "null" },
+              "inheritance_operator_version": { "type": "null" },
+              "mutation_operator_id": { "type": "null" },
+              "mutation_operator_version": { "type": "null" },
+              "rng_derivation_ref": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "generation": { "type": "integer", "minimum": 1 },
+              "parent_genome_a": { "$ref": "#/$defs/digest" },
+              "parent_genome_b": { "$ref": "#/$defs/digest" },
+              "birth_event_ref": { "$ref": "#/$defs/opaqueId" },
+              "inheritance_operator_id": {
+                "enum": ["H0_RESET_ZERO", "H1_SYMMETRIC_DELTA_BLEND", "H2_RANDOM_DELTA_CROSSOVER"]
+              },
+              "inheritance_operator_version": { "$ref": "#/$defs/version" },
+              "rng_derivation_ref": { "$ref": "../contracts/artifact-ref.schema.json" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "mutation_operator_id": { "type": "null" } },
+            "required": ["mutation_operator_id"]
+          },
+          "then": { "properties": { "mutation_operator_version": { "type": "null" } } },
+          "else": { "properties": { "mutation_operator_version": { "$ref": "#/$defs/version" } } }
+        }
+      ],
+      "x-alifelm-invariants": [
+        "genome_id is deterministically bound to genome_record_digest",
+        "genome_record_digest covers canonical metadata but excludes database row identity and wall time",
+        "target_modules and adapter_scaling_metadata are in unsigned UTF-8 module-path order and have identical module sets",
+        "canonical_artifact_digest is SHA-256 of canonical factor bytes or the ZERO_ADAPTER descriptor",
+        "effective_delta_digest is computed by ALIFELM_EFFECTIVE_DELTA_V1",
+        "no behavior, personality, relationship, fitness, benchmark, trust, or social label is permitted"
+      ]
+    },
+    "moduleScaling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["module_path", "scaling_rule", "lora_alpha", "effective_scale", "fan_in_fan_out"],
+      "properties": {
+        "module_path": { "$ref": "#/$defs/modulePath" },
+        "scaling_rule": { "const": "ALPHA_OVER_RANK" },
+        "lora_alpha": { "$ref": "#/$defs/canonicalDecimal" },
+        "effective_scale": { "$ref": "#/$defs/canonicalDecimal" },
+        "fan_in_fan_out": { "const": false }
+      }
+    },
+    "modulePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalDecimal": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    }
+  }
+}

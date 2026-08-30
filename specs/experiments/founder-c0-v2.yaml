@@ -1,0 +1,293 @@
+{
+  "spec_schema_version": "1.0.0",
+  "corpus_id": "FOUNDER_C0_V2",
+  "corpus_schema_version": "2.0.0",
+  "status": "FROZEN",
+  "purpose": "FOUNDER_COMPREHENSION_AND_REFERENCE_GROUNDING_PRE_SCREEN",
+  "historical_v1": {
+    "status": "IMMUTABLE_HISTORICAL_EVIDENCE",
+    "source_artifact": "E:/WORLD/AI_CACHE/evidence/i05r6c/validated_context.json",
+    "source_artifact_sha256": "35338d7c1a0ab7d330775316bcd220f55530c3d98d60d4990ee3189e9fa322b1",
+    "retired_probe": {
+      "id": "VC02",
+      "category": "peer",
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1"
+      ],
+      "question": "Select the option exactly supported by the visible peer directory.",
+      "choices": ["1", "2", "3"],
+      "expected": "2",
+      "source_binding": "peer_directory",
+      "status": "RETIRED_AMBIGUOUS",
+      "retirement_reason": "question lacks an explicit predicate identifying what quantity should be selected"
+    },
+    "results": [
+      {
+        "candidate": "allenai/OLMo-2-0425-1B-Instruct",
+        "evidence_artifact": "E:/WORLD/AI_CACHE/evidence/olmo2-1b-c0/c0-evidence.json",
+        "evidence_sha256": "8c4a0bb6de39011568cacabb46e94730e1147dadeba351af396531da3f6250d5",
+        "recorded_v1_score": {
+          "factual": "7/10",
+          "reference_structure": "9/10",
+          "malformed": 1,
+          "critical_core": "5/8"
+        },
+        "recorded_failures": ["VC00", "VC02", "VC10"],
+        "clean_critical_failures_supporting_rejection": ["VC00", "VC10"],
+        "score_recomputed": false
+      },
+      {
+        "candidate": "VillanovaAI/Villanova-2B-2603",
+        "evidence_artifact": "E:/WORLD/AI_CACHE/evidence/villanova-2b-c0/c0-evidence.json",
+        "evidence_sha256": "ad48203a717014555e71f4926d773dc4d6c343b75fcb673cebe6cb593a7fd55a",
+        "recorded_v1_score": {
+          "factual": "7/10",
+          "reference_structure": "10/10",
+          "malformed": 0,
+          "critical_core": "6/8"
+        },
+        "recorded_failures": ["VC02", "VC10", "VC16"],
+        "clean_critical_failures_supporting_rejection": ["VC10"],
+        "score_recomputed": false
+      }
+    ]
+  },
+  "ordering_policy": "FIXED_EXPLICIT_ORDER_V1",
+  "probe_order": [
+    "VC00",
+    "VC02R",
+    "VC09",
+    "VC12",
+    "VC15",
+    "VC01",
+    "VC11",
+    "VC05",
+    "VC10",
+    "VC16"
+  ],
+  "scoring": {
+    "probe_count": 10,
+    "factual_correct_minimum": 9,
+    "reference_structure_valid_required": 10,
+    "malformed_maximum": 0,
+    "critical_core_accuracy_required": 1.0,
+    "critical_core_error_policy": "FAIL_REGARDLESS_OF_AGGREGATE",
+    "social_desirability_scored": false
+  },
+  "sealed_from": [
+    "TRAIN",
+    "DEV",
+    "HYPERPARAMETER_SELECTION",
+    "EARLY_STOPPING",
+    "PROMPT_TUNING",
+    "FOUNDATION_ADAPTER_SELECTION"
+  ],
+  "probes": [
+    {
+      "id": "VC00",
+      "category": "peer",
+      "semantic_family": "PEER_IDENTITY",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1"
+      ],
+      "question": "Select the option exactly supported by the visible peer directory.",
+      "choices": ["P0", "P8", "SELF"],
+      "expected": "P0",
+      "source_binding": "peer_directory",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC02R",
+      "category": "peer_count",
+      "semantic_family": "VISIBLE_PEER_HANDLE_CARDINALITY",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1"
+      ],
+      "question": "How many visible peer handles are listed?",
+      "choices": ["1", "2", "3"],
+      "expected": "2",
+      "source_binding": "peer_directory count",
+      "classification": "CLEAN",
+      "renderer_neutral": true,
+      "replacement_for": "VC02"
+    },
+    {
+      "id": "VC09",
+      "category": "incoming_proposal",
+      "semantic_family": "INCOMING_PROPOSAL_COUNT",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1",
+        "Visible incoming pending requests:",
+        "R0 from P0",
+        "R1 from P1",
+        "Visible outgoing pending request R2 to P0"
+      ],
+      "question": "Select the number of visible incoming pending requests.",
+      "choices": ["1", "2", "3"],
+      "expected": "2",
+      "source_binding": "visible_protocol_state incoming count",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC12",
+      "category": "proposal_direction",
+      "semantic_family": "PROPOSAL_DIRECTION",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1",
+        "Visible incoming pending requests:",
+        "R0 from P0",
+        "R1 from P1",
+        "Visible outgoing pending request R2 to P0"
+      ],
+      "question": "Select the option describing R1.",
+      "choices": ["INCOMING", "OUTGOING", "RESOLVED"],
+      "expected": "INCOMING",
+      "source_binding": "visible_protocol_state direction",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC15",
+      "category": "history",
+      "semantic_family": "PEER_HANDLE_LOOKUP",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1",
+        "Prior visible committed interaction: text sent to P0: trace-seven"
+      ],
+      "question": "Select the peer handle occurring in the prior interaction.",
+      "choices": ["P0", "P8", "SELF"],
+      "expected": "P0",
+      "source_binding": "prior_history recipient",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC01",
+      "category": "peer",
+      "semantic_family": "PEER_IDENTITY",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1"
+      ],
+      "question": "Select the option exactly supported by the visible peer directory.",
+      "choices": ["P1", "P8", "SELF"],
+      "expected": "P1",
+      "source_binding": "peer_directory",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC11",
+      "category": "proposal_direction",
+      "semantic_family": "PROPOSAL_TARGET",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1",
+        "Visible incoming pending requests:",
+        "R0 from P0",
+        "R1 from P1",
+        "Visible outgoing pending request R2 to P0"
+      ],
+      "question": "Select the target handle of outgoing proposal R2.",
+      "choices": ["P0", "P1", "SELF"],
+      "expected": "P0",
+      "source_binding": "visible_protocol_state outgoing target",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC05",
+      "category": "message_body",
+      "semantic_family": "VISIBLE_MESSAGE_BODY",
+      "critical_core": false,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1",
+        "Newly delivered directed message from P1: signal-alpha"
+      ],
+      "question": "Select the exact newly delivered message body.",
+      "choices": ["signal-alpha", "trace-seven", "signal-beta"],
+      "expected": "signal-alpha",
+      "source_binding": "newly_delivered.body",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC10",
+      "category": "proposal_direction",
+      "semantic_family": "OUTGOING_PROPOSAL_IDENTIFICATION",
+      "critical_core": true,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1",
+        "Visible incoming pending requests:",
+        "R0 from P0",
+        "R1 from P1",
+        "Visible outgoing pending request R2 to P0"
+      ],
+      "question": "Select the proposal explicitly marked outgoing.",
+      "choices": ["R0", "R1", "R2"],
+      "expected": "R2",
+      "source_binding": "visible_protocol_state direction",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    },
+    {
+      "id": "VC16",
+      "category": "peer_count",
+      "semantic_family": "VISIBLE_PEER_HANDLE_CARDINALITY",
+      "critical_core": false,
+      "visible_facts": [
+        "Own visible age: 4",
+        "Visible peer handles: P0, P1"
+      ],
+      "question": "Select the number of visible peer handles.",
+      "choices": ["0", "1", "2"],
+      "expected": "2",
+      "source_binding": "peer_directory count",
+      "classification": "CLEAN",
+      "renderer_neutral": true
+    }
+  ],
+  "corpus_digest_law": {
+    "algorithm": "SHA-256",
+    "serialization": "UTF-8 RFC-8259 JSON; sorted object keys; compact separators; arrays preserve order",
+    "payload_fields": [
+      "corpus_id",
+      "corpus_schema_version",
+      "ordering_policy",
+      "probe_order",
+      "scoring",
+      "probes"
+    ]
+  },
+  "corpus_sha256": "05d07269265de5eb75a141a16543543adfebb8c01fccab23857f75b797069340",
+  "firewalls": {
+    "v1_probe_modified": false,
+    "expected_answers_changed": false,
+    "threshold_changed": false,
+    "foundation_training_access": "FORBIDDEN",
+    "foundation_selection_access": "FORBIDDEN"
+  },
+  "test_spec_ids": [
+    "C0V2-PROVENANCE-001",
+    "C0V2-PROVENANCE-002",
+    "C0V2-AMBIGUITY-001",
+    "C0V2-AMBIGUITY-002"
+  ]
+}

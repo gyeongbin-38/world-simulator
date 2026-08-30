@@ -51,7 +51,11 @@ class LawValidator:
         if intent.kind is ActionKind.SEND:
             assert isinstance(intent.payload, SendAction)
             target = snapshot.agent(intent.payload.target_agent_id)
-            return target is not None and target.is_active(snapshot.tick)
+            return (
+                target is not None
+                and target.agent_id != actor.agent_id
+                and target.is_active(snapshot.tick)
+            )
         if intent.kind is ActionKind.PROPOSE:
             assert isinstance(intent.payload, ProposeAction)
             target = snapshot.agent(intent.payload.target_agent_id)

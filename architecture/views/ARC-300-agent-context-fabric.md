@@ -40,7 +40,9 @@ ARC-300 ContextPack or a source of Context Fabric semantics.
 
 The peer directory excludes self because own identity has a separate projection.
 The directory describes current addressability only; it is not evidence of a
-relationship.
+relationship. The separate baseline addressing decision
+[`ADR-300-001`](../decisions/ADR-300-001-self-send-addressing.md) forbids SEND
+to self so the domain-valid target set matches this visible peer affordance.
 
 ## Agent-hidden baseline
 

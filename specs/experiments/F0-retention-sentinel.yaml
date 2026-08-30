@@ -1,0 +1,390 @@
+{
+  "spec_schema_version": "1.0.0",
+  "sentinel_id": "F0_NEUTRAL_RETENTION_SENTINEL_V1",
+  "sentinel_schema_version": "1.0.0",
+  "status": "FROZEN",
+  "role": "CATASTROPHIC_DEGRADATION_DETECTION_ONLY",
+  "selection_objective": false,
+  "public_leaderboard_source": false,
+  "social_policy_content": false,
+  "scoring": {
+    "mode": "EXACT_MATCH_AFTER_STRIPPING_ONE_TRAILING_NEWLINE",
+    "report": "RAW_OLMO_VS_FOUNDATION_OLMO",
+    "large_unexpected_degradation": "FOUNDATION_ADMISSION_FAILURE_OR_REVIEW"
+  },
+  "sealed_from": ["TRAIN", "DEV", "GRADIENT_UPDATES"],
+  "cases": [
+    {
+      "id": "RET-IF-001",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return exactly the token cedar.",
+      "expected": "cedar"
+    },
+    {
+      "id": "RET-IF-002",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return exactly YES in uppercase.",
+      "expected": "YES"
+    },
+    {
+      "id": "RET-IF-003",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return the second token from: amber cobalt ivory.",
+      "expected": "cobalt"
+    },
+    {
+      "id": "RET-IF-004",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return the last digit from: 4 8 3 9.",
+      "expected": "9"
+    },
+    {
+      "id": "RET-IF-005",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return exactly two words: north glass.",
+      "expected": "north glass"
+    },
+    {
+      "id": "RET-IF-006",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return the token inside brackets: [mango].",
+      "expected": "mango"
+    },
+    {
+      "id": "RET-IF-007",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return only the letter after Q in the English alphabet.",
+      "expected": "R"
+    },
+    {
+      "id": "RET-IF-008",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return exactly the punctuation sequence ?!.",
+      "expected": "?!"
+    },
+    {
+      "id": "RET-IF-009",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return the first line only.\nline-one\nline-two",
+      "expected": "line-one"
+    },
+    {
+      "id": "RET-IF-010",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return exactly false in lowercase.",
+      "expected": "false"
+    },
+    {
+      "id": "RET-IF-011",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return the shorter word: planetary, cup.",
+      "expected": "cup"
+    },
+    {
+      "id": "RET-IF-012",
+      "family": "BASIC_INSTRUCTION_FOLLOWING",
+      "input": "Return the repeated token from: lime ash lime.",
+      "expected": "lime"
+    },
+    {
+      "id": "RET-FE-001",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Record: color=violet; size=12. Extract the color value.",
+      "expected": "violet"
+    },
+    {
+      "id": "RET-FE-002",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Record: code=K7; mass=18. Extract the code.",
+      "expected": "K7"
+    },
+    {
+      "id": "RET-FE-003",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "The jar contains 14 beads. How many beads are stated?",
+      "expected": "14"
+    },
+    {
+      "id": "RET-FE-004",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Field A is delta. Field B is gamma. Return Field B.",
+      "expected": "gamma"
+    },
+    {
+      "id": "RET-FE-005",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Header: mode=quiet. Extract mode.",
+      "expected": "quiet"
+    },
+    {
+      "id": "RET-FE-006",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Item Z has width 6 and height 11. Return the height.",
+      "expected": "11"
+    },
+    {
+      "id": "RET-FE-007",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Date fields: year=2041, month=3, day=8. Extract month.",
+      "expected": "3"
+    },
+    {
+      "id": "RET-FE-008",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "The displayed label is quartz. Return the displayed label.",
+      "expected": "quartz"
+    },
+    {
+      "id": "RET-FE-009",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Values: left=31; right=27. Extract left.",
+      "expected": "31"
+    },
+    {
+      "id": "RET-FE-010",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "A note explicitly says status=ready. Extract status.",
+      "expected": "ready"
+    },
+    {
+      "id": "RET-FE-011",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Box C contains the word orbit. What word does Box C contain?",
+      "expected": "orbit"
+    },
+    {
+      "id": "RET-FE-012",
+      "family": "SIMPLE_FACTUAL_EXTRACTION",
+      "input": "Sequence metadata: length=5; type=integer. Extract type.",
+      "expected": "integer"
+    },
+    {
+      "id": "RET-AR-001",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 7 + 5. Return only the integer.",
+      "expected": "12"
+    },
+    {
+      "id": "RET-AR-002",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 19 - 8. Return only the integer.",
+      "expected": "11"
+    },
+    {
+      "id": "RET-AR-003",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 6 * 4. Return only the integer.",
+      "expected": "24"
+    },
+    {
+      "id": "RET-AR-004",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 36 / 6. Return only the integer.",
+      "expected": "6"
+    },
+    {
+      "id": "RET-AR-005",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 3 + 4 + 8. Return only the integer.",
+      "expected": "15"
+    },
+    {
+      "id": "RET-AR-006",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 50 - 17. Return only the integer.",
+      "expected": "33"
+    },
+    {
+      "id": "RET-AR-007",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 9 * 7. Return only the integer.",
+      "expected": "63"
+    },
+    {
+      "id": "RET-AR-008",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 81 / 9. Return only the integer.",
+      "expected": "9"
+    },
+    {
+      "id": "RET-AR-009",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "What is 25 percent of 40? Return only the integer.",
+      "expected": "10"
+    },
+    {
+      "id": "RET-AR-010",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute (8 + 2) * 3. Return only the integer.",
+      "expected": "30"
+    },
+    {
+      "id": "RET-AR-011",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 100 - 64. Return only the integer.",
+      "expected": "36"
+    },
+    {
+      "id": "RET-AR-012",
+      "family": "SIMPLE_ARITHMETIC",
+      "input": "Compute 5 squared. Return only the integer.",
+      "expected": "25"
+    },
+    {
+      "id": "RET-TX-001",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Convert river to uppercase.",
+      "expected": "RIVER"
+    },
+    {
+      "id": "RET-TX-002",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Convert CLOUD to lowercase.",
+      "expected": "cloud"
+    },
+    {
+      "id": "RET-TX-003",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Reverse the characters in lamp.",
+      "expected": "pmal"
+    },
+    {
+      "id": "RET-TX-004",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Join red and stone with a hyphen.",
+      "expected": "red-stone"
+    },
+    {
+      "id": "RET-TX-005",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Remove spaces from: one two three.",
+      "expected": "onetwothree"
+    },
+    {
+      "id": "RET-TX-006",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Replace every a with o in banana.",
+      "expected": "bonono"
+    },
+    {
+      "id": "RET-TX-007",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Sort these tokens alphabetically: pear apple mint.",
+      "expected": "apple mint pear"
+    },
+    {
+      "id": "RET-TX-008",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Repeat the token sun three times separated by commas.",
+      "expected": "sun,sun,sun"
+    },
+    {
+      "id": "RET-TX-009",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Remove the prefix pre- from pre-flight.",
+      "expected": "flight"
+    },
+    {
+      "id": "RET-TX-010",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Add the suffix -ed to fold.",
+      "expected": "folded"
+    },
+    {
+      "id": "RET-TX-011",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Return the initials of: green metal box.",
+      "expected": "gmb"
+    },
+    {
+      "id": "RET-TX-012",
+      "family": "BASIC_TEXT_TRANSFORMATION",
+      "input": "Change the comma to a semicolon in: left,right.",
+      "expected": "left;right"
+    },
+    {
+      "id": "RET-JS-001",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key color and string value blue.",
+      "expected": "{\"color\":\"blue\"}"
+    },
+    {
+      "id": "RET-JS-002",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key count and integer value 4.",
+      "expected": "{\"count\":4}"
+    },
+    {
+      "id": "RET-JS-003",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key ready and boolean value true.",
+      "expected": "{\"ready\":true}"
+    },
+    {
+      "id": "RET-JS-004",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key items and array values 2 and 5.",
+      "expected": "{\"items\":[2,5]}"
+    },
+    {
+      "id": "RET-JS-005",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with keys a then b, both integers: a=1, b=3.",
+      "expected": "{\"a\":1,\"b\":3}"
+    },
+    {
+      "id": "RET-JS-006",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key value and null value.",
+      "expected": "{\"value\":null}"
+    },
+    {
+      "id": "RET-JS-007",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key text and string value x y.",
+      "expected": "{\"text\":\"x y\"}"
+    },
+    {
+      "id": "RET-JS-008",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON array containing strings north and east.",
+      "expected": "[\"north\",\"east\"]"
+    },
+    {
+      "id": "RET-JS-009",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key meta whose value has key id and value 7.",
+      "expected": "{\"meta\":{\"id\":7}}"
+    },
+    {
+      "id": "RET-JS-010",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key ok and boolean value false.",
+      "expected": "{\"ok\":false}"
+    },
+    {
+      "id": "RET-JS-011",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON array containing integers 3, 1, and 4 in that order.",
+      "expected": "[3,1,4]"
+    },
+    {
+      "id": "RET-JS-012",
+      "family": "GENERIC_JSON_FORMATTING",
+      "input": "Return compact JSON with key empty and an empty object value.",
+      "expected": "{\"empty\":{}}"
+    }
+  ],
+  "digest_law": {
+    "algorithm": "SHA-256",
+    "serialization": "UTF-8 RFC-8259 JSON; sorted object keys; compact separators; arrays preserve order",
+    "payload_fields": [
+      "sentinel_id",
+      "sentinel_schema_version",
+      "scoring",
+      "sealed_from",
+      "cases"
+    ]
+  },
+  "sentinel_sha256": "7b321d2676f6137aa8c46aa1dd94e819fa3fce37495a579481f0fcc8ef370ef0"
+}

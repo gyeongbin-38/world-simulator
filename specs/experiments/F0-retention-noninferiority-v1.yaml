@@ -1,0 +1,21 @@
+{
+  "spec_schema_version": "1.0.0",
+  "criterion_id": "RETENTION_NONINFERIORITY_V1",
+  "status": "FROZEN_PRE_TRAINING",
+  "role": "GUARDRAIL_NOT_OPTIMIZATION_TARGET",
+  "raw_baseline": {
+    "baseline_id": "RAW_RETENTION_BASELINE_V1",
+    "score": 29,
+    "n": 60,
+    "rate": 0.48333333333333334
+  },
+  "absolute_percentage_point_margin": 10,
+  "provisional_minimum": {
+    "score": 23,
+    "n": 60,
+    "comparison": "GREATER_THAN_OR_EQUAL"
+  },
+  "category_collapse_policy": "Any category with nonzero RAW competence that reaches zero after adaptation requires review.",
+  "selection_policy": "May be used only for pass-or-review logic; must not select FA-v0 versus FA-v1 or optimize training.",
+  "public_benchmark_optimization": false
+}

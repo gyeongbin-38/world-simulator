@@ -1,0 +1,54 @@
+{
+  "manifest_schema_version": "1.0.0",
+  "architecture_set": "ARC-350-N0-HEREDITY-FOUNDATION",
+  "status": "IMPLEMENTATION_READY",
+  "semantic_owner": "architecture/views/ARC-350-neural-heredity.md",
+  "sequence_owner": "architecture/views/SEQ-351-genome-artifact-commit.md",
+  "field_owners": [
+    "specs/domain/genome.schema.yaml",
+    "specs/protocol/inheritance-operator.schema.yaml",
+    "specs/protocol/genome-evidence.schema.yaml"
+  ],
+  "decision_records": [
+    "architecture/decisions/ADR-350-001-canonical-adapter-genome.md",
+    "architecture/decisions/ADR-350-002-same-base-symmetric-neural-inheritance.md",
+    "architecture/decisions/ADR-350-003-external-genetics-dependencies.md"
+  ],
+  "baseline_decision_records": [
+    "architecture/decisions/ADR-300-001-self-send-addressing.md"
+  ],
+  "founder_admission_owner": "specs/experiments/founder-model-admission.yaml",
+  "admission_owner": "specs/experiments/N0-heredity-operator-admission.yaml",
+  "dependency_dag": {
+    "founder_admission": ["C0", "C20", "MOTOR", "AUTONOMOUS", "FOUNDER_FREEZE"],
+    "after_founder_freeze": {
+      "branch_A": ["RESOLVE_BASELINE_BLOCKERS", "M2_NULL_GENOME", "HEADLESS_EXP000_VALIDATION"],
+      "branch_B": ["N0_OPERATOR_BACKEND_ADMISSION"]
+    },
+    "M2_requires_N0": false,
+    "neural_heredity_requires": ["VALIDATED_HEADLESS_EXP000_BASELINE", "ADMITTED_N0_OPERATOR_AND_BACKEND"]
+  },
+  "n0_control_treatments": ["H0_NULL", "H0_RESET_ZERO"],
+  "test_id_prefixes": [
+    "N0-CONTRACT-",
+    "N0-COMPAT-",
+    "N0-DETERMINISM-",
+    "N0-SYMMETRY-",
+    "N0-HASH-",
+    "N0-CAS-",
+    "N0-CRASH-",
+    "N0-MUTATION-",
+    "N0-PEFT-",
+    "N0-GGUF-",
+    "N0-ISOLATION-",
+    "N0-VIABILITY-",
+    "N0-LEAKAGE-"
+  ],
+  "preserved_owners": [
+    "architecture/CONSTITUTION.md",
+    "architecture/views/LC-220-reproduction-proposal-lifecycle.md",
+    "architecture/views/ARC-270-durable-commit-replay-boundary.md",
+    "architecture/views/ARC-300-agent-context-fabric.md"
+  ],
+  "exp000_change": "SELF_SEND_GAP_RESOLUTION_ONLY"
+}

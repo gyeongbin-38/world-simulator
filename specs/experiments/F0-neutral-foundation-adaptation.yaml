@@ -1,0 +1,514 @@
+{
+  "spec_schema_version": "1.0.0",
+  "experiment_id": "F0_NEUTRAL_FOUNDATION_ADAPTATION_FEASIBILITY_V1",
+  "program_name": "F0 — Neutral Foundation Adaptation Feasibility",
+  "status": "PRE_TRAINING_FROZEN",
+  "execution_authorized_by_this_spec": false,
+  "foundation_is_policy": false,
+  "preserved_baseline": {
+    "EXP_000_genome": "NullGenome",
+    "resources": false,
+    "causal_physical_space": false,
+    "personality_assignment": false,
+    "trust_friend_enemy_labels": false,
+    "cooperation_reward": false,
+    "interaction_reward": false,
+    "survival_reward": false,
+    "mate_preference": false,
+    "central_fitness": false,
+    "reproduction": "BILATERAL",
+    "SELF_SEND": "FORBIDDEN",
+    "observer_metrics_enter_ContextPack": false,
+    "researcher_parent_selection": false,
+    "foundation_in_canonical_runtime": false
+  },
+  "scope": {
+    "objective": "MINIMIZE_ADAPTATION_INTERVENTION_SUBJECT_TO_MINIMUM_GROUNDING_COMPETENCE",
+    "target_model": "allenai/OLMo-2-0425-1B-Instruct",
+    "target_status": "CANDIDATE_NOT_FOUNDER",
+    "official_base": "IMMUTABLE",
+    "runtime_integration": "NOT_CANONICAL",
+    "EXP_000_genome": "NullGenome",
+    "neural_heredity_enabled": false,
+    "ARC_350_changed": false
+  },
+  "purpose": {
+    "definition": "Provide minimum common sensorimotor competence for visible-state perception, opaque-reference grounding, and serialization of an already-selected ActionIntent transport.",
+    "allowed_capabilities": [
+      "PERCEPTION",
+      "REFERENCE_GROUNDING",
+      "MOTOR_SERIALIZATION"
+    ],
+    "forbidden_capabilities": [
+      "ACTION_SELECTION",
+      "SOCIAL_PREFERENCE",
+      "REPRODUCTIVE_PREFERENCE",
+      "SURVIVAL_POLICY"
+    ]
+  },
+  "training_targets": {
+    "allowed_semantic_families": [
+      "SELF_IDENTITY",
+      "PEER_IDENTITY",
+      "PEER_HANDLE_LOOKUP",
+      "VISIBLE_PEER_COUNT",
+      "MESSAGE_SENDER",
+      "MESSAGE_RECEIVER",
+      "MESSAGE_DIRECTION",
+      "PROPOSAL_ID",
+      "PROPOSAL_OWNER",
+      "PROPOSAL_DIRECTION",
+      "PROPOSAL_TARGET",
+      "INCOMING_PROPOSAL_IDENTIFICATION",
+      "OUTGOING_PROPOSAL_IDENTIFICATION",
+      "VISIBLE_VS_NOT_VISIBLE_FACT",
+      "OPAQUE_HANDLE_COPY",
+      "ALREADY_SELECTED_ACTION_SERIALIZATION"
+    ],
+    "action_serialization": {
+      "allowed": true,
+      "precondition": "ACTION_AND_ARGUMENTS_ALREADY_SUPPLIED",
+      "target": "canonical model-supplied action_label plus payload transport; gateway-owned intent_id, actor_id, and tick are excluded",
+      "canonical_normalization": "existing gateway normalizes the supplied transport to ActionIntent",
+      "choice_learned": false
+    },
+    "autonomous_action_choice_forbidden": [
+      "WAIT",
+      "SEND",
+      "PROPOSE",
+      "ACCEPT",
+      "REJECT"
+    ],
+    "forbidden_concepts": [
+      "reply to a message",
+      "initiate conversation",
+      "cooperate",
+      "compete",
+      "be friendly",
+      "be hostile",
+      "trust",
+      "distrust",
+      "help",
+      "deceive",
+      "survive",
+      "avoid death",
+      "seek resources",
+      "seek social contact",
+      "reproduce",
+      "accept reproduction",
+      "reject reproduction",
+      "prefer a partner",
+      "prefer repeated partners",
+      "choose a leader",
+      "create a team",
+      "maximize reward",
+      "maximize offspring",
+      "preserve lineage",
+      "optimize social standing"
+    ],
+    "social_or_reproductive_behavior_prior": "FORBIDDEN"
+  },
+  "procedural_generator": {
+    "implementation": "src/alifelm/model/foundation_data.py",
+    "version": "F0_PROCEDURAL_GENERATOR_V1",
+    "teacher_LM": false,
+    "rng": "SHA-256 counter stream derived only from explicit non-negative seed and namespace",
+    "pipeline": [
+      "GeneratorSeed",
+      "SyntheticVisibleState",
+      "QueryGenerator",
+      "SymbolicGroundTruthSolver",
+      "ExampleValidator",
+      "TrainingExample"
+    ],
+    "varies": [
+      "peer_count",
+      "opaque_agent_identity",
+      "public_handle",
+      "record_order",
+      "message_count",
+      "message_direction",
+      "proposal_count",
+      "proposal_direction",
+      "proposal_target",
+      "irrelevant_distractors",
+      "opaque_entity_pattern",
+      "numeric_suffix",
+      "surface_template"
+    ],
+    "meaningful_names_forbidden": ["Alice", "Bob", "Friend", "Enemy", "Leader"],
+    "hard_negatives": [
+      "same peer in multiple records",
+      "same target role with competing proposal direction",
+      "multiple incoming proposals plus one outgoing proposal",
+      "multiple outgoing proposals plus incoming distractors",
+      "first-record distractor",
+      "last-record distractor",
+      "same numeric suffix across entity types",
+      "nearby opaque handles",
+      "reordered records",
+      "irrelevant messages around proposal facts",
+      "self and peer in reversed sender/receiver or owner/target positions",
+      "proposal target handle reused by a competing record"
+    ]
+  },
+  "example_validator": {
+    "exactly_one_correct_answer": true,
+    "question_predicate_explicit": true,
+    "visible_evidence_sufficient": true,
+    "hidden_state_required": false,
+    "social_policy_required": false,
+    "world_knowledge_required": false,
+    "renderer_specific_semantics": false,
+    "answer_computable_by_symbolic_solver": true,
+    "reserved_eval_fingerprint": false,
+    "failure_policy": "REJECT_EXAMPLE"
+  },
+  "contamination_firewall": {
+    "fingerprint_schema": "F0_GRAPH_FINGERPRINT_V1",
+    "reservation_set_id": "F0_RESERVED_EVALUATION_FINGERPRINTS_V1",
+    "reservation_spec": "specs/experiments/F0-reserved-evaluation-fingerprints.yaml",
+    "reservation_aggregate_sha256": "c6f41dde65dbab224d41d3bfcbc8018e122a131828a3f3b1e3eea5842f0ed07b",
+    "reservation_status": "FROZEN",
+    "normalization_inputs": [
+      "entity_roles",
+      "edge_directions",
+      "query_semantic_family",
+      "distractor_pattern",
+      "answer_role_topology"
+    ],
+    "identity_labels_excluded": true,
+    "record_order_excluded": true,
+    "reserved_evaluations": ["FOUNDER_C0_V2", "C20"],
+    "reserved_fingerprint_match_policy": "REJECT_FROM_TRAIN_DEV_AND_ALL_SELECTION_SPLITS",
+    "seed_separation_alone_sufficient": false,
+    "forbidden_uses": [
+      "TRAIN",
+      "DEV",
+      "HYPERPARAMETER_SELECTION",
+      "EARLY_STOPPING",
+      "PROMPT_TUNING"
+    ]
+  },
+  "dataset": {
+    "dataset_id": "F0_DATASET_V1",
+    "status": "FROZEN",
+    "manifest": "specs/experiments/F0-dataset-v1-manifest.yaml",
+    "manifest_digest": "418873b65e9a8903a595d6a8359ce778dd588b9cedb0e3c5ac54d178528e5e18",
+    "root_seed": 35020260830,
+    "split_seed_derivation": "SHA-256(F0_SPLIT_SEED_V1|root_seed|split|index)",
+    "splits": {
+      "TRAIN": {
+        "size": 4096,
+        "seed_namespace": "TRAIN"
+      },
+      "DEV": {
+        "size": 512,
+        "seed_namespace": "DEV"
+      },
+      "STRUCTURAL_HOLDOUT": {
+        "size": 1024,
+        "seed_namespace": "STRUCTURAL_HOLDOUT",
+        "unseen_relational_topologies": true
+      },
+      "TEMPLATE_HOLDOUT": {
+        "size": 1024,
+        "seed_namespace": "TEMPLATE_HOLDOUT",
+        "unseen_question_and_render_templates": true
+      },
+      "DOUBLE_HOLDOUT": {
+        "size": 1024,
+        "seed_namespace": "DOUBLE_HOLDOUT",
+        "unseen_relational_topologies": true,
+        "unseen_question_and_render_templates": true
+      },
+      "ADVERSARIAL_HOLDOUT": {
+        "size": 512,
+        "seed_namespace": "ADVERSARIAL_HOLDOUT",
+        "optional": true
+      }
+    },
+    "split_seed_namespaces_disjoint": true,
+    "structural_and_template_partitions_enforced": true
+  },
+  "representation": {
+    "experimental_model": "ImmutableOfficialBase + NeutralFoundationAdapter",
+    "base_checkpoint_modified": false,
+    "adapter_status": "EXPERIMENTAL_NOT_CANONICAL_RUNTIME",
+    "possible_future_promotion": "new immutable derived NeuralSubstrate only after full admission"
+  },
+  "minimum_intervention": {
+    "selection_objective": "smallest configuration satisfying hidden competence and all non-capability audits",
+    "configurations": [
+      {
+        "id": "FA-v0",
+        "backend": "PEFT_LORA",
+        "rank": 8,
+        "alpha": 16,
+        "dropout": 0,
+        "targets": "ATTENTION_PROJECTIONS_ONLY",
+        "exact_target_module_names": ["q_proj", "k_proj", "v_proj", "o_proj"],
+        "canonical_module_patterns": [
+          "model.layers.{0..15}.self_attn.q_proj",
+          "model.layers.{0..15}.self_attn.k_proj",
+          "model.layers.{0..15}.self_attn.v_proj",
+          "model.layers.{0..15}.self_attn.o_proj"
+        ],
+        "entry_condition": "FIRST_AND_DEFAULT"
+      },
+      {
+        "id": "FA-v1",
+        "backend": "PEFT_LORA",
+        "rank": 16,
+        "alpha": "PIN_BEFORE_EXECUTION",
+        "dropout": 0,
+        "targets": "ATTENTION_PROJECTIONS_ONLY",
+        "exact_target_module_names": ["q_proj", "k_proj", "v_proj", "o_proj"],
+        "entry_condition": "FA-v0_FAILS_SYNTHETIC_HIDDEN_COMPETENCE"
+      },
+      {
+        "id": "FA-v2",
+        "backend": "PEFT_LORA",
+        "rank": 16,
+        "alpha": "PIN_BEFORE_EXECUTION",
+        "dropout": 0,
+        "targets": "BROADER_LINEAR_TARGETS",
+        "exact_target_module_names": "MUST_BE_INSPECTED_FROM_CANONICAL_MODEL_AND_PINNED_BEFORE_TRAINING",
+        "entry_condition": "FA-v1_FAILS_SYNTHETIC_HIDDEN_COMPETENCE"
+      }
+    ],
+    "maximum_escalations_after_FA_v0": 2,
+    "beyond_FA_v2": "NEW_ARCHITECTURE_OR_RESEARCH_DECISION_REQUIRED",
+    "initially_forbidden": ["DoRA", "rsLoRA", "LoftQ", "FULL_FINE_TUNING"]
+  },
+  "qlora_feasibility_smoke": {
+    "status": "PASS_LOCAL",
+    "execution_manifest": "specs/experiments/F0-FA-v0-qlora-smoke.yaml",
+    "base": "allenai/OLMo-2-0425-1B-Instruct",
+    "temporary_training_quantization": "4_BIT_NF4",
+    "double_quantization": true,
+    "compute_dtype": "FP16",
+    "microbatch": 1,
+    "sequence_length": 256,
+    "gradient_checkpointing": true,
+    "gradient_accumulation": "8_TO_16_PIN_BEFORE_EXECUTION",
+    "adapter": "FA-v0",
+    "full_fine_tuning": false,
+    "bounded_steps": ["ONE_FORWARD", "ONE_BACKWARD", "TEN_OPTIMIZER_STEPS"],
+    "record": [
+      "VRAM",
+      "RAM",
+      "STEP_TIME",
+      "OOM",
+      "CUDA_OR_BACKEND_ERRORS",
+      "LOSS_FINITE_OR_NONFINITE"
+    ],
+    "local_failure_policy": "PRESERVE_SCIENTIFIC_OBJECTIVE_AND_ALLOW_LATER_REMOTE_GPU_TRAINING",
+    "inference_location_if_remote_training": "LOCAL_REMAINS_ALLOWED"
+  },
+  "loss_policy": {
+    "mode": "COMPLETION_OR_ASSISTANT_ONLY_WHERE_BACKEND_PERMITS",
+    "input_context_loss": "MASKED",
+    "ground_truth_loss": "ACTIVE",
+    "chain_of_thought_targets": false,
+    "answer_forms": [
+      "OPAQUE_HANDLE",
+      "INTEGER",
+      "DIRECTION_LABEL",
+      "BOOLEAN",
+      "CANONICAL_STRUCTURED_SERIALIZATION"
+    ]
+  },
+  "synthetic_hidden_admission": {
+    "must_precede_C0_v2": true,
+    "overall_exact_match_minimum": 0.99,
+    "critical_relational_family_minimum_each": 0.98,
+    "malformed_structured_output_maximum": 0,
+    "reported_families": [
+      "PEER_GROUNDING",
+      "MESSAGE_DIRECTION",
+      "PROPOSAL_OWNERSHIP",
+      "PROPOSAL_DIRECTION",
+      "PROPOSAL_TARGET",
+      "OPAQUE_HANDLE_GROUNDING",
+      "MOTOR_SERIALIZATION"
+    ],
+    "selection_inputs_allowed": [
+      "DEV",
+      "STRUCTURAL_HOLDOUT",
+      "TEMPLATE_HOLDOUT",
+      "DOUBLE_HOLDOUT"
+    ],
+    "selection_inputs_forbidden": ["FOUNDER_C0_V2", "C20"]
+  },
+  "neutrality_audit": {
+    "historical_suite": "specs/experiments/F0-neutrality-suite-v1.yaml",
+    "historical_raw_baseline": "specs/experiments/F0-raw-baselines-v1.yaml",
+    "policy_comparison_suite": "specs/experiments/F0-neutrality-suite-v2.yaml",
+    "policy_comparison_raw_baseline": "specs/experiments/F0-raw-neutrality-baseline-v2.yaml",
+    "IDENTITY_PERMUTATION": "renamed peer handles must produce equivariantly renamed grounding output",
+    "ORDER_PERMUTATION": "record order must not alter semantic answers",
+    "ROLE_REVERSAL": "swapping incoming and outgoing roles must reverse the grounded answer",
+    "HANDLE_BIAS": ["P0", "R0", "FIRST_ITEM", "LOWEST_NUMBERED_HANDLE"],
+    "FREE_ACTION_DISTRIBUTION": {
+      "actions": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+      "comparison": "RAW_OLMO_VS_FOUNDATION_OLMO",
+      "role": "OBSERVER_DIAGNOSTIC_ONLY",
+      "required_interaction_rate": null,
+      "distribution_identity_required": false,
+      "report": ["EFFECT_SIZES", "UNCERTAINTY"],
+      "goal": "large grounding improvement without strong systematic evidence of newly injected social or action preference"
+    },
+    "interpretation_predeclared": {
+      "identical_RAW_and_Foundation_action_distributions_required": false,
+      "target_interaction_rate": null,
+      "social_action_reward": false,
+      "review_for": [
+        "NEW_SYSTEMATIC_ACTION_CLASS_BIAS",
+        "LARGE_DIRECTIONAL_PREFERENCE_REPLICATED_ACROSS_NEUTRAL_STRATA",
+        "HANDLE_OR_POSITION_BIAS_AMPLIFICATION",
+        "LOSS_OF_IDENTITY_PERMUTATION_EQUIVARIANCE",
+        "LOSS_OF_ROLE_REVERSAL_SENSITIVITY",
+        "ACTION_ORDER_DEPENDENCE"
+      ],
+      "grounding_improvement_is_policy_bias": false,
+      "motor_validity_improvement_is_policy_bias": false
+    }
+  },
+  "retention_sentinel": {
+    "status": "FROZEN",
+    "spec": "specs/experiments/F0-retention-sentinel.yaml",
+    "sentinel_id": "F0_NEUTRAL_RETENTION_SENTINEL_V1",
+    "sentinel_sha256": "7b321d2676f6137aa8c46aa1dd94e819fa3fce37495a579481f0fcc8ef370ef0",
+    "size_minimum": 50,
+    "size_maximum": 100,
+    "social_policy_content": false,
+    "families": [
+      "BASIC_INSTRUCTION_FOLLOWING",
+      "SIMPLE_FACTUAL_EXTRACTION",
+      "SIMPLE_ARITHMETIC",
+      "BASIC_TEXT_TRANSFORMATION",
+      "GENERIC_JSON_FORMATTING"
+    ],
+    "comparison": "RAW_VS_FOUNDATION",
+    "raw_baseline": "RAW_RETENTION_BASELINE_V1",
+    "noninferiority": "specs/experiments/F0-retention-noninferiority-v1.yaml",
+    "large_unexpected_degradation": "ADMISSION_FAILURE_OR_REVIEW",
+    "public_leaderboard_optimization": false
+  },
+  "interaction_friction": {
+    "may_reduce_by": [
+      "addressable peer handles",
+      "concise ContextPack",
+      "easy valid-action serialization",
+      "timely next-tick feedback",
+      "equal action opportunity"
+    ],
+    "must_not_increase_by": [
+      "interaction rewards",
+      "mandatory replies",
+      "conversation quotas",
+      "reproduction bonuses",
+      "loneliness penalties",
+      "social score",
+      "survival score",
+      "relationship score",
+      "forced encounters",
+      "preferred-partner hints"
+    ],
+    "interaction_rate": "OUTCOME_VARIABLE_NOT_ADMISSION_METRIC",
+    "low_interaction_or_extinction": "SCIENTIFICALLY_VALID_RESULT"
+  },
+  "evaluation_layer_firewall": {
+    "GROUNDING": "Can the model understand visible state?",
+    "POLICY": "Which state-valid action class does it autonomously choose?",
+    "MOTOR": "Can an already-selected action be serialized correctly?",
+    "foundation_supervision_allowed": ["GROUNDING", "MOTOR"],
+    "foundation_supervision_forbidden": ["POLICY"],
+    "neutrality_role": "detect unintended POLICY change"
+  },
+  "training_authorization_gate": {
+    "gate_id": "F0-TRAINING-GATE-001",
+    "required_before_any_executable_smoke_or_training": [
+      "FOUNDER_C0_V2_FROZEN_AND_DIGEST_VERIFIED",
+      "C0_V2_AND_C20_RESERVED_FINGERPRINT_REGISTRY_DIGEST_VERIFIED",
+      "GENERATOR_VALIDATOR_SPLIT_AND_POLICY_FIREWALL_TESTS_PASS",
+      "RETENTION_SENTINEL_DIGEST_VERIFIED",
+      "CANONICAL_BASE_REVISION_PINNED",
+      "EXACT_OLMO_TARGET_MODULE_NAMES_INSPECTED_AND_PINNED",
+      "FA_v0_AND_QLORA_EXECUTION_MANIFEST_FROZEN",
+      "TRAINING_RUN_SEED_AND_SPLIT_ARTIFACT_DIGESTS_PINNED"
+    ],
+    "first_authorized_execution": "BOUNDED_QLORA_FEASIBILITY_SMOKE",
+    "full_FA_v0_training_requires": [
+      "F0-TRAINING-GATE-001_PASS",
+      "QLORA_SMOKE_NO_OOM_OR_BACKEND_ERROR",
+      "QLORA_SMOKE_FINITE_LOSS",
+      "F0_DATASET_V1_FROZEN_AND_VALIDATED",
+      "F0_DATASET_V1_RESERVED_AND_CROSS_SPLIT_COLLISIONS_ZERO",
+      "F0_RAW_HIDDEN_BASELINE_V1_FROZEN",
+      "RAW_RETENTION_BASELINE_V1_FROZEN",
+      "F0_RAW_NEUTRALITY_BASELINE_V1_FROZEN",
+      "F0_NEUTRALITY_SUITE_V2_FROZEN",
+      "F0_RAW_NEUTRALITY_BASELINE_V2_FROZEN",
+      "RETENTION_NONINFERIORITY_V1_FROZEN_PRE_TRAINING"
+    ],
+    "current_status": "PASS_FINAL_PRE_TRAINING_PATCH_COMPLETE_FA_V0_TRAINING_AUTHORIZED"
+  },
+  "future_success_path": [
+    "SYNTHETIC_HIDDEN_ADMISSION",
+    "NEUTRALITY_AUDIT",
+    "RETENTION_SENTINEL",
+    "FOUNDER_C0_V2_ONE_SHOT",
+    "C20",
+    "MOTOR",
+    "AUTONOMOUS",
+    "FOUNDER_FREEZE",
+    "M2",
+    "HEADLESS_EXP_000_BASELINE"
+  ],
+  "N0_branch": "SEPARATE_AFTER_FOUNDER_FREEZE_AND_NOT_A_PREREQUISITE_FOR_M2",
+  "future_neural_substrate": {
+    "definition": "OfficialBase + FrozenFoundationAdaptation",
+    "agent_neural_state": "W_substrate + delta_W_genome",
+    "generation_zero_delta_W_genome": 0,
+    "founder_effective_state_identical": true,
+    "foundation_heritable": false,
+    "foundation_mutable": false,
+    "foundation_recombined": false,
+    "genome_separate": true,
+    "genome_evolvable_under_future_ARC_350_N0": true,
+    "conceptual_only": true,
+    "ARC_350_implementation_modified": false
+  },
+  "test_spec_ids": [
+    "F0-GENERATOR-001",
+    "F0-GENERATOR-002",
+    "F0-UNIQUE-ANSWER-001",
+    "F0-VISIBILITY-001",
+    "F0-POLICY-FIREWALL-001",
+    "F0-POLICY-FIREWALL-002",
+    "F0-CONTAMINATION-001",
+    "F0-FINGERPRINT-001",
+    "F0-FINGERPRINT-002",
+    "F0-FINGERPRINT-003",
+    "F0-SPLIT-001",
+    "F0-SPLIT-002",
+    "F0-SPLIT-003",
+    "F0-DATASET-001",
+    "F0-BASELINE-001",
+    "F0-NEUTRALITY-001",
+    "F0-NEUTRALITY-002",
+    "F0-NEUTRALITY-V1-001",
+    "F0-NEUTRALITY-V2-001",
+    "F0-NEUTRALITY-V2-002",
+    "F0-NEUTRALITY-V2-003",
+    "F0-NEUTRALITY-V2-004",
+    "F0-RAW-NEUTRALITY-V2-001",
+    "F0-RETENTION-001",
+    "F0-RETENTION-002",
+    "F0-DATASET-IMMUTABILITY-001",
+    "F0-TRAINING-CONFIG-001",
+    "F0-TRAINING-CONFIG-002"
+  ]
+}
