@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Run the preregistered A0 autonomous-interface admission on the exact FA-v1.
 
-The study is a researcher-side dry run.  It loads the accepted BF16 base plus
+The study is a researcher-side dry run. It loads the accepted BF16 base plus
 FA-v1 once, compiles a fixed cohort of real WORLD ContextPacks, and compares
-I0/I1/I2/I3 on the exact same contexts.  It never commits simulation state and
+I0/I1/I2/I3 on the exact same contexts. It never commits simulation state and
 never uses action-frequency targets as an admission criterion.
 """
 
@@ -31,7 +31,6 @@ from alifelm.model import (  # noqa: E402
     ModelProfile,
     PeftTransformersLoader,
     RealCognitionDryRunner,
-    R3ContextClass,
     WORLD_V0_FA_V1_IDENTITY,
     action_codec_json_schema,
     build_transformers_constraint,
@@ -77,7 +76,9 @@ A0_GENERATION_SEED_ID = "A0_GREEDY_SEED_V1"
 A0_GENERATION_SEED = 35020260831
 A0_PROFILE_ID = "A0_WORLD_V0_FA_V1_BF16"
 A0_MAX_NEW_TOKENS = 128
-A0_DISCOVERY_SMOKE_MANIFEST = "717bdd81c388c47beb7d5e2777867762b7cd223e61a50f7195840c72315ccf89"
+A0_DISCOVERY_SMOKE_MANIFEST = (
+    "717bdd81c388c47beb7d5e2777867762b7cd223e61a50f7195840c72315ccf89"
+)
 A0_DISCOVERY_SMOKE_OBSERVATION = "6/6 first-token EOS under I0"
 
 
@@ -124,7 +125,9 @@ def _model_profile(base_model_dir: Path) -> ModelProfile:
         generation_policy_id=A0_GENERATION_POLICY_ID,
         device="cuda:0",
         dtype="bfloat16",
-        adapter_ref=ArtifactRef(ArtifactId("F0_FA_V1_FORMAL"), identity.adapter_sha256),
+        adapter_ref=ArtifactRef(
+            ArtifactId("F0_FA_V1_FORMAL"), identity.adapter_sha256
+        ),
         trust_remote_code=False,
         add_special_tokens=True,
     )
@@ -159,7 +162,9 @@ def _planned_manifest(*, paths: DeploymentPaths, git_commit: str) -> dict[str, A
             "contexts_reused_across_treatments": True,
         },
         "treatments": list(A0_TREATMENT_ORDER),
-        "promotion_rule": "FIRST_MINIMAL_TREATMENT_PASSING_MOTOR_AND_AUTONOMOUS_GATES",
+        "promotion_rule": (
+            "FIRST_MINIMAL_TREATMENT_PASSING_MOTOR_AND_AUTONOMOUS_GATES"
+        ),
         "i3_branch_audit": {
             "conditional": True,
             "orders": [list(order) for order in I3_BRANCH_ORDERS],
@@ -201,9 +206,11 @@ def _planned_manifest(*, paths: DeploymentPaths, git_commit: str) -> dict[str, A
     }
 
 
-def _static_preflight(paths: DeploymentPaths, expected_git_commit: str) -> dict[str, Any]:
+def _static_preflight(
+    paths: DeploymentPaths, expected_git_commit: str
+) -> dict[str, Any]:
     # Reuse the accepted artifact/tokenizer verifier without colliding with the
-    # A0 manifest namespace.  The sentinel path is never written by preflight.
+    # A0 manifest namespace. The sentinel path is never written by preflight.
     sentinel = DeploymentPaths(
         base_model_dir=paths.base_model_dir,
         adapter_path=paths.adapter_path,
@@ -241,7 +248,7 @@ def _constraint(runtime, treatment_name: str, *, branch_order=None):
         return None
     if treatment_name == "I2":
         schema = action_codec_json_schema()
-    elif treatment_name == "I3":
+    elif treatment_name == "I3" or treatment_name.startswith("I3_ORDER_"):
         schema = typed_action_codec_json_schema(action_order=branch_order)
     else:
         raise ValueError(treatment_name)
@@ -265,6 +272,10 @@ def _evidence_complete(store, result, rendered_expected: bytes) -> bool:
         and resolved[1] == rendered_expected
         and resolved[2] == result.raw_generation.raw_text.encode("utf-8")
     )
+
+
+def _artifact_ref(digest: str) -> ArtifactRef:
+    return ArtifactRef(ArtifactId(f"artifact-{digest}"), digest)
 
 
 def _run_treatment(
@@ -349,32 +360,14 @@ def _run_treatment(
             }
         )
 
-    # Repeat one exact request after the cohort.  This is not a retry and does
+    # Repeat one exact request after the cohort. This is not a retry and does
     # not replace the primary observation.
     first_compiled = cohort[0][2]
     first_primary_ref = details[0]["raw_generation_ref"]
     repeat = runner.run(first_compiled)
-    first_primary_bytes = store.resolve(
-        next(
-            ref
-            for ref in (
-                repeat.evidence.raw_generation_ref,
-                # The primary ref is reconstructed below only for comparison;
-                # CAS references are digest-addressed and immutable.
-            )
-            if ref.digest == repeat.evidence.raw_generation_ref.digest
-        )
+    primary_raw = json.loads(
+        store.resolve(_artifact_ref(first_primary_ref)).decode("utf-8")
     )
-    del first_primary_bytes  # byte equality follows from the raw result fields below
-    primary_raw_bytes = store.resolve(
-        type(repeat.evidence.raw_generation_ref)(
-            type(repeat.evidence.raw_generation_ref.artifact_id)(
-                f"artifact-{first_primary_ref}"
-            ),
-            first_primary_ref,
-        )
-    )
-    primary_raw = json.loads(primary_raw_bytes.decode("utf-8"))
     exact_repeat_equal = (
         primary_raw.get("raw_text") == repeat.raw_generation.raw_text
         and tuple(primary_raw.get("token_ids") or ())
@@ -392,7 +385,11 @@ def _run_treatment(
         infrastructure_failures=0,
         exact_repeat_equal=exact_repeat_equal,
         context_class_domain_valid=tuple(
-            (context_class.value, class_valid[context_class.value], class_total[context_class.value])
+            (
+                context_class.value,
+                class_valid[context_class.value],
+                class_total[context_class.value],
+            )
             for context_class in A0_CONTEXT_CLASSES
         ),
     )
@@ -420,7 +417,9 @@ def _run_treatment(
     return metrics, detail_ref, tuple(candidate_labels), detail_payload
 
 
-def _final_manifest(planned: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
+def _final_manifest(
+    planned: dict[str, Any], result: dict[str, Any]
+) -> dict[str, Any]:
     final = dict(planned)
     final["status"] = "COMPLETE"
     final["result"] = result
@@ -469,8 +468,16 @@ def main() -> int:
         return 0
 
     if existing == "ALREADY_COMPLETE":
-        manifest = json.loads((paths.output_root / "manifest.json").read_text())
-        print(json.dumps({"status": "ALREADY_COMPLETE", "manifest": manifest}, sort_keys=True))
+        manifest = json.loads(
+            (paths.output_root / "manifest.json").read_text(encoding="utf-8")
+        )
+        print(
+            json.dumps(
+                {"status": "ALREADY_COMPLETE", "manifest": manifest},
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+        )
         return 0
 
     environment = ensure_execute_environment()
@@ -540,11 +547,17 @@ def main() -> int:
                     "metrics": metrics.as_dict(),
                     "evaluation": evaluate_treatment(metrics),
                     "detail_ref": detail_ref.digest,
-                    "candidate_distribution": detail_payload["candidate_distribution"],
-                    "action_distribution": detail_payload["action_distribution"],
+                    "candidate_distribution": detail_payload[
+                        "candidate_distribution"
+                    ],
+                    "action_distribution": detail_payload[
+                        "action_distribution"
+                    ],
                 }
             )
-        branch_audit = evaluate_i3_branch_order_audit(order_metrics, order_labels)
+        branch_audit = evaluate_i3_branch_order_audit(
+            order_metrics, order_labels
+        )
         branch_audit["orders"] = order_results
         if not branch_audit["pass"]:
             final_selected = None
@@ -558,7 +571,9 @@ def main() -> int:
         None,
     )
     result = {
-        "status": "ADMISSION_PASS" if final_selected is not None else "ADMISSION_FAIL",
+        "status": (
+            "ADMISSION_PASS" if final_selected is not None else "ADMISSION_FAIL"
+        ),
         "environment": environment,
         "preflight": preflight,
         "attempts_per_treatment": A0_ATTEMPTS_PER_TREATMENT,
