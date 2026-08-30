@@ -17,6 +17,9 @@ Each active document owns one bounded question. Do not duplicate its detailed ru
 | ARC-270 | `views/ARC-270-durable-commit-replay-boundary.md` | REVIEWED | durable commit, evidence, outbox, snapshot, replay boundary |
 | ARC-300 | `views/ARC-300-agent-context-fabric.md` | REVIEWED | exact EXP-000 agent-visible ContextPack semantics and hidden information |
 | ARC-350 | `views/ARC-350-neural-heredity.md` | REVIEWED | model-independent neural genotype, inheritance law, genetic/cultural firewall, and N0 backend boundary |
+| ARC-600 | `views/ARC-600-observatory-isolation-read-model.md` | DRAFT / O0 | read-only Observatory authority boundary and committed read model |
+| SEQ-610 | `views/SEQ-610-live-replay-observation.md` | DRAFT / O0 | post-commit live delivery, reconnect, and replay observation sequence |
+| ARC-620 | `views/ARC-620-observatory-research-views.md` | DRAFT / O0 | researcher-facing world/agent/lineage/timeline/evidence view semantics |
 | LC-210 | `views/LC-210-agent-lifecycle.md` | REVIEWED | birth activation, maturity, refractory, natural death |
 | LC-220 | `views/LC-220-reproduction-proposal-lifecycle.md` | REVIEWED | proposal/accept/reject/conflict resolution |
 | SEQ-230 | `views/SEQ-230-one-simulation-tick.md` | REVIEWED | deterministic `S_t → S_(t+1)` causal ordering |
@@ -31,7 +34,8 @@ Each active document owns one bounded question. Do not duplicate its detailed ru
 | Document | Owns |
 |---|---|
 | `../docs/DOCS_POLICY.md` | repository documentation/context loading |
-| `../docs/observatory/SPRITES.md` | non-causal sprite identity and visual inheritance modes |
+| `../docs/observatory/SPRITES.md` | non-causal sprite identity, uniqueness, and visual inheritance modes |
+| `../docs/observatory/DESIGN_SYSTEM.md` | Observatory visual language, collapsible panel shell, UI styling |
 | `decisions/ADR-300-001-self-send-addressing.md` | EXP-000 SEND target law and self-addressing prohibition |
 
 ## Planned — create only when implementation reaches the gate
@@ -44,7 +48,6 @@ Do **not** author these just to make the document count complete.
 | ARC-400 / WF-410 / SEQ-420 | before controlled interventions/confirmation tooling | experiment control and confirmation workflow |
 | ARC-430 | before causal physical space | causal 2D environment |
 | ARC-500 / WF-520 | before performance scaling backend | compute admission/batching without causal drift |
-| ARC-600 / SEQ-610 / ARC-620 | before Observatory implementation | read-only UI/subscription/research views |
 
 ## Retrieval rule
 
