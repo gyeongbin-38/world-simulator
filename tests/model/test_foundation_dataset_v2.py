@@ -11,22 +11,26 @@ from alifelm.model.foundation_data_v2 import (
     build_sensor_invariant_records,
     build_v2_split,
     derive_v2_seed,
+    family_counts,
     generate_relational_pair,
+    relational_curriculum_coverage,
     screening_subset,
     validate_v2_split_isolation,
 )
 
 
-def test_v2_neural_split_excludes_sensor_owned_peer_count() -> None:
-    records = build_v2_split("TRAIN", 48)
+def test_v2_neural_split_excludes_sensor_owned_peer_count_and_balances_families() -> None:
+    records = build_v2_split("TRAIN", 256)
     assert records
     assert all(
         record.semantic_family != SemanticFamily.VISIBLE_PEER_COUNT.value
         for record in records
     )
+    counts = family_counts(records)
+    assert max(counts.values()) - min(counts.values()) <= 1
 
 
-def test_message_minimal_pair_changes_target_direction_and_keeps_pair_metadata() -> None:
+def test_message_minimal_pair_changes_only_target_message_relation() -> None:
     seed = derive_v2_seed("TRAIN", 91)
     siblings = generate_relational_pair(
         split="TRAIN",
@@ -82,8 +86,23 @@ def test_proposal_counterfactual_has_factual_and_counterfactual_sibling() -> Non
     assert siblings[0].example.answer != siblings[1].example.answer
 
 
+def test_direction_families_receive_all_six_curriculum_profiles() -> None:
+    records = build_v2_split("TRAIN", 512)
+    coverage = relational_curriculum_coverage(records)
+    expected = {
+        "ADVERSARIAL",
+        "COUNTERFACTUAL",
+        "EASY",
+        "HARD",
+        "MEDIUM",
+        "MINIMAL_PAIR",
+    }
+    assert set(coverage[SemanticFamily.MESSAGE_DIRECTION.value]) == expected
+    assert set(coverage[SemanticFamily.PROPOSAL_DIRECTION.value]) == expected
+
+
 def test_split_isolation_rejects_pair_sibling_crossing_boundary() -> None:
-    train = build_v2_split("TRAIN", 20)
+    train = build_v2_split("TRAIN", 256)
     paired = next(record for record in train if record.pair_group_id is not None)
     leaked = replace(
         paired,
@@ -95,14 +114,15 @@ def test_split_isolation_rejects_pair_sibling_crossing_boundary() -> None:
 
 
 def test_screening_subset_preserves_complete_pair_groups() -> None:
-    records = build_v2_split("TRAIN", 64)
-    selected = screening_subset(records, split="TRAIN", size=24)
-    assert len(selected) == 24
+    records = build_v2_split("TRAIN", 512)
+    selected = screening_subset(records, split="TRAIN", size=128)
+    assert len(selected) == 128
     selected_groups = {
         record.pair_group_id
         for record in selected
         if record.pair_group_id is not None
     }
+    assert selected_groups
     for group_id in selected_groups:
         assert sum(record.pair_group_id == group_id for record in selected) == 2
 
@@ -116,6 +136,7 @@ def test_sensor_invariants_remain_outside_neural_training() -> None:
     )
     assert all(
         record["role"] == "DETERMINISTIC_SENSOR_INVARIANT_ONLY"
+        and record["gradient_target"] is False
         for record in records
     )
     for record in records:
