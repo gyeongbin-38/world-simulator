@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -22,6 +23,8 @@ from alifelm.model.world_v0_smoke import (
     verify_static_deployment,
 )
 
+RECOVERED_LOCAL_BASE = "/workspace/alifelm/models/OLMo-2-0425-1B-Instruct"
+
 
 def test_recovered_tokenizer_hash_map_and_aggregate_are_frozen():
     assert TOKENIZER_FILE_HASHES == {
@@ -37,7 +40,11 @@ def test_recovered_tokenizer_hash_map_and_aggregate_are_frozen():
     assert canonical_digest(MODEL_CONFIG_FILE_HASHES) == MODEL_CONFIG_AGGREGATE_SHA256
 
 
-def _write_deployment(tmp_path: Path) -> tuple[DeploymentPaths, DeploymentExpectations]:
+def _write_deployment(
+    tmp_path: Path,
+    *,
+    base_model_name_or_path: str = RECOVERED_LOCAL_BASE,
+) -> tuple[DeploymentPaths, DeploymentExpectations]:
     base = tmp_path / "base"
     adapter = tmp_path / "adapter"
     output = tmp_path / "evidence"
@@ -47,7 +54,7 @@ def _write_deployment(tmp_path: Path) -> tuple[DeploymentPaths, DeploymentExpect
     (adapter / "adapter_model.safetensors").write_bytes(b"adapter")
     adapter_config = {
         "peft_type": "LORA",
-        "base_model_name_or_path": "allenai/OLMo-2-0425-1B-Instruct",
+        "base_model_name_or_path": base_model_name_or_path,
         "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
     }
     (adapter / "adapter_config.json").write_text(
@@ -110,6 +117,34 @@ def test_validate_static_deployment_never_loads_model(tmp_path, monkeypatch):
     assert calls == []
 
 
+def test_recovered_local_base_path_is_metadata_only(tmp_path):
+    paths, expectations = _write_deployment(tmp_path)
+    result = verify_static_deployment(
+        paths,
+        expectations=expectations,
+        expected_git_commit="abc",
+    )
+    assert result["adapter_base_model_name_or_path"] == RECOVERED_LOCAL_BASE
+
+
+def test_accepted_hub_base_identifier_passes(tmp_path):
+    paths, expectations = _write_deployment(
+        tmp_path,
+        base_model_name_or_path="allenai/OLMo-2-0425-1B-Instruct",
+    )
+    result = verify_static_deployment(paths, expectations=expectations, expected_git_commit="abc")
+    assert result["adapter_base_model_name_or_path"] == "allenai/OLMo-2-0425-1B-Instruct"
+
+
+def test_unrelated_hub_base_identifier_fails_closed(tmp_path):
+    paths, expectations = _write_deployment(
+        tmp_path,
+        base_model_name_or_path="other-org/other-model",
+    )
+    with pytest.raises(SmokePreflightError, match="source identifier"):
+        verify_static_deployment(paths, expectations=expectations)
+
+
 def test_bad_static_hash_fails_before_any_loader(tmp_path):
     paths, expectations = _write_deployment(tmp_path)
     bad = DeploymentExpectations(
@@ -144,6 +179,19 @@ def test_static_identity_failures_happen_before_loader(tmp_path, field, message)
     bad = DeploymentExpectations(**values)
     with pytest.raises(SmokePreflightError, match=message):
         verify_static_deployment(paths, expectations=bad)
+
+
+def test_target_module_mismatch_still_fails_after_config_hash_update(tmp_path):
+    paths, expectations = _write_deployment(tmp_path)
+    config = json.loads(paths.adapter_config.read_text(encoding="utf-8"))
+    config["target_modules"] = ["q_proj", "k_proj", "v_proj", "gate_proj"]
+    paths.adapter_config.write_text(json.dumps(config, separators=(",", ":")), encoding="utf-8")
+    updated = replace(
+        expectations,
+        adapter_config_sha256=hashlib.sha256(paths.adapter_config.read_bytes()).hexdigest(),
+    )
+    with pytest.raises(SmokePreflightError, match="target modules"):
+        verify_static_deployment(paths, expectations=updated)
 
 
 def test_output_manifest_mismatch_refuses_overwrite(tmp_path):

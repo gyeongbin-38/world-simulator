@@ -97,7 +97,15 @@ def is_absolute_deployment_path(value: Path | str) -> bool:
     """Accept native absolute paths and Windows drive paths on any host."""
 
     text = str(value)
-    return Path(text).is_absolute() or PureWindowsPath(text).is_absolute()
+    # ``Path`` on Windows treats ``/workspace`` as drive-relative even though
+    # it is an absolute POSIX deployment path on the Linux A40 host.  Keep the
+    # cross-platform root check explicit so historical PEFT paths are metadata
+    # rather than mistaken hub identifiers.
+    return (
+        text.startswith("/")
+        or Path(text).is_absolute()
+        or PureWindowsPath(text).is_absolute()
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,6 +192,18 @@ def _aggregate_file_digest(hashes: Mapping[str, str]) -> str:
     return canonical_digest({name: hashes[name] for name in sorted(hashes)})
 
 
+def _validate_adapter_base_provenance(value: Any) -> str:
+    """Validate hub provenance without treating serialized local paths as source IDs."""
+
+    if not isinstance(value, str) or not value:
+        raise SmokePreflightError("adapter base model provenance is missing")
+    if is_absolute_deployment_path(value):
+        return value
+    if value != BASE_MODEL_REPO:
+        raise SmokePreflightError("adapter base model source identifier does not match accepted source")
+    return value
+
+
 def _verify_tokenizer_metadata(root: Path, expectations: DeploymentExpectations) -> dict[str, Any]:
     config = _read_json(root / "tokenizer_config.json")
     added = config.get("added_tokens_decoder")
@@ -235,9 +255,7 @@ def verify_static_deployment(
     adapter_config = _read_json(paths.adapter_config)
     if adapter_config.get("peft_type") != "LORA":
         raise SmokePreflightError("accepted adapter must be PEFT LoRA")
-    base_name = adapter_config.get("base_model_name_or_path")
-    if not isinstance(base_name, str) or BASE_MODEL_REPO not in base_name:
-        raise SmokePreflightError("adapter base model provenance does not match accepted source")
+    base_name = _validate_adapter_base_provenance(adapter_config.get("base_model_name_or_path"))
     targets = adapter_config.get("target_modules")
     if set(targets or ()) != set(EXPECTED_TARGET_MODULES) or set(targets or ()) & set(FORBIDDEN_TARGET_MODULES):
         raise SmokePreflightError("adapter target modules do not match accepted FA-v1")
@@ -288,6 +306,7 @@ def verify_static_deployment(
         "base_checkpoint_sha256": base_hash,
         "adapter_sha256": adapter_hash,
         "adapter_config_sha256": config_hash,
+        "adapter_base_model_name_or_path": base_name,
         "tokenizer_revision": TOKENIZER_REVISION,
         "tokenizer_digest": tokenizer_digest,
         "tokenizer_file_hashes": tokenizer_hashes,
