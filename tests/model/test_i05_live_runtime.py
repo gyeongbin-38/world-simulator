@@ -30,6 +30,7 @@ from alifelm.persistence import FileSystemArtifactStore
 BASE_DIGEST = "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f"
 ADAPTER_DIGEST = "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec"
 BASE_REVISION = "48d788eca847d4d7548f375ad03d3c9312f6139e"
+TOKENIZER_DIGEST = "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff"
 
 
 def _profile() -> ModelProfile:
@@ -41,7 +42,7 @@ def _profile() -> ModelProfile:
         model_digest=BASE_DIGEST,
         tokenizer_identifier="local/olmo-tokenizer",
         tokenizer_revision=BASE_REVISION,
-        tokenizer_digest="a" * 64,
+        tokenizer_digest=TOKENIZER_DIGEST,
         model_class="AUTO_CAUSAL_LM",
         generation_policy_id="world-v0-greedy",
         device="cpu",
@@ -72,6 +73,8 @@ def _identity() -> LiveRuntimeIdentity:
         base_model_repo="allenai/OLMo-2-0425-1B-Instruct",
         base_model_revision=BASE_REVISION,
         base_checkpoint_sha256=BASE_DIGEST,
+        tokenizer_revision=BASE_REVISION,
+        tokenizer_digest=TOKENIZER_DIGEST,
         adapter_sha256=ADAPTER_DIGEST,
     )
 
@@ -269,6 +272,8 @@ def test_live_runtime_rejects_wrong_startup_adapter_digest(tmp_path: Path) -> No
         wrong.base_model_repo,
         wrong.base_model_revision,
         wrong.base_checkpoint_sha256,
+        wrong.tokenizer_revision,
+        wrong.tokenizer_digest,
         "b" * 64,
     )
     with pytest.raises(Exception, match="adapter digest"):
@@ -281,6 +286,104 @@ def test_live_runtime_rejects_wrong_startup_adapter_digest(tmp_path: Path) -> No
         )
 
 
+def test_live_runtime_rejects_wrong_startup_tokenizer_digest(tmp_path: Path) -> None:
+    profile = _profile()
+    identity = _identity()
+    wrong = LiveRuntimeIdentity(
+        identity.base_model_repo,
+        identity.base_model_revision,
+        identity.base_checkpoint_sha256,
+        identity.tokenizer_revision,
+        "c" * 64,
+        identity.adapter_sha256,
+    )
+    with pytest.raises(Exception, match="tokenizer digest"):
+        LiveCandidateRuntime(
+            ScriptedBackend(profile, {}),
+            profile=profile,
+            generation_policy=_policy(),
+            artifact_store=FileSystemArtifactStore(tmp_path / "cas-tokenizer"),
+            identity=wrong,
+        )
+
+
+def test_live_runtime_rejects_wrong_startup_tokenizer_revision(tmp_path: Path) -> None:
+    profile = _profile()
+    identity = _identity()
+    wrong = LiveRuntimeIdentity(
+        identity.base_model_repo,
+        identity.base_model_revision,
+        identity.base_checkpoint_sha256,
+        "revision-other",
+        identity.tokenizer_digest,
+        identity.adapter_sha256,
+    )
+    with pytest.raises(Exception, match="tokenizer revision"):
+        LiveCandidateRuntime(
+            ScriptedBackend(profile, {}),
+            profile=profile,
+            generation_policy=_policy(),
+            artifact_store=FileSystemArtifactStore(tmp_path / "cas-tokenizer-revision"),
+            identity=wrong,
+        )
+
+
+def test_live_runtime_accepts_local_paths_by_digest_not_path_name(tmp_path: Path) -> None:
+    profile = _profile()
+    path_profile = ModelProfile(
+        profile_id=profile.profile_id,
+        profile_version=profile.profile_version,
+        model_identifier=str(tmp_path / "resolved-base"),
+        model_revision=profile.model_revision,
+        model_digest=profile.model_digest,
+        tokenizer_identifier=str(tmp_path / "resolved-tokenizer"),
+        tokenizer_revision=profile.tokenizer_revision,
+        tokenizer_digest=profile.tokenizer_digest,
+        model_class=profile.model_class,
+        generation_policy_id=profile.generation_policy_id,
+        device=profile.device,
+        dtype=profile.dtype,
+        adapter_ref=profile.adapter_ref,
+        trust_remote_code=profile.trust_remote_code,
+        add_special_tokens=profile.add_special_tokens,
+    )
+    runtime = ScriptedBackend(path_profile, {})
+    LiveCandidateRuntime(
+        runtime,
+        profile=path_profile,
+        generation_policy=_policy(),
+        artifact_store=FileSystemArtifactStore(tmp_path / "cas-local"),
+        identity=_identity(),
+    )
+
+
+def test_live_runtime_rejects_hub_source_identifier_mismatch(tmp_path: Path) -> None:
+    profile = _profile()
+    source_profile = ModelProfile(
+        profile_id=profile.profile_id,
+        profile_version=profile.profile_version,
+        model_identifier="other-org/model",
+        model_revision=profile.model_revision,
+        model_digest=profile.model_digest,
+        tokenizer_identifier=profile.tokenizer_identifier,
+        tokenizer_revision=profile.tokenizer_revision,
+        tokenizer_digest=profile.tokenizer_digest,
+        model_class=profile.model_class,
+        generation_policy_id=profile.generation_policy_id,
+        device=profile.device,
+        dtype=profile.dtype,
+        adapter_ref=profile.adapter_ref,
+        trust_remote_code=profile.trust_remote_code,
+        add_special_tokens=profile.add_special_tokens,
+    )
+    with pytest.raises(Exception, match="source identifier"):
+        LiveCandidateRuntime(
+            ScriptedBackend(source_profile, {}),
+            profile=source_profile,
+            generation_policy=_policy(),
+            artifact_store=FileSystemArtifactStore(tmp_path / "cas-source"),
+            identity=_identity(),
+        )
 def test_raw_identity_mismatch_is_infrastructure_failure(tmp_path: Path) -> None:
     run = _run("identity-failure")
     store = FileSystemArtifactStore(tmp_path / "cas")

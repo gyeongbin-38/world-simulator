@@ -248,10 +248,11 @@ def generation_identity(
         "model_profile": {
             "profile_id": profile.profile_id,
             "profile_version": profile.profile_version,
-            "model_identifier": profile.model_identifier,
+            # Deployment paths are intentionally excluded.  Scientific model
+            # identity is bound by revisions/digests and the live runtime
+            # identity verifier; a path must not change causal request IDs.
             "model_revision": profile.model_revision,
             "model_digest": profile.model_digest,
-            "tokenizer_identifier": profile.tokenizer_identifier,
             "tokenizer_revision": profile.tokenizer_revision,
             "tokenizer_digest": profile.tokenizer_digest,
             "model_class": profile.model_class,

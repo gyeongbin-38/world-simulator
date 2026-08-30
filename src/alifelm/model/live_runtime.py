@@ -8,6 +8,7 @@ written through the existing evidence/CAS implementation.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path, PureWindowsPath
 from typing import Protocol
 
 from alifelm.context import CognitionAttempt, CompiledContext, ModelActionParser
@@ -31,13 +32,18 @@ class LiveRuntimeIdentity:
     base_model_repo: str
     base_model_revision: str
     base_checkpoint_sha256: str
+    tokenizer_revision: str
+    tokenizer_digest: str
     adapter_sha256: str
 
     def __post_init__(self) -> None:
         if not self.base_model_repo or not self.base_model_revision:
             raise ValueError("base model repository and revision are required")
+        if not self.tokenizer_revision:
+            raise ValueError("tokenizer revision is required")
         for value, name in (
             (self.base_checkpoint_sha256, "base_checkpoint_sha256"),
+            (self.tokenizer_digest, "tokenizer_digest"),
             (self.adapter_sha256, "adapter_sha256"),
         ):
             if len(value) != 64 or any(char not in "0123456789abcdef" for char in value):
@@ -48,6 +54,8 @@ WORLD_V0_FA_V1_IDENTITY = LiveRuntimeIdentity(
     base_model_repo="allenai/OLMo-2-0425-1B-Instruct",
     base_model_revision="48d788eca847d4d7548f375ad03d3c9312f6139e",
     base_checkpoint_sha256="36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    tokenizer_revision="48d788eca847d4d7548f375ad03d3c9312f6139e",
+    tokenizer_digest="c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
     adapter_sha256="46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
 )
 
@@ -68,10 +76,32 @@ def validate_live_runtime_identity(
         raise ModelLoadError("loaded base revision does not match live runtime identity")
     if profile.model_digest != identity.base_checkpoint_sha256:
         raise ModelLoadError("loaded base checkpoint digest does not match live runtime identity")
+    if profile.tokenizer_revision != identity.tokenizer_revision:
+        raise ModelLoadError("loaded tokenizer revision does not match live runtime identity")
+    if profile.tokenizer_digest != identity.tokenizer_digest:
+        raise ModelLoadError("loaded tokenizer digest does not match live runtime identity")
     if profile.adapter_ref is None:
         raise ModelLoadError("live runtime requires a bound adapter ArtifactRef")
     if profile.adapter_ref.digest != identity.adapter_sha256:
         raise ModelLoadError("loaded adapter digest does not match live runtime identity")
+    for identifier, label in (
+        (profile.model_identifier, "model"),
+        (profile.tokenizer_identifier, "tokenizer"),
+    ):
+        # A deployment path is infrastructure metadata and is admitted by
+        # verified content digests.  A hub-style identifier remains source
+        # identity and must name the accepted repository.  Synthetic test
+        # identifiers such as ``local/olmo`` are neither of these and are
+        # intentionally left to the injected-runtime contract.
+        explicit_path = (
+            Path(identifier).is_absolute()
+            or PureWindowsPath(identifier).is_absolute()
+            or identifier.startswith((".", "/", "\\"))
+            or Path(identifier).exists()
+        )
+        if not explicit_path and identifier.count("/") == 1 and not identifier.startswith("local/"):
+            if identifier != identity.base_model_repo:
+                raise ModelLoadError(f"{label} source identifier does not match live runtime identity")
 
 
 class LiveCandidateRuntime:

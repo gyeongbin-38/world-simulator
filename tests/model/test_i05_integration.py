@@ -375,6 +375,19 @@ def test_model_profile_change_changes_generation_identity(tmp_path) -> None:
     assert request_a.generation_id != request_b.generation_id
 
 
+def test_deployment_paths_do_not_change_generation_identity(tmp_path) -> None:
+    compiled_a, _, _ = _compiled(tmp_path / "path-a")
+    profile_a = _profile()
+    profile_b = replace(
+        profile_a,
+        model_identifier=str(tmp_path / "resolved-b" / "base"),
+        tokenizer_identifier=str(tmp_path / "resolved-b" / "tokenizer"),
+    )
+    request_a = generation_request_for(compiled_a, profile_a, _generation_policy())
+    request_b = generation_request_for(compiled_a, profile_b, _generation_policy())
+    assert request_a.generation_id == request_b.generation_id
+
+
 def test_tokenizer_profile_identity_is_recorded(tmp_path) -> None:
     compiled, store, _ = _compiled(tmp_path)
     result = RealCognitionDryRunner(

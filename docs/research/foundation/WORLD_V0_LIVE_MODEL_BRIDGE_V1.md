@@ -87,7 +87,7 @@ The current components already provide most of the required semantics:
 | Component | Boundary role | Admission constraint |
 |---|---|---|
 | `ContextCognitionPipeline` | P3 all-context barrier and P4 collection | retain one-snapshot compile barrier and actor-sorted intents |
-| `ContextModelRuntimeAdapter` | request construction and raw-result identity checks | add durable raw-evidence sink for live use |
+| `ContextModelRuntimeAdapter` | request construction and raw-result identity checks | shared with durable live evidence preparation |
 | `TransformersModelRuntime` | shared model generation backend | construct once; no per-agent loading |
 | `ModelActionParser` | strict syntax and field contract | rejection is not `WAIT` |
 | `CognitionGateway` | bind hidden actor/tick/intent identity | remains sole identity authority |
@@ -121,14 +121,23 @@ No shared mutable decoder state, cache bleed, or adapter switching may make
 the result depend on completion order. A malformed member must be recorded as
 rejected without changing the other members or turning into a default action.
 
+## Deployment admission tooling
+
+`tools/world_v0_a40_smoke.py` now provides explicit `--validate-only` and
+`--execute` modes. The static preflight checks deployment bytes, tokenizer
+semantics, accepted identities, repository commit, and immutable output
+manifest policy before the PEFT loader can import or move a model to CUDA.
+`PeftTransformersLoader` loads the tokenizer, BF16 base, and frozen FA-v1 once
+and returns the concrete `TransformersModelRuntime` used by the live bridge.
+Deployment paths remain infrastructure metadata; revisions and digests are
+the scientific identity.
+
 ## Remaining implementation gap list before GPU admission
 
 1. Run the exact accepted OLMo + FA-v1 configuration in a real headless A40
    smoke; no GPU run has been performed by this slice.
-2. Verify deployment-specific model/tokenizer/adapter file digests against the
-   run manifest before admission.
-3. Add single-request versus batch equivalence tests before enabling batching.
-4. Add a durable-store crash/resume test for the live evidence path.
+2. Add single-request versus batch equivalence tests before enabling batching.
+3. Add a durable-store crash/resume test for the live evidence path.
 
 ## Test plan before implementation admission
 

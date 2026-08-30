@@ -57,6 +57,7 @@ from .live_runtime import (
     validate_live_runtime_identity,
 )
 from .profile import ModelProfile
+from .peft_runtime import PeftTransformersLoader
 from .motor_diagnostics import (
     GROUNDING_TREATMENT_VERSION,
     SELECTOR_CODES,
@@ -80,6 +81,12 @@ from .motor_diagnostics import (
 )
 from .r3_fixtures import R3ContextClass, compile_r3_fixture
 from .transformers_backend import GenerationError, ModelLoadError, TransformersModelRuntime
+from .world_v0_smoke import (
+    DeploymentExpectations,
+    DeploymentPaths,
+    SmokePreflightError,
+    verify_static_deployment,
+)
 from .treatments import (
     I0_STRICT_FREE_GENERATION,
     I1_NEUTRAL_CODEC_SCAFFOLD,
@@ -130,6 +137,11 @@ __all__ = [
     "GenerationRequest",
     "ModelLoadError",
     "ModelProfile",
+    "PeftTransformersLoader",
+    "DeploymentExpectations",
+    "DeploymentPaths",
+    "SmokePreflightError",
+    "verify_static_deployment",
     "GROUNDING_TREATMENT_VERSION",
     "SELECTOR_CODES",
     "SELECTOR_GENERATED_OBJECT_PREFIX",
