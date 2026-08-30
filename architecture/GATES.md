@@ -49,11 +49,24 @@ Exit intent:
 
 ## O0 — Observatory
 
-Author before authoritative Observatory implementation.
+**Status: ARCHITECTURE DRAFT / IMPLEMENTATION NOT YET ADMITTED**
+
+Owners:
+- ARC-600 Observatory Isolation & Read Model;
+- SEQ-610 Live / Replay Observation Sequence;
+- ARC-620 Observatory Research Views;
+- `docs/observatory/SPRITES.md` for presentation-only sprite identity;
+- `docs/observatory/DESIGN_SYSTEM.md` for UI visual language.
 
 Exit intent:
 - UI can fail/disconnect without changing simulation;
-- rendering/layout remains non-causal unless an explicit physical experiment says otherwise.
+- only committed facts are represented as committed;
+- rendering/layout/display identity remains non-causal unless an explicit physical experiment says otherwise;
+- display names and sprite traits remain hidden from agents in EXP-000;
+- genealogy resolves exactly to canonical lineage facts;
+- headless experiment execution remains authoritative with no Observatory present.
+
+Implementation admission requires conformance tests for isolation, deterministic projection identity, display-name/sprite non-leakage, committed-only rendering, lineage fidelity, and headless equivalence.
 
 ## Founder admission and post-freeze branches
 
