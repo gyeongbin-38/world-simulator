@@ -1,0 +1,70 @@
+{
+  "record_schema_version": "1.0.0",
+  "record_id": "F0_HISTORICAL_FA_V1_RECOVERY_V1",
+  "status": "RECOVERED_FORMAL_PROVENANCE",
+  "scientific_role": "HISTORICAL_STAGE0_REEVALUATION_INPUT_ONLY",
+  "recovery_source": "PERSISTENT_A40_VOLUME",
+  "previous_recovery_scope": {
+    "roots": [
+      "E:/WORLD",
+      "E:/WORLD/AI_CACHE",
+      "E:/WORLD/AI_CACHE/evidence",
+      "E:/WORLD/AI_CACHE/artifacts",
+      "E:/WORLD/AI_MODELS",
+      "accessible local shell history"
+    ],
+    "result": "INCOMPLETE_RECOVERY_SCOPE"
+  },
+  "base": {
+    "repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f"
+  },
+  "adapter": {
+    "artifact_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "role": "EXACT_HISTORICAL_FA_V1_ADAPTER"
+  },
+  "training_evidence": {
+    "artifact_sha256": "e4033811f2916f955896dc561355d5e69d86c7c85dc308cdc256f7d2e80720b4"
+  },
+  "historical_hidden_evaluation": {
+    "evidence_sha256": "7882747b8f9a04fe53d7b24d9e8dcd7e4a31d077916de61135d1043608a1d5c7",
+    "predictions_sha256": "91557a8d49da011f12367f374788487aa68a816afde1ee77a797080bb6919daa",
+    "dataset_id": "F0_DATASET_V1",
+    "dataset_manifest_digest": "418873b65e9a8903a595d6a8359ce778dd588b9cedb0e3c5ac54d178528e5e18",
+    "union_splits": [
+      "STRUCTURAL_HOLDOUT",
+      "TEMPLATE_HOLDOUT",
+      "DOUBLE_HOLDOUT",
+      "ADVERSARIAL_HOLDOUT"
+    ],
+    "union_count": 3584
+  },
+  "historical_result": {
+    "numerator": 3524,
+    "denominator": 3584,
+    "exact": 0.9832589285714286,
+    "status": "FAIL_SYNTHETIC_HIDDEN_ADMISSION",
+    "evaluator": "GREEDY_DIRECT_ANSWER",
+    "evaluation_precision": "BF16",
+    "quantization": "NONE",
+    "choices_in_prompt": false
+  },
+  "post_hoc_sensor_boundary_diagnostic": {
+    "scope": "OLD_EVALUATOR_NEURAL_CASES_EXCLUDING_VISIBLE_PEER_COUNT",
+    "numerator": 3344,
+    "denominator": 3360,
+    "exact": 0.9952380952380953,
+    "not_an_admission_result": true
+  },
+  "chronology": {
+    "prior_record": "specs/experiments/F0-historical-fa-v1-legacy.yaml",
+    "prior_status_preserved": "UNVERIFIABLE_LEGACY",
+    "prior_record_rewritten": false
+  },
+  "comparison_policy": {
+    "original_fail_status_preserved": true,
+    "historical_score_retroactive_pass_forbidden": true,
+    "formal_stage0_runner_must_reverify_hashes": true
+  }
+}
