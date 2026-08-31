@@ -51,6 +51,7 @@
     "canonical_state_commits": 0
   },
   "primary_treatments": {
+    "implementation_owner": "src/alifelm/model/treatments.py",
     "order_of_minimality": ["I0", "I1", "I2", "I3"],
     "I0": {
       "completion_suffix": "",
@@ -68,6 +69,15 @@
       "completion_suffix": "\\nAction selection JSON:\\n",
       "constraint": "ACTION_CONDITIONAL_TYPED_JSON"
     }
+  },
+  "measurement_definitions": {
+    "implementation_owner": "src/alifelm/model/typed_codec.py",
+    "codec_valid": "CodecValidityStatus.CODEC_VALID from evaluate_typed_codec; known canonical action label, exact action payload field set, and valid identifier scalar types are required",
+    "domain_valid": "DomainValidityStatus.DOMAIN_VALID from evaluate_typed_codec after opportunity-local target/proposal/reproduction checks, CognitionGateway binding, LawValidator validation, and fragment planning",
+    "commit_status": "Recorded as a diagnostic for every attempt; no canonical commit occurs in A0",
+    "first_token_eos": "generated token sequence begins with tokenizer EOS id 100257 and finish_reason is eos_token",
+    "evidence_complete": "ContextPack, rendered input, raw text, raw generation, final cognition evidence, and typed codec diagnostic remain CAS-addressable; rendered/raw bytes match their recorded refs",
+    "exact_repeat_equal": "one post-cohort repeat of the first context has the exact same raw-generation CAS digest; it is not a retry and cannot replace the primary observation"
   },
   "promotion_rule": {
     "method": "FIRST_MINIMAL_TREATMENT_PASSING_BOTH_GATES",
