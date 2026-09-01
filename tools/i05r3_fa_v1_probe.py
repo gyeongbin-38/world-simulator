@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import json
 from pathlib import Path
 import statistics
@@ -238,11 +238,9 @@ def main() -> int:
     profile = _profile(arguments.base_model_dir)
     mode = "S" if arguments.phase == "mode-s" else "D"
     generation_policy = _generation_policy(mode)
-    profile = ModelProfile(
-        **{
-            **asdict(profile),
-            "generation_policy_id": generation_policy.policy_id,
-        }
+    profile = replace(
+        profile,
+        generation_policy_id=generation_policy.policy_id,
     )
     validate_live_runtime_identity(profile, WORLD_V0_FA_V1_IDENTITY)
     started = time.perf_counter()
