@@ -1,0 +1,158 @@
+{
+  "study_id": "WORLD_P1C_V2_COMMON_TOPOLOGY_PHASE_ABLATION_V1",
+  "schema_version": "1.0.0",
+  "protocol_commit": "9d6e7831c54c5aea3cb23f61c4dc26b5a2668a6f",
+  "source_results": {
+    "p1c_v1_results_freeze_commit": "274a51ed5f93805a6cbf41f1c757666cedf3cca1",
+    "p1c_v1_status": "P1C_BASE_WRAPPER_EQUIVALENCE_FAIL",
+    "p1c_v1_result_digest": "e38870bbf1b0232987be9a73dabd8955148f4521c2c56f78ece931557b214065",
+    "d1_results_freeze_commit": "34bc6881754fe206faf66cf17b3548373da2a9ff",
+    "d1_status": "D1_MEASUREMENT_COMPLETE",
+    "d1_result_digest": "0aac4e02a50f4fa4c6a847b8a84937c23d5ea1c58f5fb9b82d2c424324838cd2",
+    "d1_canonical_archive_sha256": "300b064a9b29822c307655918cfa76cd63dd07f3a9382c2218bd0c9f0300eb9d"
+  },
+  "identities": {
+    "base_model": "allenai/OLMo-2-0425-1B-Instruct",
+    "base_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "bos_token_id": 100257,
+    "eos_token_id": 100257,
+    "pad_token_id": 100277,
+    "adapter_artifact": "F0_FA_V1_FORMAL",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "adapter_config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d",
+    "pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf",
+    "runtime_package_count": 60,
+    "dtype": "bfloat16",
+    "device_class": "NVIDIA_A40"
+  },
+  "cohort": {
+    "fixture_family": "R3",
+    "case_index_start": 3000,
+    "case_index_end": 3031,
+    "cases_per_context_class": 32,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "total_contexts": 160,
+    "iid_population_sample": false
+  },
+  "phase_boundary": {
+    "phase_a": "canonical_rendered_world_context_bytes_only",
+    "phase_b_prefix": "\nAction selection JSON:\n{\"action_label\":\"",
+    "cache_reuse": true,
+    "world_context_recompute_after_switch": false,
+    "candidate_cache_clone": true,
+    "ordinary_full_sequence_primary_scoring": false
+  },
+  "conditions": {
+    "C00": {"phase_a": "BASE", "phase_b": "BASE"},
+    "C11": {"phase_a": "FA_V1", "phase_b": "FA_V1"},
+    "C10": {"phase_a": "FA_V1", "phase_b": "BASE"},
+    "C01": {"phase_a": "BASE", "phase_b": "FA_V1"}
+  },
+  "cached_wrapper_parity_control": {
+    "path": "separately_loaded_bare_base_cached",
+    "reference": "C00_peft_wrapped_adapter_disabled_cached",
+    "contexts": 160,
+    "label_comparisons": 800,
+    "rendered_bytes_exact": true,
+    "token_ids_exact": true,
+    "total_log_probability_exact": true,
+    "mean_log_probability_exact": true,
+    "rank_exact": true,
+    "posthoc_tolerance": null
+  },
+  "action_labels": [
+    "NO_DIRECTED_ACTION",
+    "DIRECT_TEXT",
+    "OPEN_BILATERAL_REQUEST",
+    "CONFIRM_BILATERAL_REQUEST",
+    "DECLINE_BILATERAL_REQUEST"
+  ],
+  "structural_families": {
+    "response": [
+      "CONFIRM_BILATERAL_REQUEST",
+      "DECLINE_BILATERAL_REQUEST"
+    ],
+    "other_directed": [
+      "DIRECT_TEXT",
+      "OPEN_BILATERAL_REQUEST"
+    ]
+  },
+  "gates": {
+    "G0": "integrity_and_exact_cached_wrapper_parity",
+    "G1": {
+      "contrast": "M_C01_minus_M_C00",
+      "median_gt": 0.0,
+      "positive_fraction_gte": 0.75
+    },
+    "G2": {
+      "contrast": "M_C10_minus_M_C00",
+      "median_gt": 0.0,
+      "positive_fraction_gte": 0.75
+    },
+    "G3": {
+      "per_contrast_full_gain": {
+        "median_gt": 0.0,
+        "positive_fraction_gte": 0.75
+      },
+      "per_contrast_prefill_carryover": {
+        "median_gt": 0.0,
+        "positive_fraction_gte": 0.75
+      },
+      "required_same_contrasts_passing_both": 2,
+      "total_structural_contrasts": 3
+    },
+    "G4": {
+      "requires_G3": true,
+      "contrast": "M_C11_minus_M_C10",
+      "median_gt": 0.0,
+      "positive_fraction_gte": 0.75
+    },
+    "G5": {
+      "matched_sensitivity_rate_gte": 0.25,
+      "nonquiet_tvd_gte": 0.25,
+      "required_nonquiet_classes": 2,
+      "total_nonquiet_classes": 4,
+      "reported_per_condition": true
+    }
+  },
+  "factorial_diagnostics": {
+    "wait_interaction": "M_C11-M_C10-M_C01+M_C00",
+    "structural_interactions": [
+      "S_msg_C11-S_msg_C10-S_msg_C01+S_msg_C00",
+      "S_prop_C11-S_prop_C10-S_prop_C01+S_prop_C00",
+      "S_owner_C11-S_owner_C10-S_owner_C01+S_owner_C00"
+    ],
+    "pass_fail_thresholds": false,
+    "report": [
+      "count",
+      "median",
+      "mean",
+      "positive_fraction",
+      "negative_fraction",
+      "zero_fraction"
+    ]
+  },
+  "execution": {
+    "generation": false,
+    "state_commit": false,
+    "weight_update": false,
+    "retry": false,
+    "fallback": false,
+    "repair": false,
+    "eos_manipulation": false,
+    "scalar_calibration": false,
+    "action_hints": false,
+    "exact_first_score_repeat": true,
+    "failed_run_overwrite": false,
+    "primary_archive_before_posthoc": true
+  },
+  "founder_freeze": "NOT_ESTABLISHED"
+}
