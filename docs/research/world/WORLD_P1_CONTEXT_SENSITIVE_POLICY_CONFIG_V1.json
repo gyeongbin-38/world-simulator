@@ -1,0 +1,86 @@
+{
+  "study_id": "WORLD_P1_CONTEXT_SENSITIVE_POLICY_V1",
+  "schema_version": "1.0.0",
+  "preregistration_commit": "eac7d109ea8f84ece9ac4c0f57e4e1882a55e9eb",
+  "deployment": {
+    "base_model_repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "base_model_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "adapter_config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d",
+    "runtime_pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf",
+    "python": "3.12.3",
+    "torch": "2.7.1+cu118",
+    "torch_cuda": "11.8",
+    "cudnn": 90100,
+    "gpu": "NVIDIA A40",
+    "compute_capability": "8.6",
+    "device": "cuda:0",
+    "dtype": "bfloat16"
+  },
+  "generation": {
+    "interface": "I3_CONDITIONAL_TYPED_CODEC",
+    "completion_suffix": "\nAction selection JSON:\n",
+    "policy_id": "WORLD_P1_GREEDY_I3_V1",
+    "seed_id": "WORLD_P1_SEED_V1",
+    "seed": 35020260831,
+    "max_new_tokens": 128,
+    "do_sample": false,
+    "temperature": null,
+    "top_p": null,
+    "top_k": null,
+    "repetition_penalty": 1.0,
+    "retry": false,
+    "fallback": false,
+    "repair": false,
+    "chat_template": false,
+    "min_new_tokens_workaround": false,
+    "eos_suppression": false
+  },
+  "cohort": {
+    "fixture": "R3ContextClass/compile_r3_fixture",
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "cases_per_context": 16,
+    "total_contexts": 80,
+    "no_state_commit": true
+  },
+  "diagnostic": {
+    "teacher_forced_action_label_scoring": true,
+    "treatment_id": "i05r3-action-label-sequence-score",
+    "action_score_prefix": "\nAction selection JSON:\n{\"action_label\":\"",
+    "diagnostic_only": true
+  },
+  "gates": {
+    "G0": {
+      "attempts": 80,
+      "codec_valid_rate": 1.0,
+      "domain_valid_rate": 1.0,
+      "evidence_complete_rate": 1.0,
+      "first_token_eos_rate": 0.0,
+      "exact_first_repeat_equal": true,
+      "teacher_forced_measurements": 80
+    },
+    "G1": {
+      "matched_sensitivity_rate_min": 0.25,
+      "tvd_min": 0.25,
+      "nonquiet_tvd_classes_min": 2
+    },
+    "G2": {
+      "matched_sensitivity_rate_min": 0.25,
+      "tvd_min": 0.25,
+      "nonquiet_tvd_classes_min": 2
+    }
+  },
+  "interpretation": {
+    "founder_freeze": "NOT_ESTABLISHED_BY_P1_ALONE",
+    "action_frequency_is_gate": false,
+    "social_desirability_is_gate": false
+  }
+}
