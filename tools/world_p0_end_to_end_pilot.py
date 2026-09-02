@@ -321,8 +321,6 @@ def _privacy_pass(pack, snapshot, rendered: bytes, context_policy) -> bool:
     if actual_peers != expected_peers or actor.value in actual_peers:
         return False
 
-    if pack.model_input.prior_history:
-        return False
 
     for provenance in evidence.provenance:
         if provenance.commit_tick is not None and provenance.commit_tick >= int(snapshot.tick):
