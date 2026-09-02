@@ -1,0 +1,81 @@
+{
+  "study_id": "WORLD_P1C_D1_EQUIVALENCE_LOCALIZATION_V1",
+  "schema_version": "1.0.0",
+  "protocol_commit": "7dca63312efd01350c597b41c24b4ab1fa9dd4ad",
+  "source_p1c": {
+    "primary_git_commit": "f2e9e4dc9e7cdee6034ff33c663ffe434fa7c6ae",
+    "results_freeze_commit": "274a51ed5f93805a6cbf41f1c757666cedf3cca1",
+    "config_sha256": "1ee7e53e8e8efd67e9868702138e89bf2532e737fa41329ad276c8a10ef98589",
+    "result_digest": "e38870bbf1b0232987be9a73dabd8955148f4521c2c56f78ece931557b214065",
+    "summary_sha256": "47e9cbf2962bdbb6c3f59e4ae70fcc71bc204fbcb86a7e54bf1420085e492ee2",
+    "stdout_sha256": "188688bc311198b4e6028973a578c33ef27ed310951439ca05632a479db56867",
+    "archive_sha256": "90eef02128d2caad16ef736170b28e1f8be76cb1331a53a2edb9e4d69bdff39d",
+    "observed_max_total_abs_difference": 0.21875,
+    "observed_max_mean_abs_difference": 0.0703125,
+    "original_equivalence_tolerance": 0.00001
+  },
+  "identities": {
+    "base_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "adapter_config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d",
+    "pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf",
+    "runtime_package_count": 60
+  },
+  "bf16_cohort": {
+    "case_index_start": 2000,
+    "case_index_end": 2031,
+    "cases_per_context": 32,
+    "contexts": 160,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ]
+  },
+  "fp32_subset": {
+    "case_index_start": 2000,
+    "case_index_end": 2003,
+    "cases_per_context": 4,
+    "contexts": 20
+  },
+  "phase_b_prefix": "\nAction selection JSON:\n{\"action_label\":\"",
+  "action_labels": [
+    "NO_DIRECTED_ACTION",
+    "DIRECT_TEXT",
+    "OPEN_BILATERAL_REQUEST",
+    "CONFIRM_BILATERAL_REQUEST",
+    "DECLINE_BILATERAL_REQUEST"
+  ],
+  "bf16_conditions": {
+    "E0": "BARE_FULL_BF16",
+    "E1": "BARE_CACHED_BF16",
+    "E2": "PEFT_DISABLED_FULL_BF16",
+    "E3": "PEFT_DISABLED_CACHED_BF16"
+  },
+  "fp32_conditions": {
+    "F0": "BARE_FULL_FP32",
+    "F1": "BARE_CACHED_FP32"
+  },
+  "reconstruction": {
+    "expected_max_total_abs_difference": 0.21875,
+    "expected_max_mean_abs_difference": 0.0703125,
+    "exact_numeric_match_required": true
+  },
+  "execution": {
+    "generation": false,
+    "state_commit": false,
+    "weight_update": false,
+    "retry": false,
+    "fallback": false,
+    "repair": false,
+    "eos_manipulation": false,
+    "scalar_calibration": false,
+    "action_hints": false,
+    "exact_first_score_repeat": true
+  },
+  "founder_freeze": "NOT_ESTABLISHED"
+}
