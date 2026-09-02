@@ -1,0 +1,104 @@
+{
+  "study_id": "WORLD_P1C_FOUNDATION_POLICY_PHASE_ABLATION_V1",
+  "schema_version": "1.0.0",
+  "preregistration_commit": "8573d7a57c0a24bf480cb149d457d491e6a9d2ae",
+  "base_model": {
+    "repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "bos_token_id": 100257,
+    "eos_token_id": 100257,
+    "pad_token_id": 100277
+  },
+  "adapter": {
+    "artifact_id": "F0_FA_V1_FORMAL",
+    "sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d",
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"]
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.7.1+cu118",
+    "torch_cuda": "11.8",
+    "transformers": "5.16.1",
+    "peft": "0.20.0",
+    "dtype": "bfloat16",
+    "device": "cuda:0",
+    "gpu": "NVIDIA A40",
+    "pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf"
+  },
+  "heldout_cohort": {
+    "case_index_start": 2000,
+    "case_index_end": 2031,
+    "cases_per_context": 32,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "contexts": 160
+  },
+  "phase_boundary": {
+    "phase_a": "canonical_r3_world_context_only",
+    "phase_b_prefix": "\nAction selection JSON:\n{\"action_label\":\"",
+    "reuse_past_key_values_without_context_recompute": true
+  },
+  "conditions": {
+    "C00": {"prefill_adapter": false, "selector_adapter": false},
+    "C11": {"prefill_adapter": true, "selector_adapter": true},
+    "C10": {"prefill_adapter": true, "selector_adapter": false},
+    "C01": {"prefill_adapter": false, "selector_adapter": true}
+  },
+  "action_labels": [
+    "NO_DIRECTED_ACTION",
+    "DIRECT_TEXT",
+    "OPEN_BILATERAL_REQUEST",
+    "CONFIRM_BILATERAL_REQUEST",
+    "DECLINE_BILATERAL_REQUEST"
+  ],
+  "scoring": {
+    "primary": "full_label_sequence_total_log_probability",
+    "secondary": "mean_log_probability_per_label_token",
+    "chat_template": false,
+    "state_commit": false,
+    "weight_update": false
+  },
+  "base_wrapper_equivalence": {
+    "contexts": 160,
+    "token_ids_exact": true,
+    "total_log_probability_abs_tolerance": 1e-5,
+    "mean_log_probability_abs_tolerance": 1e-5
+  },
+  "thresholds": {
+    "P1C_G1": {"positive_fraction_min": 0.75, "median_strictly_positive": true},
+    "P1C_G2": {"positive_fraction_min": 0.75, "median_strictly_positive": true},
+    "P1C_G3": {
+      "positive_fraction_min": 0.75,
+      "median_strictly_positive": true,
+      "structural_contrasts_required": 2,
+      "structural_contrasts_total": 3
+    },
+    "P1C_G4": {
+      "positive_fraction_min": 0.75,
+      "median_strictly_positive": true,
+      "requires_P1C_G3": true
+    },
+    "P1C_G5": {
+      "matched_sensitivity_rate_min": 0.25,
+      "tvd_min": 0.25,
+      "nonquiet_tvd_classes_min": 2
+    }
+  },
+  "prior_evidence": {
+    "p1b_results_freeze_commit": "06ee82298fec14c9ac3bc4cfd5bf3c7ec1be9f4c",
+    "p1b_summary_sha256": "114c8a894edf80ba5d2dfd4c6b64239ca4d621aa603142bc108976be5416d2b1",
+    "p1b_stdout_sha256": "11106dd00171305c7ac6787c140969f67ad701d7ce706d3930282013dcf27bb3",
+    "p1b_archive_sha256": "87d815436254d2ed4eafeeeb49fb1d03edd5ccac3dc9949753c2b46dfcd51e6a",
+    "p1b_archive_roundtrip_verified": true,
+    "p1b_windows_backup_sha256_verified": true
+  },
+  "founder_freeze": "NOT_ESTABLISHABLE_BY_P1C"
+}
