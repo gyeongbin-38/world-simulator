@@ -1,0 +1,136 @@
+{
+  "study_id": "WORLD_P1B_ADAPTER_SELECTOR_DECOMPOSITION_V1",
+  "schema_version": "1.0.0",
+  "preregistration_commit": "13634bc13122f8b194a4bdba0e6feadee0f0e54d",
+  "base_model": {
+    "repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff"
+  },
+  "adapter": {
+    "artifact_id": "F0_FA_V1_FORMAL",
+    "sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d"
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.7.1+cu118",
+    "torch_cuda": "11.8",
+    "transformers": "5.16.1",
+    "peft": "0.20.0",
+    "lm_format_enforcer": "0.11.3",
+    "dtype": "bfloat16",
+    "device": "cuda:0",
+    "gpu": "NVIDIA A40",
+    "compute_capability": "8.6",
+    "pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf"
+  },
+  "model_conditions": [
+    "BASE_ONLY",
+    "FA_V1"
+  ],
+  "context_classes": [
+    "QUIET",
+    "MESSAGE_RECEIVED",
+    "PROPOSAL_RECEIVED",
+    "OWN_PROPOSAL_PENDING",
+    "RECENT_INTERACTION"
+  ],
+  "cohorts": {
+    "heldout": {
+      "case_index_start": 1000,
+      "case_index_end": 1031,
+      "cases_per_context": 32,
+      "contexts": 160
+    },
+    "paired_p1_interface": {
+      "case_index_start": 0,
+      "case_index_end": 15,
+      "cases_per_context": 16,
+      "contexts": 80,
+      "model_conditions": [
+        "FA_V1"
+      ]
+    }
+  },
+  "action_labels": [
+    "NO_DIRECTED_ACTION",
+    "DIRECT_TEXT",
+    "OPEN_BILATERAL_REQUEST",
+    "CONFIRM_BILATERAL_REQUEST",
+    "DECLINE_BILATERAL_REQUEST"
+  ],
+  "teacher_forced": {
+    "prefix": "\nAction selection JSON:\n{\"action_label\":\"",
+    "score": "full_label_sequence_total_log_probability",
+    "mean_log_probability_secondary": true
+  },
+  "label_only_selector": {
+    "suffix": "\nAction selection JSON:\n",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "action_label": {
+          "type": "string",
+          "enum": [
+            "NO_DIRECTED_ACTION",
+            "DIRECT_TEXT",
+            "OPEN_BILATERAL_REQUEST",
+            "CONFIRM_BILATERAL_REQUEST",
+            "DECLINE_BILATERAL_REQUEST"
+          ]
+        }
+      },
+      "required": [
+        "action_label"
+      ],
+      "additionalProperties": false
+    },
+    "generation": {
+      "do_sample": false,
+      "temperature": null,
+      "top_p": null,
+      "top_k": null,
+      "repetition_penalty": 1.0,
+      "max_new_tokens": 48,
+      "seed": 35020260831,
+      "seed_id": "WORLD_P1B_GREEDY_SEED_V1",
+      "chat_template": false,
+      "retry": false,
+      "fallback": false,
+      "repair": false,
+      "eos_suppression": false
+    }
+  },
+  "thresholds": {
+    "P1B_G1": {
+      "overall_wait_rate_min": 0.95,
+      "per_context_wait_rate_min": 0.90
+    },
+    "P1B_G2": {
+      "positive_fraction_min": 0.75,
+      "median_strictly_positive": true
+    },
+    "P1B_G3": {
+      "positive_fraction_min": 0.75,
+      "median_strictly_positive": true,
+      "structural_contrasts_required": 2,
+      "structural_contrasts_total": 3
+    },
+    "P1B_G4": {
+      "positive_fraction_min": 0.75,
+      "median_strictly_positive": true,
+      "adapter_gain_contrasts_required": 2,
+      "adapter_gain_contrasts_total": 3
+    },
+    "P1B_G5": {
+      "matched_sensitivity_rate_min": 0.25,
+      "tvd_min": 0.25,
+      "nonquiet_tvd_classes_min": 2
+    }
+  },
+  "state_commit": false,
+  "weight_update": false,
+  "founder_freeze": "NOT_ESTABLISHABLE_BY_P1B"
+}
