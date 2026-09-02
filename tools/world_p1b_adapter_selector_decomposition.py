@@ -10,13 +10,12 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from contextlib import nullcontext
 import hashlib
 import json
 from pathlib import Path
 import subprocess
 import sys
-from typing import Any, Mapping
+from typing import Any
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
@@ -34,7 +33,6 @@ from alifelm.model.evidence import raw_generation_bytes  # noqa: E402
 from alifelm.model.generation import GenerationPolicy  # noqa: E402
 from alifelm.model.p1b_metrics import (  # noqa: E402
     ACTION_LABELS,
-    DIRECTED_LABELS,
     P1B_CONTEXT_CLASSES,
     P1B_HELDOUT_CASES,
     P1B_PAIRED_CASES,
@@ -72,9 +70,8 @@ from alifelm.model.world_v0_smoke import (  # noqa: E402
 from alifelm.persistence import FileSystemArtifactStore  # noqa: E402
 
 
-P1B_RUNNER_VERSION = "1.0.0"
+P1B_RUNNER_VERSION = "1.0.1"
 P1B_PREREG_COMMIT = "13634bc13122f8b194a4bdba0e6feadee0f0e54d"
-P1B_CONFIG_FILENAME = "WORLD_P1B_ADAPTER_SELECTOR_DECOMPOSITION_CONFIG_V1.json"
 P1B_GENERATION_POLICY_ID = "WORLD_P1B_LABEL_ONLY_GREEDY_V1"
 P1B_GENERATION_SEED_ID = "WORLD_P1B_GREEDY_SEED_V1"
 P1B_GENERATION_SEED = 35020260831
@@ -127,6 +124,17 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _runtime_freeze_sha256() -> tuple[str, int]:
+    completed = subprocess.run(
+        [sys.executable, "-m", "pip", "freeze", "--all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    lines = sorted(line for line in completed.stdout.splitlines() if line)
+    return _sha256(("\n".join(lines) + "\n").encode("utf-8")), len(lines)
+
+
 def _load_config(path: Path) -> tuple[dict[str, Any], str]:
     raw = path.read_bytes()
     config = json.loads(raw.decode("utf-8"))
@@ -160,12 +168,22 @@ def _load_config(path: Path) -> tuple[dict[str, Any], str]:
     if selector.get("schema") != LABEL_ONLY_SCHEMA:
         raise SmokePreflightError("P1B label-only schema drift")
     generation = selector.get("generation", {})
-    if (
-        generation.get("max_new_tokens") != P1B_MAX_NEW_TOKENS
-        or generation.get("seed") != P1B_GENERATION_SEED
-        or generation.get("seed_id") != P1B_GENERATION_SEED_ID
-        or generation.get("do_sample") is not False
-    ):
+    expected_generation = {
+        "do_sample": False,
+        "temperature": None,
+        "top_p": None,
+        "top_k": None,
+        "repetition_penalty": 1.0,
+        "max_new_tokens": P1B_MAX_NEW_TOKENS,
+        "seed": P1B_GENERATION_SEED,
+        "seed_id": P1B_GENERATION_SEED_ID,
+        "chat_template": False,
+        "retry": False,
+        "fallback": False,
+        "repair": False,
+        "eos_suppression": False,
+    }
+    if generation != expected_generation:
         raise SmokePreflightError("P1B generation policy drift")
     thresholds = config.get("thresholds", {})
     expected_thresholds = {
@@ -271,15 +289,14 @@ def _verify_p1_archive(p1_root: Path) -> dict[str, Any]:
         raise SmokePreflightError("P1 canonical result digest drift")
     if summary.get("gates") != {"P1-G0": True, "P1-G1": False, "P1-G2": False}:
         raise SmokePreflightError("P1 frozen gate result drift")
-    generated = summary.get("generated_distribution_by_context", {})
     expected = {name: {WAIT_LABEL: 16} for name in P1B_CONTEXT_CLASSES}
-    if generated != expected:
+    if summary.get("generated_distribution_by_context") != expected:
         raise SmokePreflightError("P1 archived I3 distribution drift")
     return {
         "summary_sha256": digest,
         "result_digest": summary["result_digest"],
         "gates": summary["gates"],
-        "generated_distribution_by_context": generated,
+        "generated_distribution_by_context": summary["generated_distribution_by_context"],
     }
 
 
@@ -311,10 +328,8 @@ def _compile_cohort(
     return tuple(rows)
 
 
-def _cohort_map(cohort) -> dict[tuple[str, int], Any]:
-    return {(context, case, compiled): None for context, case, compiled in ()} if False else {
-        (context, case): compiled for context, case, compiled in cohort
-    }
+def _cohort_map(cohort):
+    return {(context, case): compiled for context, case, compiled in cohort}
 
 
 def _verify_identical_inputs(base_cohort, fa_cohort) -> tuple[bool, list[dict[str, Any]]]:
@@ -391,22 +406,21 @@ def _runtime_freeze_status(runtime: TransformersModelRuntime) -> dict[str, Any]:
 
 
 def _score_equal(left, right) -> bool:
-    left_values = {
-        item.model_label: (item.token_ids, item.total_log_probability, item.mean_log_probability, item.rank)
-        for item in left.scores
-    }
-    right_values = {
-        item.model_label: (item.token_ids, item.total_log_probability, item.mean_log_probability, item.rank)
-        for item in right.scores
-    }
-    return left_values == right_values
+    def values(result):
+        return {
+            item.model_label: (
+                item.token_ids,
+                item.total_log_probability,
+                item.mean_log_probability,
+                item.rank,
+            )
+            for item in result.scores
+        }
+
+    return values(left) == values(right)
 
 
-def _score_one(
-    runtime: TransformersModelRuntime,
-    compiled,
-    store: FileSystemArtifactStore,
-) -> tuple[Any, str, dict[str, Any]]:
+def _score_one(runtime: TransformersModelRuntime, compiled, store: FileSystemArtifactStore):
     if compiled.artifact_ref is None:
         raise RuntimeError("P1B compiled context requires CAS artifact ref")
     rendered_ref = store.put_bytes(
@@ -421,26 +435,23 @@ def _score_one(
         context_pack_ref=compiled.artifact_ref.digest,
         rendered_input_ref=rendered_ref.digest,
     )
-    score_bytes = action_label_score_bytes(score)
     score_ref = store.put_bytes(
-        score_bytes,
+        action_label_score_bytes(score),
         media_type="application/json",
         contract_id="p1b-action-label-score-1.0.0",
     )
     totals = {item.model_label: item.total_log_probability for item in score.scores}
-    means = {item.model_label: item.mean_log_probability for item in score.scores}
-    ranks = {item.model_label: item.rank for item in score.scores}
-    token_ids = {item.model_label: list(item.token_ids) for item in score.scores}
     if set(totals) != set(ACTION_LABELS):
         raise RuntimeError("P1B teacher-forced score label-set drift")
-    return score, score_ref.digest, {
+    record = {
         "score_ref": score_ref.digest,
         "rendered_input_ref": rendered_ref.digest,
         "totals": totals,
-        "means": means,
-        "ranks": ranks,
-        "token_ids": token_ids,
+        "means": {item.model_label: item.mean_log_probability for item in score.scores},
+        "ranks": {item.model_label: item.rank for item in score.scores},
+        "token_ids": {item.model_label: list(item.token_ids) for item in score.scores},
     }
+    return score, record
 
 
 def _parse_label_only(raw_text: str) -> str:
@@ -460,7 +471,7 @@ def _generate_label_only(
     compiled,
     constraint,
     store: FileSystemArtifactStore,
-) -> tuple[Any, str | None, str, dict[str, Any]]:
+):
     request = generation_request_for(
         compiled,
         profile,
@@ -481,9 +492,8 @@ def _generate_label_only(
         media_type="text/plain; charset=utf-8",
         contract_id="p1b-label-only-raw-text-1.0.0",
     )
-    raw_bytes = raw_generation_bytes(result)
     raw_ref = store.put_bytes(
-        raw_bytes,
+        raw_generation_bytes(result),
         media_type="application/json",
         contract_id="p1b-label-only-raw-generation-1.0.0",
     )
@@ -512,7 +522,7 @@ def _generate_label_only(
         contract_id="p1b-label-only-evidence-1.0.0",
     )
     evidence["evidence_ref"] = evidence_ref.digest
-    return result, label, raw_ref.digest, evidence
+    return label, raw_ref.digest, evidence
 
 
 def _planned_document(
@@ -549,11 +559,11 @@ def _execute(
     *,
     paths: DeploymentPaths,
     p1_root: Path,
-    config: dict[str, Any],
     config_sha256: str,
     expected_git_commit: str,
+    runtime_freeze_sha256: str,
+    runtime_package_count: int,
 ) -> dict[str, Any]:
-    del config
     if paths.output_root.exists() and any(paths.output_root.iterdir()):
         raise SmokePreflightError("P1B output root already exists and is non-empty")
     paths.output_root.mkdir(parents=True, exist_ok=True)
@@ -569,15 +579,15 @@ def _execute(
 
     preflight = _static_preflight(paths, expected_git_commit)
     environment = ensure_execute_environment()
-    if environment.get("pip_freeze_sha256") != P1B_PIP_FREEZE_SHA256:
-        raise SmokePreflightError("P1B canonical runtime freeze drift")
+    environment["pip_freeze_sha256"] = runtime_freeze_sha256
+    environment["pip_freeze_package_count"] = runtime_package_count
 
     store = FileSystemArtifactStore(paths.output_root / "cas")
     policy = _generation_policy()
     base_profile = _profile(paths.base_model_dir, condition="BASE_ONLY")
     fa_profile = _profile(paths.base_model_dir, condition="FA_V1")
 
-    # Compile all model-visible contexts before loading or measuring a model.
+    # Compile every model-visible context before loading either model.
     heldout_base = _compile_cohort(
         store=store,
         profile=base_profile,
@@ -635,7 +645,7 @@ def _execute(
         first_score = None
         first_compiled = None
         for ordinal, (context_name, case_index, compiled) in enumerate(cohort, 1):
-            score, score_ref, record = _score_one(runtime, compiled, store)
+            score, record = _score_one(runtime, compiled, store)
             record.update(
                 {
                     "condition": condition,
@@ -653,7 +663,7 @@ def _execute(
                 print(f"P1B_SCORE_{condition} {ordinal}/{len(cohort)}", flush=True)
         if first_score is None or first_compiled is None:
             raise RuntimeError("P1B score cohort unexpectedly empty")
-        repeat, _, _ = _score_one(runtime, first_compiled, store)
+        repeat, _ = _score_one(runtime, first_compiled, store)
         score_repeat_equal[condition] = _score_equal(first_score, repeat)
 
     label_details: dict[str, dict[str, list[dict[str, Any]]]] = {
@@ -666,7 +676,11 @@ def _execute(
     }
     paired_labels = {name: [] for name in P1B_CONTEXT_CLASSES}
     generation_repeat_equal: dict[str, bool] = {}
-    generation_valid_counts = {"BASE_ONLY_HELDOUT": 0, "FA_V1_HELDOUT": 0, "FA_V1_PAIRED": 0}
+    generation_valid_counts = {
+        "BASE_ONLY_HELDOUT": 0,
+        "FA_V1_HELDOUT": 0,
+        "FA_V1_PAIRED": 0,
+    }
 
     for condition, runtime, profile, constraint, cohort in (
         ("BASE_ONLY", base_runtime, base_profile, base_constraint, heldout_base),
@@ -675,7 +689,7 @@ def _execute(
         first_raw_ref = None
         first_compiled = None
         for ordinal, (context_name, case_index, compiled) in enumerate(cohort, 1):
-            _, label, raw_ref, evidence = _generate_label_only(
+            label, raw_ref, evidence = _generate_label_only(
                 runtime, profile, policy, compiled, constraint, store
             )
             evidence.update(
@@ -687,11 +701,8 @@ def _execute(
                 }
             )
             label_details[condition]["HELDOUT"].append(evidence)
-            if label is not None:
-                heldout_labels[condition][context_name].append(label)
-                generation_valid_counts[f"{condition}_HELDOUT"] += 1
-            else:
-                heldout_labels[condition][context_name].append("__INVALID__")
+            heldout_labels[condition][context_name].append(label or "__INVALID__")
+            generation_valid_counts[f"{condition}_HELDOUT"] += int(label is not None)
             if first_raw_ref is None:
                 first_raw_ref = raw_ref
                 first_compiled = compiled
@@ -699,13 +710,13 @@ def _execute(
                 print(f"P1B_LABEL_{condition}_HELDOUT {ordinal}/{len(cohort)}", flush=True)
         if first_raw_ref is None or first_compiled is None:
             raise RuntimeError("P1B generation cohort unexpectedly empty")
-        _, _, repeat_ref, _ = _generate_label_only(
+        _, repeat_ref, _ = _generate_label_only(
             runtime, profile, policy, first_compiled, constraint, store
         )
         generation_repeat_equal[condition] = repeat_ref == first_raw_ref
 
     for ordinal, (context_name, case_index, compiled) in enumerate(paired_fa, 1):
-        _, label, _, evidence = _generate_label_only(
+        label, _, evidence = _generate_label_only(
             fa_runtime, fa_profile, policy, compiled, fa_constraint, store
         )
         evidence.update(
@@ -717,15 +728,11 @@ def _execute(
             }
         )
         label_details["FA_V1"]["PAIRED_P1"].append(evidence)
-        if label is not None:
-            paired_labels[context_name].append(label)
-            generation_valid_counts["FA_V1_PAIRED"] += 1
-        else:
-            paired_labels[context_name].append("__INVALID__")
+        paired_labels[context_name].append(label or "__INVALID__")
+        generation_valid_counts["FA_V1_PAIRED"] += int(label is not None)
         if ordinal % 20 == 0 or ordinal == len(paired_fa):
             print(f"P1B_LABEL_FA_V1_PAIRED {ordinal}/{len(paired_fa)}", flush=True)
 
-    # Integrity is evaluated before scientific/mechanistic gates.
     score_complete = all(len(score_details[name]) == 160 for name in ("BASE_ONLY", "FA_V1"))
     score_label_complete = all(
         set(record["totals"]) == set(ACTION_LABELS)
@@ -748,23 +755,29 @@ def _execute(
         and fa_freeze["frozen"]
     )
 
-    # The scientific gates are computed only on complete valid measurements.
     g1_metrics = None
     g2_metrics = None
     g3_metrics = None
     g4_metrics = None
     g5_metrics = None
+    g1_pass = g2_pass = g3_pass = g4_pass = None
     if g0:
         g1 = evaluate_wait_dominance(paired_labels, cases_per_context=P1B_PAIRED_CASES)
+        g1_pass = g1.passed
         g1_metrics = g1.as_dict()
 
         base_margins = []
         fa_margins = []
         for context_name in P1B_CONTEXT_CLASSES:
             for case_index in range(HELDOUT_START, HELDOUT_END + 1):
-                base_margins.append(score_structure(score_maps["BASE_ONLY"][(context_name, case_index)]).wait_margin)
-                fa_margins.append(score_structure(score_maps["FA_V1"][(context_name, case_index)]).wait_margin)
+                base_margins.append(
+                    score_structure(score_maps["BASE_ONLY"][(context_name, case_index)]).wait_margin
+                )
+                fa_margins.append(
+                    score_structure(score_maps["FA_V1"][(context_name, case_index)]).wait_margin
+                )
         g2, wait_effects = evaluate_wait_amplification(base_margins, fa_margins)
+        g2_pass = g2.passed
         g2_metrics = g2.as_dict()
         g2_metrics["effects"] = list(wait_effects)
 
@@ -806,11 +819,6 @@ def _execute(
             "BASE_ONLY": base_sensitivity.as_dict(),
             "FA_V1": fa_sensitivity.as_dict(),
         }
-    else:
-        g1 = None
-        g2 = None
-        g3_pass = None
-        g4_pass = None
 
     score_ref = store.put_bytes(
         canonical_bytes(score_details),
@@ -845,8 +853,8 @@ def _execute(
         "p1_archive": p1_archive,
         "gates": {
             "P1B-G0": g0,
-            "P1B-G1": (g1.passed if g1 is not None else None),
-            "P1B-G2": (g2.passed if g2 is not None else None),
+            "P1B-G1": g1_pass,
+            "P1B-G2": g2_pass,
             "P1B-G3": g3_pass,
             "P1B-G4": g4_pass,
             "P1B-G5": (
@@ -903,7 +911,7 @@ def main() -> int:
     parser.add_argument("--expected-git-commit", required=True)
     args = parser.parse_args()
 
-    config, config_sha256 = _load_config(args.config)
+    _, config_sha256 = _load_config(args.config)
     paths = DeploymentPaths(
         base_model_dir=args.base_model_dir,
         adapter_path=args.adapter_path,
@@ -911,6 +919,12 @@ def main() -> int:
     )
     preflight = _static_preflight(paths, args.expected_git_commit)
     p1_archive = _verify_p1_archive(args.p1_root)
+    runtime_freeze_sha256, runtime_package_count = _runtime_freeze_sha256()
+    if runtime_freeze_sha256 != P1B_PIP_FREEZE_SHA256:
+        raise SmokePreflightError(
+            f"P1B runtime freeze drift: expected {P1B_PIP_FREEZE_SHA256}, got {runtime_freeze_sha256}"
+        )
+
     if args.validate_only:
         print(
             json.dumps(
@@ -918,9 +932,11 @@ def main() -> int:
                     "status": "P1B_STATIC_PREFLIGHT_OK",
                     "git_commit": _git_head(),
                     "config_sha256": config_sha256,
+                    "runtime_pip_freeze_sha256": runtime_freeze_sha256,
+                    "runtime_package_count": runtime_package_count,
                     "preflight": preflight,
                     "p1_archive": p1_archive,
-                    "planned_model_inference_calls": {
+                    "planned_measurements": {
                         "teacher_forced_score_sets": 320,
                         "label_only_generations": 400,
                         "repeat_score_sets": 2,
@@ -937,9 +953,10 @@ def main() -> int:
         result = _execute(
             paths=paths,
             p1_root=args.p1_root,
-            config=config,
             config_sha256=config_sha256,
             expected_git_commit=args.expected_git_commit,
+            runtime_freeze_sha256=runtime_freeze_sha256,
+            runtime_package_count=runtime_package_count,
         )
     except Exception as error:
         paths.output_root.mkdir(parents=True, exist_ok=True)
