@@ -86,12 +86,16 @@ def _as_tuple_ids(value: Any) -> tuple[int, ...]:
     return tuple(value)
 
 
-def phase_boundary_token_ids(runtime: TransformersModelRuntime, rendered_input: bytes) -> tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]:
-    """Return context, selector-prefix and combined IDs, failing on boundary retokenization.
+def phase_boundary_token_ids(
+    runtime: TransformersModelRuntime, rendered_input: bytes
+) -> tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]:
+    """Return context, selector-prefix and combined IDs, failing on retokenization.
 
     P1C requires C00 to be comparable with the ordinary P1/P1B scorer. The
-    tokenization of ``context + ACTION_SCORE_PREFIX`` therefore must equal the
-    tokenization of the context followed by a token-aligned selector suffix.
+    exact tokenization of ``context + ACTION_SCORE_PREFIX`` therefore must be
+    identical to standalone context tokenization followed by standalone
+    selector-prefix tokenization. Any token merge, split, or replacement
+    induced by concatenation fails closed before model inference.
     """
 
     if not isinstance(rendered_input, bytes):
@@ -99,16 +103,15 @@ def phase_boundary_token_ids(runtime: TransformersModelRuntime, rendered_input: 
     tokenizer = runtime.tokenizer
     add_special = runtime.profile.add_special_tokens
     context_text = rendered_input.decode("utf-8")
+    prefix_text = ACTION_SCORE_PREFIX.decode("utf-8")
     combined_text = (rendered_input + ACTION_SCORE_PREFIX).decode("utf-8")
     context_ids = tuple(tokenizer.encode(context_text, add_special_tokens=add_special))
+    prefix_ids = tuple(tokenizer.encode(prefix_text, add_special_tokens=False))
     combined_ids = tuple(tokenizer.encode(combined_text, add_special_tokens=add_special))
-    if not context_ids or len(combined_ids) <= len(context_ids):
+    if not context_ids or not prefix_ids:
         raise GenerationError("P1C phase boundary produced an empty token segment")
-    if combined_ids[: len(context_ids)] != context_ids:
+    if combined_ids != context_ids + prefix_ids:
         raise GenerationError("P1C byte boundary is not token-aligned under frozen tokenizer")
-    prefix_ids = combined_ids[len(context_ids) :]
-    if not prefix_ids:
-        raise GenerationError("P1C selector prefix has no token IDs")
     return context_ids, prefix_ids, combined_ids
 
 
@@ -126,7 +129,13 @@ def _ones(torch_module: Any, length: int, *, device: str) -> Any:
     return value
 
 
-def _forward(model: Any, *, input_ids: Any, attention_mask: Any, past_key_values: Any | None = None) -> Any:
+def _forward(
+    model: Any,
+    *,
+    input_ids: Any,
+    attention_mask: Any,
+    past_key_values: Any | None = None,
+) -> Any:
     kwargs = {
         "input_ids": input_ids,
         "attention_mask": attention_mask,
@@ -173,7 +182,11 @@ def score_phase_switched_labels(
     context_tensor = _tensor_ids(torch_module, context_ids, device=device)
     prefix_tensor = _tensor_ids(torch_module, prefix_ids, device=device)
 
-    inference_context = torch_module.inference_mode() if hasattr(torch_module, "inference_mode") else nullcontext()
+    inference_context = (
+        torch_module.inference_mode()
+        if hasattr(torch_module, "inference_mode")
+        else nullcontext()
+    )
     with inference_context:
         with adapter_state(runtime.model, prefill_adapter):
             prefill_output = _forward(
@@ -225,7 +238,9 @@ def score_phase_switched_labels(
             raw.append((label, ids, total_value))
 
     ordered = sorted(raw, key=lambda item: (-item[2], item[0]))
-    rank_by_label = {label: rank for rank, (label, _, _) in enumerate(ordered, 1)}
+    rank_by_label = {
+        label: rank for rank, (label, _, _) in enumerate(ordered, 1)
+    }
     scores = tuple(
         PhaseScore(
             model_label=label,
