@@ -1,0 +1,148 @@
+{
+  "study_id": "WORLD_P2_PHASE_DECOUPLED_BEHAVIORAL_ADMISSION_V1",
+  "schema_version": "1.0.0",
+  "protocol_commit": "299b5ff29a14aef92b977ee53d0cf8e792067f11",
+  "source_results_commit": "1059b03e28668e2b8563c4aa81d39e1a2e65576f",
+  "scientific_identity": {
+    "base_model_repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "base_model_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "adapter_config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "tokenizer_config_aggregate_sha256": "eeed26d20a24ad35479aa33b690b196096c5f98fee8bc43d816c3bd314987c38"
+  },
+  "runtime": {
+    "device": "cuda:0",
+    "dtype": "bfloat16",
+    "package_count": 60,
+    "pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf"
+  },
+  "source_evidence": {
+    "p1c_v2_execution_commit": "4fcbf4827a2887700dc59e180a7c08e5117b59b9",
+    "p1c_v2_result_digest": "0e19ae757ee07121102e1bd278125fe41d92e55b30add75f1e5895a1c315df04",
+    "p1c_v2_summary_sha256": "8632473c2e13983d535a8b16381b3f8e4dc1eea68741ccb0ad2e9cfd4ef1c40a",
+    "p1c_v2_details_sha256": "c03e4370cf077c0c7c492727375141ecb66623762bcc96b0881ae147c5a272ea",
+    "p1c_v2_stdout_sha256": "061d50db2eb7dec80af44c251bf5586c13df64f1a8a486e530ab693a7800e004",
+    "p1c_v2_archive_sha256": "b34f60b98868bf9a26b3d726fb4b6fd9093e9d2ec462b247cb82553900b0c39d"
+  },
+  "cohort": {
+    "fixture": "compile_r3_fixture",
+    "case_start": 4000,
+    "case_end": 4031,
+    "matched_cases": 32,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "contexts_per_condition": 160,
+    "fresh_primary_cohort": true
+  },
+  "conditions": {
+    "order": ["C00", "C01", "C10", "C11"],
+    "C00": {"prefill_adapter": false, "selector_adapter": false},
+    "C01": {"prefill_adapter": false, "selector_adapter": true},
+    "C10": {"prefill_adapter": true, "selector_adapter": false},
+    "C11": {"prefill_adapter": true, "selector_adapter": true}
+  },
+  "interface": {
+    "mode": "I3",
+    "treatment_id": "i05r2-i3-conditional-typed-codec",
+    "version": "1.0.0",
+    "completion_suffix": "\nAction selection JSON:\n",
+    "constraint_policy_id": "i05r2-conditional-typed-action-json-v1",
+    "semantic_payload_narrowing": false,
+    "branch_orders": [
+      ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+      ["REJECT", "ACCEPT", "PROPOSE", "SEND", "WAIT"],
+      ["SEND", "PROPOSE", "ACCEPT", "REJECT", "WAIT"],
+      ["ACCEPT", "WAIT", "REJECT", "SEND", "PROPOSE"]
+    ]
+  },
+  "generation": {
+    "policy_id": "P2_GREEDY_PHASE_DECOUPLED_I3_V1",
+    "seed": 35020260831,
+    "max_new_tokens": 128,
+    "do_sample": false,
+    "temperature": null,
+    "top_p": null,
+    "top_k": null,
+    "repetition_penalty": 1.0,
+    "retry": false,
+    "fallback": false,
+    "repair": false,
+    "eos_suppression": false,
+    "min_new_tokens": null,
+    "scalar_action_logit_correction": false,
+    "action_hint": false,
+    "action_frequency_target": null
+  },
+  "gates": {
+    "G0": {
+      "all_primary_conditions_complete": true,
+      "exact_context_bytes_across_conditions": true,
+      "exact_context_tokenization_across_conditions": true,
+      "one_world_prefill_per_attempt": true,
+      "no_world_recompute_after_phase_switch": true,
+      "phase_flags_exact": true,
+      "i3_identity_exact": true,
+      "first_attempt_exact_repeat_per_condition": true,
+      "runtime_freeze_exact": true,
+      "source_evidence_unchanged": true,
+      "simulation_state_commits": 0,
+      "weight_updates": 0,
+      "retries": 0,
+      "fallbacks": 0,
+      "repairs": 0
+    },
+    "G1_C10_motor_domain": {
+      "codec_valid_rate_min": 0.99,
+      "first_token_eos_rate_max": 0.01,
+      "evidence_complete_rate_required": 1.0,
+      "infrastructure_failures_required": 0,
+      "exact_repeat_required": true,
+      "domain_valid_rate_min": 0.95,
+      "minimum_context_class_domain_valid_rate_min": 0.9
+    },
+    "G2_C10_generated_context_sensitivity": {
+      "matched_sensitivity_rate_min": 0.25,
+      "matched_case_requires_all_five_domain_valid": true,
+      "tvd_from_quiet_min": 0.25,
+      "nonquiet_tvd_classes_min": 2,
+      "domain_invalid_distribution_label": "INVALID"
+    },
+    "G3_C10_branch_order": {
+      "conditional_on_G0_G1_G2": true,
+      "all_orders_G1_required": true,
+      "candidate_agreement_min": 0.95,
+      "domain_valid_rate_spread_max": 0.05,
+      "audit_contexts_per_order": 160,
+      "audit_orders": 4
+    },
+    "G4_candidate_promotion": {
+      "requires": ["G0", "G1", "G2", "G3"],
+      "pass_label": "C10_PHASE_DECOUPLED_BEHAVIORAL_ADMISSION_PASS"
+    }
+  },
+  "comparators": {
+    "conditions": ["C00", "C01", "C11"],
+    "same_validity_metrics": true,
+    "same_sensitivity_metrics": true,
+    "affect_candidate_thresholds": false,
+    "descriptive_only": [
+      "action_label_distribution_by_condition_and_context",
+      "wait_rate_by_condition_and_context",
+      "paired_C11_to_C10_wait_escape_and_reversal",
+      "C10_pairwise_action_label_agreement",
+      "commit_status_distribution",
+      "generated_token_count_distribution"
+    ]
+  },
+  "ordinary_full_sequence_primary_generation_calls": 0,
+  "simulation_state_commit": false,
+  "weight_update": false,
+  "founder_freeze": "NOT_ESTABLISHED"
+}
