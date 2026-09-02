@@ -12,7 +12,9 @@ from alifelm.model.transformers_backend import GenerationError, TransformersMode
 
 class FakeTokenizer:
     def __init__(self):
-        alphabet = sorted(set((ACTION_SCORE_PREFIX.decode("utf-8") + "".join(ACTION_LABELS) + "CTX\n")))
+        alphabet = sorted(
+            set(ACTION_SCORE_PREFIX.decode("utf-8") + "".join(ACTION_LABELS) + "CTX\n")
+        )
         self.ids = {char: index + 1 for index, char in enumerate(alphabet)}
 
     def encode(self, text, add_special_tokens=False):
@@ -25,14 +27,20 @@ class FakeTokenizer:
 class BoundaryMergingTokenizer(FakeTokenizer):
     def encode(self, text, add_special_tokens=False):
         values = super().encode(text, add_special_tokens=add_special_tokens)
-        if text.endswith(ACTION_SCORE_PREFIX.decode("utf-8")):
-            return values[:-2] + [98]
+        prefix = ACTION_SCORE_PREFIX.decode("utf-8")
+        # Simulate a tokenizer merge that occurs only when the WORLD context
+        # and selector prefix are concatenated. The standalone context and
+        # standalone prefix tokenizations remain unchanged.
+        if text.startswith("CTX\n") and text.endswith(prefix):
+            context_length = len(super().encode("CTX\n", add_special_tokens=add_special_tokens))
+            return values[: context_length - 1] + [98] + values[context_length + 1 :]
         return values
 
 
 class FakePeftModel:
-    def __init__(self, vocab_size=128):
+    def __init__(self, *, signal_token_id, vocab_size=128):
         self.vocab_size = vocab_size
+        self.signal_token_id = signal_token_id
         self.adapter_enabled = True
         self.prefill_calls = 0
         self.selector_prefix_calls = 0
@@ -50,15 +58,10 @@ class FakePeftModel:
         del attention_mask, use_cache
         batch, length = input_ids.shape
         logits = torch.zeros((batch, length, self.vocab_size), dtype=torch.float32)
-        # Adapter state deterministically shifts two arbitrary token logits so
-        # tests can prove that phase switching is active without encoding any
-        # WORLD action semantics in the fake.
-        if self.adapter_enabled:
-            logits[..., 1] = 1.0
-            logits[..., 2] = -1.0
-        else:
-            logits[..., 1] = -1.0
-            logits[..., 2] = 1.0
+        # Shift one token that is guaranteed to occur in the frozen action
+        # labels. This proves adapter phase switching changes model scores
+        # without encoding a preferred WORLD action in the fake.
+        logits[..., self.signal_token_id] = 1.0 if self.adapter_enabled else -1.0
         prior_len = 0 if past_key_values is None else int(past_key_values[0].item())
         if past_key_values is None:
             self.prefill_calls += 1
@@ -69,7 +72,6 @@ class FakePeftModel:
 
     def generate(self, *args, **kwargs):  # pragma: no cover - runtime contract only
         raise NotImplementedError
-
 
 
 def _profile():
@@ -93,10 +95,11 @@ def _profile():
 
 
 def _runtime(tokenizer=None):
+    tokenizer = tokenizer or FakeTokenizer()
     return TransformersModelRuntime.from_components(
         _profile(),
-        tokenizer=tokenizer or FakeTokenizer(),
-        model=FakePeftModel(),
+        tokenizer=tokenizer,
+        model=FakePeftModel(signal_token_id=tokenizer.ids["D"]),
         torch_module=torch,
     )
 
