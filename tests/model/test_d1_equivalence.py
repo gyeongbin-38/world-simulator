@@ -30,6 +30,9 @@ class FakeBareModel:
         self.vocab_size = vocab_size
         self.prefill_calls = 0
 
+    def generate(self, *args, **kwargs):
+        raise AssertionError("D1 scoring tests must never call generation")
+
     def __call__(self, *, input_ids, attention_mask, use_cache, past_key_values=None):
         del attention_mask, use_cache
         batch, length = input_ids.shape
