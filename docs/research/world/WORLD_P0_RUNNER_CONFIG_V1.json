@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0.0",
+  "protocol_id": "WORLD_P0_END_TO_END_PILOT_V1",
+  "status": "PRE_EXECUTION_STATIC_CONFIG",
+  "preregistration_commit": "5ba7affcfaf0905a48a1010b4220d9cbbe00387a",
+  "runtime_environment_commit": "3fd2145c06a8c9503a7ae674de78b6c2a93cf1c7",
+  "deployment_identity": {
+    "base_model_repo": "allenai/OLMo-2-0425-1B-Instruct",
+    "base_model_revision": "48d788eca847d4d7548f375ad03d3c9312f6139e",
+    "base_checkpoint_sha256": "36d044c73655bb904f822915e6294ba3dae8e6e1af5e703e9d452f2d6a3a294f",
+    "tokenizer_digest": "c448b9e69576a2af5fccdb905c4d6c9f6c0d06509b15d2459a3bc92bb33d42ff",
+    "adapter_sha256": "46917511362243be67e0783ddb7411a96f26613c1083bc4f95117d910d0998ec",
+    "adapter_config_sha256": "687100a0b6340b6096ca1e86066d3c13224b3c8e14ce9fb1b0cf78a52a8bdb7d",
+    "runtime_pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf",
+    "device": "cuda:0",
+    "dtype": "bfloat16"
+  },
+  "generation": {
+    "profile_id": "WORLD_P0_FA_V1_BF16",
+    "profile_version": "1.0.0",
+    "policy_id": "WORLD_P0_GREEDY_V1",
+    "policy_version": "1.0.0",
+    "max_new_tokens": 128,
+    "do_sample": false,
+    "temperature": null,
+    "top_p": null,
+    "top_k": null,
+    "repetition_penalty": 1.0,
+    "seed_id": "WORLD_P0_SEED_V1",
+    "seed": 35020260831,
+    "stop_policy_id": null
+  },
+  "interface": {
+    "treatment_id": "i05r2-i3-conditional-typed-codec",
+    "version": "1.0.0",
+    "completion_suffix": "\nAction selection JSON:\n",
+    "constraint_policy_id": "i05r2-conditional-typed-action-json-v1"
+  },
+  "context": {
+    "policy_id": "exp000-context",
+    "max_prior_visible_records": 2
+  },
+  "world": {
+    "founders": [
+      "A",
+      "B",
+      "C"
+    ],
+    "initial_tick": 0,
+    "initial_state_version": 0,
+    "lifespan_ticks": 100,
+    "maturity_delay_ticks": 0,
+    "refractory_interval_ticks": 0,
+    "population_capacity": null,
+    "committed_ticks": 12
+  },
+  "replicas": {
+    "P0-FWD": [
+      "A",
+      "B",
+      "C"
+    ],
+    "P0-REV": [
+      "C",
+      "B",
+      "A"
+    ]
+  },
+  "forbidden": {
+    "chat_template": true,
+    "min_new_tokens_workaround": true,
+    "eos_suppression": true,
+    "retry": true,
+    "fallback": true,
+    "repair": true,
+    "proposal_pointer_interface": true
+  },
+  "replica_execution": {
+    "completion_order_domain": "ACTIVE_AGENTS_AT_BOUND_TICK",
+    "P0-FWD": "LEXICAL_ASCENDING_AGENT_ID",
+    "P0-REV": "LEXICAL_DESCENDING_AGENT_ID",
+    "completion_order_is_model_visible": false
+  }
+}
