@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""Efficiency-preserving entrypoint for the frozen P2-D1 runner.
+"""Protocol-neutral hardening entrypoint for the frozen P2-D1 runner.
 
 The scientific runner verifies three unpacked P2 source files against the known
 canonical P2 archive. Re-opening a 5+ GiB gzip tar for each member would repeat
 full decompression. This wrapper memoizes those member bytes after one archive
 scan. The runner still re-hashes the compressed archive before and after D1, so
-mid-run source mutation remains detectable. No model input, score, threshold,
-or diagnostic interpretation is changed.
+mid-run source mutation remains detectable.
+
+It also materializes the preregistered per-branch token count as an explicit
+field alongside the already-recorded token IDs. Neither hardening changes model
+input, logits, score accumulation, thresholds, localization, or the frozen P2
+result.
 """
 
 from __future__ import annotations
@@ -23,6 +27,7 @@ _TARGET_SUFFIXES = (
     base.SOURCE_P2_STDOUT_NAME,
 )
 _CACHE: dict[Path, dict[str, bytes]] = {}
+_ORIGINAL_RECORD_FROM_PROBE = base._record_from_probe
 
 
 def _scan_archive_once(archive: Path) -> dict[str, bytes]:
@@ -57,8 +62,19 @@ def _cached_archive_member_bytes(archive: Path, suffix: str) -> bytes:
     return _scan_archive_once(archive)[suffix]
 
 
+def _record_with_explicit_token_counts(*args, **kwargs):
+    row = _ORIGINAL_RECORD_FROM_PROBE(*args, **kwargs)
+    for score in row["branch_scores"]:
+        token_ids = score.get("token_ids")
+        if not isinstance(token_ids, list) or not token_ids:
+            raise base.SmokePreflightError("P2-D1 branch token IDs are missing")
+        score["token_count"] = len(token_ids)
+    return row
+
+
 def main() -> int:
     base._archive_member_bytes = _cached_archive_member_bytes
+    base._record_from_probe = _record_with_explicit_token_counts
     return int(base.main())
 
 
