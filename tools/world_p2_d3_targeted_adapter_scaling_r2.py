@@ -10,10 +10,16 @@ to the frozen D3 runner.
 
 from __future__ import annotations
 
+from pathlib import Path
+import sys
 from typing import Any
 
-from alifelm.model.p2_d1_boundary import D1_ACTION_ORDER
-from tools import world_p2_d3_targeted_adapter_scaling as base
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
+sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from alifelm.model.p2_d1_boundary import D1_ACTION_ORDER  # noqa: E402
+from tools import world_p2_d3_targeted_adapter_scaling as base  # noqa: E402
 
 
 def _score_record_from_d1(score: Any, *, condition: str, layers: tuple[int, ...]) -> dict[str, Any]:
