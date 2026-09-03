@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from typing import Any, Iterable
 
 from .transformers_backend import GenerationError
@@ -26,7 +27,25 @@ def _clone_tensor(value: Any) -> Any:
     return clone()
 
 
+def _layer_object_pairs(cache: Any) -> tuple[tuple[Any, Any], ...] | None:
+    """Expose Transformers v5 Cache.layers K/V tensors without mutating cache state."""
+
+    raw_layers = getattr(cache, "layers", None)
+    if not isinstance(raw_layers, (tuple, list)):
+        return None
+    layers: list[tuple[Any, Any]] = []
+    for layer in raw_layers:
+        key = getattr(layer, "keys", None)
+        value = getattr(layer, "values", None)
+        if key is None or value is None:
+            return None
+        layers.append((key, value))
+    return tuple(layers)
+
+
 def _legacy_cache(cache: Any) -> tuple[tuple[tuple[Any, Any], ...], str, type[Any] | None]:
+    """Normalize supported legacy and modern HF cache representations to K/V pairs."""
+
     converter = getattr(cache, "to_legacy_cache", None)
     if callable(converter):
         raw = converter()
@@ -41,7 +60,12 @@ def _legacy_cache(cache: Any) -> tuple[tuple[tuple[Any, Any], ...], str, type[An
         kind = "LEGACY_LIST"
         cache_type = None
     else:
-        raise GenerationError("D2 unsupported past_key_values representation")
+        layer_pairs = _layer_object_pairs(cache)
+        if layer_pairs is None:
+            raise GenerationError("D2 unsupported past_key_values representation")
+        raw = layer_pairs
+        kind = "LAYER_OBJECT_CACHE"
+        cache_type = type(cache)
 
     if not isinstance(raw, (tuple, list)):
         raise GenerationError("D2 cache conversion did not produce a sequence")
@@ -53,11 +77,33 @@ def _legacy_cache(cache: Any) -> tuple[tuple[tuple[Any, Any], ...], str, type[An
     return tuple(layers), kind, cache_type
 
 
-def _rebuild_cache(layers: tuple[tuple[Any, Any], ...], kind: str, cache_type: type[Any] | None) -> Any:
+def _rebuild_cache(
+    layers: tuple[tuple[Any, Any], ...],
+    kind: str,
+    cache_type: type[Any] | None,
+    *,
+    template: Any | None = None,
+) -> Any:
     if kind == "LEGACY_TUPLE":
         return tuple(layers)
     if kind == "LEGACY_LIST":
         return list(layers)
+    if kind == "LAYER_OBJECT_CACHE":
+        if template is None or cache_type is None or type(template) is not cache_type:
+            raise GenerationError("D2 modern cache rebuild requires the exact target cache type")
+        try:
+            rebuilt = copy.deepcopy(template)
+        except Exception as error:
+            raise GenerationError("D2 failed to clone modern cache representation") from error
+        rebuilt_layers = getattr(rebuilt, "layers", None)
+        if not isinstance(rebuilt_layers, (tuple, list)) or len(rebuilt_layers) != len(layers):
+            raise GenerationError("D2 modern cache clone changed layer structure")
+        for layer, (key, value) in zip(rebuilt_layers, layers):
+            if not hasattr(layer, "keys") or not hasattr(layer, "values"):
+                raise GenerationError("D2 modern cache layer does not expose mutable keys/values")
+            layer.keys = key
+            layer.values = value
+        return rebuilt
     if kind != "CACHE_CLASS" or cache_type is None:
         raise GenerationError("D2 cannot rebuild cache representation")
     builder = getattr(cache_type, "from_legacy_cache", None)
@@ -115,7 +161,7 @@ def transplant_cache_layers(target_cache: Any, donor_cache: Any, layer_indices: 
     for index in range(expected_layers):
         key, value = donor_layers[index] if index in selected_set else target_layers[index]
         rebuilt.append((_clone_tensor(key), _clone_tensor(value)))
-    return _rebuild_cache(tuple(rebuilt), target_kind, target_type)
+    return _rebuild_cache(tuple(rebuilt), target_kind, target_type, template=target_cache)
 
 
 __all__ = [
