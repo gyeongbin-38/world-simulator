@@ -39,3 +39,12 @@ def test_d1_hardened_entry_preserves_source_checks_and_materializes_token_count(
     assert "world_p2_d1_hardened_entry.py --validate-only" in launcher
     assert "world_p2_d1_hardened_entry.py --execute" in launcher
     assert "git status --porcelain --untracked-files=all" in launcher
+
+
+def test_d1_hardened_entry_requires_exact_prereg_scientific_bytes():
+    hardened = HARDENED.read_text(encoding="utf-8")
+    assert '"git", "merge-base", "--is-ancestor", base.PREREG_COMMIT, "HEAD"' in hardened
+    assert '"git", "show", f"{base.PREREG_COMMIT}:{relative_path}"' in hardened
+    assert "P2-D1 preregistered scientific file drift" in hardened
+    assert "_PROTOCOL_REL" in hardened
+    assert "_CONFIG_REL" in hardened
