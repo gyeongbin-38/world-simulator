@@ -1,0 +1,131 @@
+{
+  "study_id": "WORLD_P2_D2_KV_CACHE_CAUSAL_LOCALIZATION_V1",
+  "status": "PREREGISTERED_MECHANISTIC_DIAGNOSTIC",
+  "source_d1_study_id": "WORLD_P2_D1_DECISION_BOUNDARY_LOCALIZATION_V1",
+  "source_d1_scientific_commit": "5f7f5e02a66c253e0352771cbb35f0db6c408072",
+  "source_d1_result_digest": "865616cdb65e5f4c969a9302c02bb285167db06a905e1497b05e4e0912935c20",
+  "source_d1_details_sha256": "0e5e62709d58168c9922645c1d05d54a7f5c417b68b3f461b4558d3706ca3b17",
+  "source_d1_archive_sha256": "c42999e001c789a4a43fa14962119315066b2df6c66e3b472ce76a6f27cad2f1",
+  "source_p2_interpretation": "C10_NOT_BEHAVIORALLY_ADMITTED",
+  "founder_freeze": "NOT_ESTABLISHED",
+  "model": {
+    "identifier": "OLMo-2-0425-1B-Instruct",
+    "expected_transformer_layers": 16,
+    "dtype": "bfloat16",
+    "selector_adapter": false
+  },
+  "full_cohort": {
+    "case_start": 4000,
+    "case_stop_inclusive": 4031,
+    "cases_per_context": 32,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "contexts": 160
+  },
+  "screening_cohort": {
+    "case_start": 4000,
+    "case_stop_inclusive": 4003,
+    "cases_per_context": 4,
+    "contexts": 20
+  },
+  "source_caches": {
+    "B": {"prefill_adapter": false, "role": "BASE_PREFILL_CACHE"},
+    "F": {"prefill_adapter": true, "role": "FA_PREFILL_CACHE"}
+  },
+  "patch": {
+    "unit": "TRANSFORMER_LAYER_PAST_KEY_VALUE",
+    "replace_key": true,
+    "replace_value": true,
+    "clone_target_before_patch": true,
+    "clone_donor_tensors": true,
+    "world_context_recompute_after_patch": false,
+    "rescue": "F_WITH_B_LAYERS",
+    "induction": "B_WITH_F_LAYERS"
+  },
+  "decision_readout": {
+    "primary_gap": "WAIT_TOTAL_LOG_PROBABILITY_MINUS_SEND_TOTAL_LOG_PROBABILITY",
+    "negative_side": "SEND",
+    "positive_side": "WAIT",
+    "common_prefix_divergence": "D1_FIVE_SCHEMA_EARLIEST_LEGAL_SET_DIVERGENCE",
+    "screening_persisted_branches": ["WAIT", "SEND"],
+    "confirmation_branches": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+    "secondary_metric": "MEAN_LOG_PROBABILITY"
+  },
+  "mediator_metrics": {
+    "gap_symbol": "G",
+    "denominator": "D=G_F-G_B",
+    "denominator_required_positive_per_case": true,
+    "normalized_rescue": "NR=(G_F-G_R)/D",
+    "normalized_induction": "NI=(G_I-G_B)/D",
+    "symmetric_score": "S=(NR+NI)/2",
+    "clip_normalized_fractions": false
+  },
+  "stage0_controls": {
+    "unpatched_baseline_must_match_source_d1": true,
+    "all_layer_rescue_must_equal_B": true,
+    "all_layer_induction_must_equal_F": true,
+    "self_patch_noop_unit_contract": true,
+    "donor_and_source_target_mutation_forbidden": true
+  },
+  "stageA": {
+    "cohort": "screening_cohort",
+    "blocks": {
+      "Q0": [0, 1, 2, 3],
+      "Q1": [4, 5, 6, 7],
+      "Q2": [8, 9, 10, 11],
+      "Q3": [12, 13, 14, 15]
+    },
+    "directions": ["rescue", "induction"],
+    "selection_metric": "MEDIAN_PER_CASE_SYMMETRIC_MEDIATOR_SCORE",
+    "advance_count": 2,
+    "tie_break": "LOWER_STARTING_LAYER_INDEX"
+  },
+  "stageB": {
+    "cohort": "screening_cohort",
+    "candidate_layers": "ALL_IN_STAGEA_TOP2_BLOCKS",
+    "directions": ["rescue", "induction"],
+    "selection_metric": "MEDIAN_PER_CASE_SYMMETRIC_MEDIATOR_SCORE",
+    "advance_count": 2,
+    "tie_break": "LOWER_LAYER_INDEX"
+  },
+  "stageC": {
+    "cohort": "full_cohort",
+    "conditions": [
+      "B_BASELINE",
+      "F_BASELINE",
+      "RESCUE_L1",
+      "INDUCTION_L1",
+      "RESCUE_L2",
+      "INDUCTION_L2",
+      "RESCUE_L1_L2_UNION",
+      "INDUCTION_L1_L2_UNION"
+    ],
+    "full_five_action_scoring": true,
+    "exact_repeat_conditions": [
+      "RESCUE_L1_L2_UNION",
+      "INDUCTION_L1_L2_UNION"
+    ],
+    "exact_repeat_serialized_equality_required": true
+  },
+  "descriptive_labels": [
+    "UNION_BIDIRECTIONAL_UNIVERSAL_FLIP",
+    "UNION_BIDIRECTIONAL_NONUNIVERSAL",
+    "UNION_ONE_DIRECTION_ONLY",
+    "NO_SIGN_FLIP_MEDIATION"
+  ],
+  "posthoc_selection_thresholds_forbidden": true,
+  "p2_relabel_forbidden": true,
+  "d1_relabel_forbidden": true,
+  "action_intent_generation": false,
+  "simulation_state_commit": false,
+  "weight_update": false,
+  "retry": false,
+  "repair": false,
+  "fallback": false,
+  "canonical_runtime_pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf"
+}
