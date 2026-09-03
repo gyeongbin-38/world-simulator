@@ -80,16 +80,19 @@ def evaluate_p2_i3_branch_order_audit(
 
 
 def canonical_allowed_tokens(allowed_tokens: Sequence[int]) -> tuple[int, ...]:
-    """Return a process-stable allowed-token order for constrained greedy decode."""
+    """Return a process-stable set/order for constrained greedy decode.
+
+    Constraint providers may emit the same token ID more than once through
+    overlapping parser branches.  Allowed-token semantics are set-valued, so
+    duplicate IDs are normalized away before canonical sorting.
+    """
 
     values = tuple(allowed_tokens)
     if not values:
         raise ValueError("I3 constraint returned no allowed tokens")
     if any(type(token_id) is not int or token_id < 0 for token_id in values):
         raise ValueError("I3 constraint returned invalid token IDs")
-    if len(set(values)) != len(values):
-        raise ValueError("I3 constraint returned duplicate token IDs")
-    return tuple(sorted(values))
+    return tuple(sorted(set(values)))
 
 
 def stable_allowed_argmax(torch_module: Any, logits: Any, allowed_tokens: list[int]) -> int:
