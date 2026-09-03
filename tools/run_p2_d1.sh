@@ -28,7 +28,7 @@ COMMON=(
 )
 
 if [[ "$MODE" == "validate" ]]; then
-  exec "$PY" tools/world_p2_d1_decision_boundary_localization.py --validate-only "${COMMON[@]}"
+  exec "$PY" tools/world_p2_d1_hardened_entry.py --validate-only "${COMMON[@]}"
 fi
 if [[ "$MODE" != "execute" ]]; then
   echo "usage: $0 [validate|execute]" >&2
@@ -41,7 +41,7 @@ test ! -e "$OUT"
 test ! -e "$STDOUT"
 test ! -e "$ARCHIVE"
 
-"$PY" tools/world_p2_d1_decision_boundary_localization.py --execute "${COMMON[@]}" 2>&1 | tee "$STDOUT"
+"$PY" tools/world_p2_d1_hardened_entry.py --execute "${COMMON[@]}" 2>&1 | tee "$STDOUT"
 test -f "$OUT/summary.json"
 test -f "$OUT/details.json"
 sha256sum "$OUT/summary.json" "$OUT/details.json" "$STDOUT" > "$OUT/preservation_manifest.sha256"
