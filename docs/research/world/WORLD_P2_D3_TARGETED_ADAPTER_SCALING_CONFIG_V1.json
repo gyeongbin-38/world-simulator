@@ -1,0 +1,95 @@
+{
+  "study_id": "WORLD_P2_D3_TARGETED_ADAPTER_SCALING_V1",
+  "status": "PREREGISTERED_REPAIR_DIAGNOSTIC",
+  "source_d1_study_id": "WORLD_P2_D1_DECISION_BOUNDARY_LOCALIZATION_V1",
+  "source_d1_result_digest": "865616cdb65e5f4c969a9302c02bb285167db06a905e1497b05e4e0912935c20",
+  "source_d1_details_sha256": "0e5e62709d58168c9922645c1d05d54a7f5c417b68b3f461b4558d3706ca3b17",
+  "source_d1_archive_sha256": "c42999e001c789a4a43fa14962119315066b2df6c66e3b472ce76a6f27cad2f1",
+  "source_d2_study_id": "WORLD_P2_D2_KV_CACHE_CAUSAL_LOCALIZATION_V1",
+  "source_d2_result_digest": "cf03450cdcde79e0f2fe78b4caf7bda6df99bec159246a15817194dcc61b9a61",
+  "source_d2_details_sha256": "e554f6a113597cd8d3f1d9c923f7ee4e17c59c51e9933cd398a2118f15731608",
+  "source_d2_archive_sha256": "f811de72d5faf1e9d56de534f73c8ecac101d5e22f12256ea00c14be6b101559",
+  "source_d2_localization": "UNION_BIDIRECTIONAL_NONUNIVERSAL",
+  "source_d2_selected_layers": [9, 10],
+  "source_p2_interpretation": "C10_NOT_BEHAVIORALLY_ADMITTED",
+  "founder_freeze": "NOT_ESTABLISHED",
+  "model": {
+    "identifier": "OLMo-2-0425-1B-Instruct",
+    "expected_transformer_layers": 16,
+    "dtype": "bfloat16",
+    "prefill_adapter": true,
+    "selector_adapter": false
+  },
+  "intervention": {
+    "type": "PREFILL_ONLY_LORA_LAYER_SCALE_MULTIPLIER",
+    "target_layers": [9, 10],
+    "scale_candidates": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "scale_applies_to_all_active_lora_modules_in_target_layers": true,
+    "non_target_layers_unchanged": true,
+    "selector_adapter_disabled": true,
+    "parameter_tensor_mutation_forbidden": true,
+    "scaling_metadata_restored_after_each_score": true
+  },
+  "full_cohort": {
+    "case_start": 4000,
+    "case_stop_inclusive": 4031,
+    "cases_per_context": 32,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "contexts": 160
+  },
+  "screening_cohort": {
+    "case_start": 4000,
+    "case_stop_inclusive": 4003,
+    "cases_per_context": 4,
+    "contexts": 20
+  },
+  "decision_readout": {
+    "branches": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+    "primary_gap": "WAIT_TOTAL_LOG_PROBABILITY_MINUS_SEND_TOTAL_LOG_PROBABILITY",
+    "negative_side": "SEND",
+    "positive_side": "WAIT",
+    "common_prefix_divergence": "D1_FIVE_SCHEMA_EARLIEST_LEGAL_SET_DIVERGENCE"
+  },
+  "stageA": {
+    "cohort": "screening_cohort",
+    "evaluate_all_scale_candidates": true,
+    "selection_rule_lexicographic": [
+      "MAX_MATCHED_CASE_RANK1_CONTEXT_SENSITIVITY_COUNT",
+      "MAX_DISTINCT_RANK1_ACTION_COUNT",
+      "MIN_ABS_MEDIAN_WAIT_SEND_GAP",
+      "MAX_SCALE_TO_PRESERVE_FA"
+    ],
+    "selection_is_frozen_before_execution": true
+  },
+  "stageB": {
+    "cohort": "full_cohort",
+    "condition": "SELECTED_STAGEA_SCALE_ON_LAYERS_9_10",
+    "full_five_action_scoring": true,
+    "exact_repeat": true,
+    "exact_repeat_serialized_equality_required": true,
+    "report_rank1_distribution_by_context": true,
+    "report_wait_send_gap_by_context": true,
+    "report_matched_rank1_context_sensitivity": true,
+    "report_tvd_from_quiet": true
+  },
+  "interpretation": {
+    "score_proxy_only": true,
+    "p2_behavioral_admission_relabel_forbidden": true,
+    "d1_relabel_forbidden": true,
+    "d2_relabel_forbidden": true,
+    "successful_score_proxy_does_not_establish_generation_admission": true,
+    "next_step_if_promising": "INDEPENDENT_GENERATION_REPAIR_ADMISSION"
+  },
+  "action_intent_generation": false,
+  "simulation_state_commit": false,
+  "weight_update": false,
+  "retry": false,
+  "fallback": false,
+  "canonical_runtime_pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf"
+}
