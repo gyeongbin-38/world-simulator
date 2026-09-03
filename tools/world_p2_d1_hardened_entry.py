@@ -2,20 +2,22 @@
 """Protocol-neutral hardening entrypoint for the frozen P2-D1 runner.
 
 The scientific runner verifies three unpacked P2 source files against the known
-canonical P2 archive. Re-opening a 5+ GiB gzip tar for each member would repeat
+canonical P2 archive. Re-opening a large gzip tar for each member would repeat
 full decompression. This wrapper memoizes those member bytes after one archive
 scan. The runner still re-hashes the compressed archive before and after D1, so
 mid-run source mutation remains detectable.
 
 It also materializes the preregistered per-branch token count as an explicit
-field alongside the already-recorded token IDs. Neither hardening changes model
-input, logits, score accumulation, thresholds, localization, or the frozen P2
-result.
+field alongside the already-recorded token IDs and verifies that the live
+protocol/config bytes are exactly those present at the preregistration commit.
+None of these hardenings changes model input, logits, score accumulation,
+thresholds, localization, or the frozen P2 result.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 import tarfile
 
 import world_p2_d1_decision_boundary_localization as base
@@ -28,6 +30,8 @@ _TARGET_SUFFIXES = (
 )
 _CACHE: dict[Path, dict[str, bytes]] = {}
 _ORIGINAL_RECORD_FROM_PROBE = base._record_from_probe
+_PROTOCOL_REL = "docs/research/world/WORLD_P2_D1_DECISION_BOUNDARY_LOCALIZATION_V1.md"
+_CONFIG_REL = "docs/research/world/WORLD_P2_D1_DECISION_BOUNDARY_LOCALIZATION_CONFIG_V1.json"
 
 
 def _scan_archive_once(archive: Path) -> dict[str, bytes]:
@@ -72,7 +76,41 @@ def _record_with_explicit_token_counts(*args, **kwargs):
     return row
 
 
+def _git_bytes_at_prereg(relative_path: str) -> bytes:
+    try:
+        completed = subprocess.run(
+            ["git", "show", f"{base.PREREG_COMMIT}:{relative_path}"],
+            cwd=base.REPOSITORY_ROOT,
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise base.SmokePreflightError("P2-D1 cannot resolve preregistered scientific bytes") from error
+    return completed.stdout
+
+
+def _require_prereg_freeze() -> None:
+    try:
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", base.PREREG_COMMIT, "HEAD"],
+            cwd=base.REPOSITORY_ROOT,
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise base.SmokePreflightError("P2-D1 HEAD is not descended from the preregistration commit") from error
+
+    for relative_path in (_PROTOCOL_REL, _CONFIG_REL):
+        current = (base.REPOSITORY_ROOT / relative_path).read_bytes()
+        frozen = _git_bytes_at_prereg(relative_path)
+        if current != frozen:
+            raise base.SmokePreflightError(
+                f"P2-D1 preregistered scientific file drift: {relative_path}"
+            )
+
+
 def main() -> int:
+    _require_prereg_freeze()
     base._archive_member_bytes = _cached_archive_member_bytes
     base._record_from_probe = _record_with_explicit_token_counts
     return int(base.main())
