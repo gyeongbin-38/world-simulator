@@ -74,16 +74,16 @@ def test_phase_execution_identity_distinguishes_conditions_without_model_input_c
     assert c00 != c10
 
 
-def test_allowed_token_order_is_canonical_and_duplicate_free():
+def test_allowed_token_order_is_canonical_and_duplicate_tolerant():
     assert canonical_allowed_tokens([9, 3, 7]) == (3, 7, 9)
-    with pytest.raises(ValueError, match="duplicate"):
-        canonical_allowed_tokens([3, 3])
+    assert canonical_allowed_tokens([7, 3, 7, 9, 3]) == (3, 7, 9)
 
 
 def test_constrained_greedy_tie_breaks_to_lowest_allowed_token_id():
     torch = pytest.importorskip("torch")
     logits = torch.zeros(12)
     assert stable_allowed_argmax(torch, logits, [9, 3, 7]) == 3
+    assert stable_allowed_argmax(torch, logits, [9, 3, 7, 3]) == 3
 
 
 def test_dirty_worktree_is_fail_closed():
