@@ -1,0 +1,51 @@
+{
+  "study_id": "WORLD_P2_D1_DECISION_BOUNDARY_LOCALIZATION_V1",
+  "status": "PREREGISTERED_DIAGNOSTIC",
+  "source_p2_study_id": "WORLD_P2_PHASE_DECOUPLED_BEHAVIORAL_ADMISSION_V1",
+  "source_p2_result_digest": "4226c5909fd13d8d769436d344a221d6f0c1746b08466ff6f5eb03303c0be563",
+  "source_p2_archive_sha256": "61a19717cf089fb59b43e2b52efc31e28036449418e3aeba69c8dd0bbad17790",
+  "source_p2_git_commit": "7bbe51abf539e5451db83c33b2a24b6a8b55b1de",
+  "source_p2_interpretation": "C10_NOT_BEHAVIORALLY_ADMITTED",
+  "founder_freeze": "NOT_ESTABLISHED",
+  "case_indices": {
+    "start": 4000,
+    "stop_inclusive": 4031,
+    "count": 32
+  },
+  "context_classes": [
+    "QUIET",
+    "MESSAGE_RECEIVED",
+    "PROPOSAL_RECEIVED",
+    "OWN_PROPOSAL_PENDING",
+    "RECENT_INTERACTION"
+  ],
+  "conditions": {
+    "C00": {"prefill_adapter": false, "selector_adapter": false, "role": "COMPARATOR"},
+    "C10": {"prefill_adapter": true, "selector_adapter": false, "role": "PRIMARY_DIAGNOSTIC"}
+  },
+  "action_branch_order": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+  "probe": {
+    "interface": "I3_CONDITIONAL_TYPED_CODEC",
+    "decision_point": "EARLIEST_FORCED_I3_BRANCH_LEGAL_SET_DIVERGENCE",
+    "score_until": "ACTION_LABEL_UNIQUELY_DETERMINED",
+    "score_metrics": ["TOTAL_LOG_PROBABILITY", "MEAN_LOG_PROBABILITY"],
+    "world_context_recompute_after_switch": false,
+    "simulation_state_commit": false,
+    "weight_update": false
+  },
+  "measurements": [
+    "branch_total_log_probability",
+    "branch_mean_log_probability",
+    "branch_total_rank",
+    "branch_mean_rank",
+    "rank1_branch",
+    "nda_margin_over_best_non_nda",
+    "matched_nonquiet_vs_quiet_score_delta",
+    "matched_nonquiet_vs_quiet_margin_delta",
+    "paired_c10_vs_c00_score_shift",
+    "exact_repeat_delta"
+  ],
+  "posthoc_threshold_changes_forbidden": true,
+  "p2_relabel_forbidden": true,
+  "canonical_runtime_pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf"
+}
