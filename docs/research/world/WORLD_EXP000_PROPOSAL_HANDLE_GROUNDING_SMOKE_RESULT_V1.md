@@ -1,6 +1,6 @@
 # WORLD EXP-000 Proposal Handle Grounding Smoke Result V1
 
-Status: **GROUNDING_SMOKE_PASS / VM EVIDENCE PRESENT / OFF-MACHINE BACKUP PENDING**
+Status: **GROUNDING_SMOKE_PASS / VM SEALED / OFF-MACHINE BACKUP PENDING**
 
 ## 1. Scope
 
@@ -29,12 +29,24 @@ The smoke completed with:
 - retries/fallbacks/repairs: `0`
 - descriptive LawValidator admissions: `2 / 3`
 
-VM evidence identities:
+## 4. VM preservation
+
+The grounding-smoke evidence was sealed after execution. The sealed directory contains `20` files and every file passed internal SHA-256 verification. The canonical archive passed both gzip and tar verification.
+
+Frozen VM identities:
 
 - manifest SHA-256: `aedfa2f58c9b127ff9c04e5d79bebe7c7b9e892c831fa5ffac385abcff505260`
 - stdout SHA-256: `920061e3d342e27f6aafc1abb7fa7fda3a538b50b14830d0442ab0e4e355a2d9`
+- seal `SHA256SUMS` SHA-256: `31ff48bfe03e256e95f70c6c82a1028b51f3f5f5c0e19af11854555d44b35675`
+- canonical archive SHA-256: `ca3ae00fb89dfbb628254410189328381ae0901b8bb7d502f93fe6026e918dd3`
 
-## 4. Case results
+Canonical VM archive path:
+
+`/workspace/WORLD_EXP000_PROPOSAL_HANDLE_GROUNDING_SMOKE_V1_58BB492_R1_CANONICAL.tar.gz`
+
+Off-machine verification is not yet claimed in this record.
+
+## 5. Case results
 
 ### Tick 2 / EXP000_FOUNDER_A / ACCEPT
 
@@ -63,7 +75,7 @@ The source baseline had generated the invented identifier `exp000_proposal`. Wit
 
 The source baseline had generated the generic identifier `proposal_id`. With local handles, the payload resolved to an exact canonical visible proposal and the unchanged LawValidator admitted the REJECT intent.
 
-## 5. Interpretation
+## 6. Interpretation
 
 The smoke establishes that the long opaque proposal-ID generation failure can be removed by a context-local handle interface while preserving canonical world authority, frozen C10 phase identity, Gateway identity binding, LawValidator authority, and no-retry/no-fallback semantics.
 
@@ -75,11 +87,10 @@ Therefore the current remaining failure modes are now separated as:
 2. **semantic proposal selection / action availability** — still observable and intentionally not masked;
 3. **agent target grounding** — unchanged in V1 and still responsible for the prior self-SEND failure.
 
-## 6. Next milestone
+## 7. Next milestone
 
 Before any follow-up continuous LIVE run:
 
-1. seal and hash-verify the grounding-smoke evidence;
-2. copy the canonical grounding-smoke archive and key evidence off-machine and verify destination hashes;
-3. preregister a new versioned LIVE EXP-000 run using the same score selector plus proposal-handle payload grounding, with no action-availability mask;
-4. treat births and LawValidator admissions as descriptive trajectory outcomes rather than required thresholds.
+1. copy the canonical grounding-smoke archive and key evidence off-machine and verify destination hashes;
+2. preregister a new versioned LIVE EXP-000 run using the same score selector plus proposal-handle payload grounding, with no action-availability mask;
+3. treat births and LawValidator admissions as descriptive trajectory outcomes rather than required thresholds.
