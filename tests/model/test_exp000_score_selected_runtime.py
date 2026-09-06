@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import pytest
 
 from alifelm.context import CognitionAttempt, CompiledContext, ModelActionCandidate
-from alifelm.domain import AgentId, Duration, OpportunityId, RunId, Tick
+from alifelm.domain import AgentId, Duration, OpportunityId, RunId
 from alifelm.kernel import EqualOpportunityScheduler, SimulationRun
 from alifelm.model.evidence import ModelOutputStatus, RejectedModelOutput
 from alifelm.model.score_selected_runtime import ScoreSelectedCandidateRuntime
@@ -14,16 +14,12 @@ from alifelm.model.score_selected_runtime import ScoreSelectedCandidateRuntime
 ACTIONS = ("WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT")
 
 
-def _compiled(agent: str = "A", *, tick: int = 0) -> CompiledContext:
+def _compiled(agent: str = "A") -> CompiledContext:
     run = SimulationRun.bootstrap(
         RunId("EXP000_CPU_COMPOSE"),
         lifespan_ticks=Duration(20),
         founder_ids=(AgentId("A"), AgentId("B")),
     )
-    if tick:
-        # These composition tests only need immutable opportunity identity;
-        # use tick 0 unless a caller explicitly constructs another fixture.
-        raise ValueError("test helper supports tick 0 only")
     opportunities = EqualOpportunityScheduler().enumerate(run.snapshot)
     opportunity = next(item for item in opportunities if item.agent_id == AgentId(agent))
     return CompiledContext(
@@ -63,6 +59,37 @@ class Payloads:
             ),
             generation_id="payload-generation",
             rejection=self.rejection,
+        )
+
+
+class AnySelectedPayload:
+    """Return a contract-shaped candidate for whichever action was selected."""
+
+    def generate_for_action(self, compiled, selected_action):
+        candidates = {
+            "SEND": ModelActionCandidate(
+                "DIRECT_TEXT",
+                (("body", "hello"), ("target_agent_id", "B")),
+            ),
+            "PROPOSE": ModelActionCandidate(
+                "OPEN_BILATERAL_REQUEST",
+                (("target_agent_id", "B"),),
+            ),
+            "ACCEPT": ModelActionCandidate(
+                "CONFIRM_BILATERAL_REQUEST",
+                (("proposal_id", "PENDING"),),
+            ),
+            "REJECT": ModelActionCandidate(
+                "DECLINE_BILATERAL_REQUEST",
+                (("proposal_id", "PENDING"),),
+            ),
+        }
+        return CognitionAttempt(
+            opportunity_id=compiled.opportunity.opportunity_id,
+            candidate=candidates[selected_action],
+            evidence_ref=None,
+            parse_status=ModelOutputStatus.VALID,
+            generation_id="payload-generation",
         )
 
 
@@ -184,8 +211,8 @@ def test_completion_order_does_not_change_per_opportunity_decision() -> None:
     a = _compiled("A")
     b = _compiled("B")
 
-    forward = ScoreSelectedCandidateRuntime(Scores(values), Payloads())
-    reverse = ScoreSelectedCandidateRuntime(Scores(values), Payloads())
+    forward = ScoreSelectedCandidateRuntime(Scores(values), AnySelectedPayload())
+    reverse = ScoreSelectedCandidateRuntime(Scores(values), AnySelectedPayload())
 
     for compiled in (a, b):
         forward.infer(compiled)
