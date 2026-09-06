@@ -67,6 +67,11 @@ from .score_selector import (
     score_selector_seed_material,
     select_score_action,
 )
+from .score_selected_runtime import (
+    ConditionalPayloadProvider,
+    MeanBranchScoreProvider,
+    ScoreSelectedCandidateRuntime,
+)
 from .motor_diagnostics import (
     GROUNDING_TREATMENT_VERSION,
     SELECTOR_CODES,
@@ -158,6 +163,9 @@ __all__ = [
     "score_selector_probabilities",
     "score_selector_seed_material",
     "select_score_action",
+    "ConditionalPayloadProvider",
+    "MeanBranchScoreProvider",
+    "ScoreSelectedCandidateRuntime",
     "GROUNDING_TREATMENT_VERSION",
     "SELECTOR_CODES",
     "SELECTOR_GENERATED_OBJECT_PREFIX",
