@@ -1,6 +1,6 @@
 # WORLD EXP-000 Live Grounding Pilot Result V1
 
-Status: **LIVE_GROUNDING_PILOT_COMPLETE / VM SEALED / OFF-MACHINE BACKUP PENDING**
+Status: **LIVE_GROUNDING_PILOT_COMPLETE / VM SEALED / OFF-MACHINE HASH VERIFIED**
 
 ## 1. Scope
 
@@ -28,7 +28,7 @@ This record establishes an engineering/scientific trajectory result, not a claim
 
 ## 3. Primary integrity result
 
-Two manifests were produced by the runner:
+Two manifests were produced by the runner.
 
 ### Base live manifest
 
@@ -121,11 +121,11 @@ The run therefore supports the bounded engineering claim that the current EXP-00
 
 It does **not** establish stable population dynamics, calibrated reproductive competence, beneficial social behavior, evolutionary adaptation, neural heredity, resource-based selection, culture, or civilization.
 
-## 7. VM preservation
+## 7. Preservation
 
-The sealed recovery directory contains `195` files and all files passed internal SHA-256 verification. The canonical archive passed both gzip and tar verification.
+The sealed recovery directory contains `195` files and all files passed internal SHA-256 verification. The canonical archive passed both gzip and tar verification. The Windows off-machine copies were then verified byte-for-byte against the frozen VM hashes.
 
-Frozen VM identities:
+Frozen identities:
 
 - base `manifest.json`: `aa70c88392f52a018af2ea87f096360e0bfd362cb795668e0216215e57490320`
 - `grounding_manifest.json`: `1cb4f18c2a4239f73d00c8065353a7f835b5d32abc446e29b70b24d3ecb4e281`
@@ -137,8 +137,14 @@ Canonical VM archive path:
 
 `/workspace/WORLD_EXP000_LIVE_GROUNDING_PILOT_V1_3B1580D_R1_CANONICAL.tar.gz`
 
-Off-machine verification is intentionally not claimed until the Windows destination hashes are checked.
+Off-machine destination:
+
+`E:\WORLD\RECOVERY\EXP000_LIVE_GROUNDING_PILOT_V1_R1_20260906`
+
+The Windows destination hashes for the canonical archive, base manifest, grounding manifest, stdout, and `SHA256SUMS` exactly matched the frozen VM identities above.
 
 ## 8. Milestone decision
 
-Subject to off-machine hash verification, EXP-000 has reached the minimum artificial-life engine milestone for the present project scope. The next engineering milestone should move to a read-only researcher Observatory UI and longer durability/soak observation before adding new causal variables such as heredity, resources, geography, survival pressure, group structure, or game mechanics.
+EXP-000 has reached the minimum artificial-life engine milestone for the present project scope and is formally closed for this engineering stage.
+
+The next engineering milestone should move to a read-only researcher Observatory UI and longer durability/soak observation before adding new causal variables such as heredity, resources, geography, survival pressure, group structure, or game mechanics.
