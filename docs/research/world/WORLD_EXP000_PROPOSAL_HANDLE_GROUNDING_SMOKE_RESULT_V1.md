@@ -1,6 +1,6 @@
 # WORLD EXP-000 Proposal Handle Grounding Smoke Result V1
 
-Status: **GROUNDING_SMOKE_PASS / VM SEALED / OFF-MACHINE BACKUP PENDING**
+Status: **GROUNDING_SMOKE_PASS / VM SEALED / OFF-MACHINE HASH VERIFIED**
 
 ## 1. Scope
 
@@ -29,11 +29,11 @@ The smoke completed with:
 - retries/fallbacks/repairs: `0`
 - descriptive LawValidator admissions: `2 / 3`
 
-## 4. VM preservation
+## 4. Preservation
 
 The grounding-smoke evidence was sealed after execution. The sealed directory contains `20` files and every file passed internal SHA-256 verification. The canonical archive passed both gzip and tar verification.
 
-Frozen VM identities:
+Frozen identities:
 
 - manifest SHA-256: `aedfa2f58c9b127ff9c04e5d79bebe7c7b9e892c831fa5ffac385abcff505260`
 - stdout SHA-256: `920061e3d342e27f6aafc1abb7fa7fda3a538b50b14830d0442ab0e4e355a2d9`
@@ -44,7 +44,11 @@ Canonical VM archive path:
 
 `/workspace/WORLD_EXP000_PROPOSAL_HANDLE_GROUNDING_SMOKE_V1_58BB492_R1_CANONICAL.tar.gz`
 
-Off-machine verification is not yet claimed in this record.
+Off-machine destination:
+
+`E:\WORLD\RECOVERY\EXP000_PROPOSAL_HANDLE_GROUNDING_SMOKE_V1_R1_20260906`
+
+The Windows destination hashes for the canonical archive, manifest, stdout, and `SHA256SUMS` exactly matched the frozen VM identities above.
 
 ## 5. Case results
 
@@ -89,8 +93,4 @@ Therefore the current remaining failure modes are now separated as:
 
 ## 7. Next milestone
 
-Before any follow-up continuous LIVE run:
-
-1. copy the canonical grounding-smoke archive and key evidence off-machine and verify destination hashes;
-2. preregister a new versioned LIVE EXP-000 run using the same score selector plus proposal-handle payload grounding, with no action-availability mask;
-3. treat births and LawValidator admissions as descriptive trajectory outcomes rather than required thresholds.
+The grounding-smoke preservation gate is complete. The next authorized step is to preregister a new versioned continuous LIVE EXP-000 run using the same score selector plus proposal-handle payload grounding, with no action-availability mask. Births, LawValidator admissions, and population persistence remain descriptive trajectory outcomes rather than required thresholds.
