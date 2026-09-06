@@ -38,20 +38,18 @@ def transplant_cache_components(
     if component not in D4_COMPONENTS:
         raise ValueError(f"P2-D4 component must be one of {D4_COMPONENTS}")
 
-    target_layers, target_kind, target_type = _legacy_cache(target_cache)
-    donor_layers, donor_kind, donor_type = _legacy_cache(donor_cache)
-    if target_kind != donor_kind or target_type is not donor_type:
-        raise ValueError("P2-D4 target/donor cache representations differ")
-    if len(target_layers) != expected_layers or len(donor_layers) != expected_layers:
-        raise ValueError("P2-D4 target/donor cache layer count differs from preregistration")
-
     selected = tuple(sorted(set(layer_indices)))
     if not selected or any(type(index) is not int for index in selected):
         raise ValueError("P2-D4 patch requires at least one integer layer index")
     if selected[0] < 0 or selected[-1] >= expected_layers:
         raise ValueError("P2-D4 patch layer index is outside the frozen range")
 
+    # Reuse D2's fail-closed representation, layer-count, shape, dtype, and
+    # device identity checks before exposing raw K/V pairs for decomposition.
     validate_cache_pair(target_cache, donor_cache, expected_layers)
+    target_layers, target_kind, target_type = _legacy_cache(target_cache)
+    donor_layers, _, _ = _legacy_cache(donor_cache)
+
     selected_set = set(selected)
     rebuilt: list[tuple[Any, Any]] = []
 
