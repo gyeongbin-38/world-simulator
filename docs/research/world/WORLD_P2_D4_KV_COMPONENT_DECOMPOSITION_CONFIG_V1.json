@@ -1,0 +1,162 @@
+{
+  "study_id": "WORLD_P2_D4_KV_COMPONENT_DECOMPOSITION_V1",
+  "status": "PREREGISTERED_MECHANISTIC_DIAGNOSTIC",
+  "source_p2_interpretation": "C10_NOT_BEHAVIORALLY_ADMITTED",
+  "source_d1": {
+    "study_id": "WORLD_P2_D1_DECISION_BOUNDARY_LOCALIZATION_V1",
+    "historical_details_sha256": "0e5e62709d58168c9922645c1d05d54a7f5c417b68b3f461b4558d3706ca3b17",
+    "recovery_summary_sha256": "2355558f1424cacae0ba8819621c6eef532e48b59bbeeb9ab314ccdd829e1e40",
+    "recovery_stdout_sha256": "bbeabf9305ce2d912b33026a1b18e7f9fc629762f075b946a0e2f1031827afbe",
+    "recovery_archive_sha256": "7c56da7213e270fe60d2d8fe67d6aabe005dc9ff5bed79bb91120244a7743e80"
+  },
+  "source_d2": {
+    "study_id": "WORLD_P2_D2_KV_CACHE_CAUSAL_LOCALIZATION_V1",
+    "historical_scientific_head": "9cfa129c260173790865825f6d6283b57bac555c",
+    "historical_result_digest": "cf03450cdcde79e0f2fe78b4caf7bda6df99bec159246a15817194dcc61b9a61",
+    "details_sha256": "e554f6a113597cd8d3f1d9c923f7ee4e17c59c51e9933cd398a2118f15731608",
+    "recovery_summary_sha256": "37dcddf79b5cc7f197d220d11bb1b0d80bfc87d65dd77c618ec5acc3a89117fb",
+    "recovery_stdout_sha256": "1a4d8844341751240466089424d46a5e38e54c466186bafc164b3be294cc708c",
+    "recovery_archive_sha256": "ae48541bc474771b676717b5b2a156d6e0b9553867b25111b41f6a64e3fbfc3b",
+    "localization": "UNION_BIDIRECTIONAL_NONUNIVERSAL",
+    "selected_layers": [9, 10]
+  },
+  "source_d3": {
+    "study_id": "WORLD_P2_D3_TARGETED_ADAPTER_SCALING_V1",
+    "preregistration_commit": "8cbba8828fbb3f5b6bb496f2476c78b420036296",
+    "scientific_head": "ee0b1da2bbda35c026f9ca38aa7dcea92f815ce0",
+    "result_digest": "f47c082fc03d0129b82ccf404f30e39b8fed76e77650a303074d4258b90fa130",
+    "details_sha256": "8646a7d897278f639d80295766649b4ab4506e809d6b3122994339fa7b3a5f1b",
+    "summary_sha256": "74c92110510b6d477cd97de67f3fb99879331c2529ce22949aaeb44d740152fa",
+    "stdout_sha256": "c2f0aba8b0bd0ac2cc884db99119ee7950791175eb6ea0053243ea761dd16b88",
+    "archive_sha256": "9c2090ff25dce3ae6431fe78abecb774b8ac365880c50d521b270b3766e73f54",
+    "selected_scale": 0.0,
+    "repair_proxy": "SCORE_PROXY_NOT_REPAIRED"
+  },
+  "model": {
+    "identifier": "OLMo-2-0425-1B-Instruct",
+    "expected_transformer_layers": 16,
+    "dtype": "bfloat16",
+    "prefill_source_states": ["BASE", "FA"],
+    "selector_adapter": false
+  },
+  "intervention": {
+    "type": "PREFILL_KV_COMPONENT_TRANSPLANT",
+    "target_layers": [9, 10],
+    "components": ["K", "V"],
+    "clone_all_rebuilt_tensors": true,
+    "donor_mutation_forbidden": true,
+    "target_source_mutation_forbidden": true,
+    "nonselected_layers_unchanged": true,
+    "nonselected_component_unchanged": true
+  },
+  "component_candidates": [
+    {"id": "L9_K", "layers": [9], "component": "K"},
+    {"id": "L9_V", "layers": [9], "component": "V"},
+    {"id": "L10_K", "layers": [10], "component": "K"},
+    {"id": "L10_V", "layers": [10], "component": "V"},
+    {"id": "L9_L10_K", "layers": [9, 10], "component": "K"},
+    {"id": "L9_L10_V", "layers": [9, 10], "component": "V"}
+  ],
+  "full_cohort": {
+    "case_start": 4000,
+    "case_stop_inclusive": 4031,
+    "cases_per_context": 32,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "contexts": 160
+  },
+  "screening_cohort": {
+    "case_start": 4000,
+    "case_stop_inclusive": 4003,
+    "cases_per_context": 4,
+    "context_classes": [
+      "QUIET",
+      "MESSAGE_RECEIVED",
+      "PROPOSAL_RECEIVED",
+      "OWN_PROPOSAL_PENDING",
+      "RECENT_INTERACTION"
+    ],
+    "contexts": 20
+  },
+  "decision_readout": {
+    "primary_gap": "WAIT_TOTAL_LOG_PROBABILITY_MINUS_SEND_TOTAL_LOG_PROBABILITY",
+    "negative_side": "SEND",
+    "positive_side": "WAIT",
+    "screening_persisted_branches": ["WAIT", "SEND"],
+    "full_confirmation_branches": ["WAIT", "SEND", "PROPOSE", "ACCEPT", "REJECT"],
+    "common_prefix_divergence": "D1_FIVE_SCHEMA_EARLIEST_LEGAL_SET_DIVERGENCE",
+    "normalized_rescue_fraction": "(G_F-G_R)/D",
+    "normalized_induction_fraction": "(G_I-G_B)/D",
+    "symmetric_mediator_score": "(NR+NI)/2",
+    "require_positive_source_delta": true
+  },
+  "stage0": {
+    "baseline_matches_d1_required": true,
+    "k_self_donor_noop_required": true,
+    "v_self_donor_noop_required": true,
+    "kv_component_composition_matches_d2_full_kv_required": true,
+    "k_patch_preserves_target_v_required": true,
+    "v_patch_preserves_target_k_required": true,
+    "donor_and_source_target_immutability_required": true,
+    "cache_signature_preservation_required": true
+  },
+  "stageA": {
+    "cohort": "screening_cohort",
+    "evaluate_all_candidates": true,
+    "directions": ["RESCUE", "INDUCTION"],
+    "candidate_score": "MEDIAN_SYMMETRIC_MEDIATOR_SCORE",
+    "selection_rule": "MAX_MEDIAN_SYMMETRIC_MEDIATOR_SCORE",
+    "tie_break_order": [
+      "L9_K",
+      "L9_V",
+      "L10_K",
+      "L10_V",
+      "L9_L10_K",
+      "L9_L10_V"
+    ],
+    "advance_exactly_one": true,
+    "posthoc_threshold_forbidden": true,
+    "posthoc_candidate_substitution_forbidden": true
+  },
+  "stageB": {
+    "cohort": "full_cohort",
+    "selected_condition": "TOP_STAGEA_COMPONENT_CANDIDATE",
+    "directions": ["RESCUE", "INDUCTION"],
+    "recompute_unpatched_baselines": true,
+    "full_five_action_scoring": true,
+    "exact_repeat": true,
+    "exact_repeat_serialized_equality_required": true,
+    "compare_to_matching_d2_full_kv_descriptively": true,
+    "report_by_context_class": true,
+    "report_sign_flip_counts": true,
+    "report_rank1_distributions": true
+  },
+  "interpretation": {
+    "mechanistic_diagnostic_only": true,
+    "selected_candidate_is_not_unique_cause_claim": true,
+    "p2_behavioral_admission_relabel_forbidden": true,
+    "d1_relabel_forbidden": true,
+    "d2_relabel_forbidden": true,
+    "d3_relabel_forbidden": true,
+    "head_token_residual_followup_requires_new_preregistration": true
+  },
+  "preservation": {
+    "seal_archive_after_integrity_pass": true,
+    "sha256_manifest_required": true,
+    "off_machine_copy_required_before_next_study": true,
+    "destination_hash_verification_required_before_next_study": true,
+    "failed_attempts_immutable": true
+  },
+  "action_intent_generation": false,
+  "simulation_state_commit": false,
+  "weight_update": false,
+  "retry": false,
+  "repair": false,
+  "fallback": false,
+  "canonical_runtime_pip_freeze_sha256": "a98b9c11baf90a5e7717b1f108029838e9c917d46d1f499bf93e9adffad087bf"
+}
