@@ -1,6 +1,6 @@
 # WORLD EXP-000 Live Multi-Agent Pilot Result V1
 
-Status: **LIVE_PILOT_COMPLETE / VM SEALED / OFF-MACHINE BACKUP PENDING**
+Status: **LIVE_PILOT_COMPLETE / VM SEALED / OFF-MACHINE HASH VERIFIED**
 
 ## 1. Scope
 
@@ -63,7 +63,7 @@ However, successful reproduction did not occur. At least one directly inspected 
 
 No post-hoc action-frequency or birth threshold is applied to this run. Zero births is an observed trajectory result, not an infrastructure failure.
 
-## 6. VM preservation
+## 6. Preservation
 
 The sealed recovery directory contains 202 files and passed internal SHA-256 verification. The canonical archive passed both gzip and tar verification.
 
@@ -79,13 +79,12 @@ Canonical VM archive path:
 
 `/workspace/WORLD_EXP000_LIVE_PILOT_V1_55B4C51_R1_CANONICAL.tar.gz`
 
-Off-machine hash verification is intentionally not claimed in this record until the Windows destination hashes are checked.
+The canonical archive, manifest, stdout log, launch log, and seal `SHA256SUMS` were copied to Windows `E:\WORLD\RECOVERY\EXP000_LIVE_PILOT_V1_R1_20260906`. Destination SHA-256 values exactly matched the frozen VM values above for all five files. The LIVE pilot is therefore off-machine hash verified.
 
 ## 7. Next analysis boundary
 
 Before any corrected or follow-up live run:
 
-1. copy the canonical archive and key evidence files off-machine and verify exact destination SHA-256 values;
-2. perform a read-only classification of all 60 cognition opportunities, especially all eight law rejections;
-3. determine whether ACCEPT/REJECT failures are dominated by opaque proposal-ID grounding, self-targeting, wrong-target selection, or another protocol-level failure;
-4. preregister any grounding-layer intervention separately before new model forwards.
+1. perform a read-only classification of all 60 cognition opportunities, especially all eight law rejections;
+2. determine whether ACCEPT/REJECT failures are dominated by opaque proposal-ID grounding, self-targeting, wrong-target selection, or another protocol-level failure;
+3. preregister any grounding-layer intervention separately before new model forwards.
