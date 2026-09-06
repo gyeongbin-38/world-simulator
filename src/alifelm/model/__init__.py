@@ -72,6 +72,13 @@ from .score_selected_runtime import (
     MeanBranchScoreProvider,
     ScoreSelectedCandidateRuntime,
 )
+from .score_selected_c10 import (
+    C10_PREFILL_ADAPTER,
+    C10_SELECTOR_ADAPTER,
+    C10ConditionalPayloadProvider,
+    C10MeanBranchScoreProvider,
+    build_c10_score_selected_runtime,
+)
 from .motor_diagnostics import (
     GROUNDING_TREATMENT_VERSION,
     SELECTOR_CODES,
@@ -166,6 +173,11 @@ __all__ = [
     "ConditionalPayloadProvider",
     "MeanBranchScoreProvider",
     "ScoreSelectedCandidateRuntime",
+    "C10_PREFILL_ADAPTER",
+    "C10_SELECTOR_ADAPTER",
+    "C10ConditionalPayloadProvider",
+    "C10MeanBranchScoreProvider",
+    "build_c10_score_selected_runtime",
     "GROUNDING_TREATMENT_VERSION",
     "SELECTOR_CODES",
     "SELECTOR_GENERATED_OBJECT_PREFIX",
