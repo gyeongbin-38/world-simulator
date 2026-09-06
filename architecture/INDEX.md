@@ -25,6 +25,9 @@ Each active document owns one bounded question. Do not duplicate its detailed ru
 | SEQ-351 | `views/SEQ-351-genome-artifact-commit.md` | REVIEWED | N0 genome artifact CAS construction and atomic genome_ref commit ordering |
 | DF-260 | `views/DF-260-research-lineage.md` | REVIEWED | raw evidence → dataset → result → claim lineage |
 | DF-310 | `views/DF-310-context-compilation.md` | REVIEWED | deterministic ContextPack compilation, provenance, ordering, and hash |
+| ARC-600 | `views/ARC-600-observatory-isolation-read-model.md` | IMPLEMENTED / V1 | read-only Observatory authority and source precedence |
+| SEQ-610 | `views/SEQ-610-replay-observation.md` | IMPLEMENTED / V1 | observation cursor and replay frame selection |
+| ARC-620 | `views/ARC-620-observatory-research-views.md` | IMPLEMENTED / V1 | Observatory views and evidence disclosure |
 
 ## Supporting domain documents
 
@@ -44,7 +47,6 @@ Do **not** author these just to make the document count complete.
 | ARC-400 / WF-410 / SEQ-420 | before controlled interventions/confirmation tooling | experiment control and confirmation workflow |
 | ARC-430 | before causal physical space | causal 2D environment |
 | ARC-500 / WF-520 | before performance scaling backend | compute admission/batching without causal drift |
-| ARC-600 / SEQ-610 / ARC-620 | before Observatory implementation | read-only UI/subscription/research views |
 
 ## Retrieval rule
 

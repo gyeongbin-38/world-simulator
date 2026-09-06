@@ -38,14 +38,17 @@ class LintReport:
 
 
 def _markdown_files(root: Path) -> tuple[Path, ...]:
-    ignored = {".git", ".venv", "__pycache__", ".pytest_cache"}
-    return tuple(
-        sorted(
-            path
-            for path in root.rglob("*.md")
-            if not any(part in ignored for part in path.parts)
-        )
-    )
+    ignored = {
+        ".git", ".venv", "__pycache__", ".pytest_cache", "node_modules",
+        ".observatory-cache", "dist", "build", "test-results", "playwright-report",
+    }
+    files: list[Path] = []
+    for directory, subdirectories, names in root.walk():
+        # Prune generated/dependency trees before traversal. Their README links
+        # are not repository documentation and their evidence may be sealed.
+        subdirectories[:] = [name for name in subdirectories if name not in ignored]
+        files.extend(directory / name for name in names if name.lower().endswith(".md"))
+    return tuple(sorted(files))
 
 
 def _content_lines(lines: list[str]):

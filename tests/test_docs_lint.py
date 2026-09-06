@@ -25,6 +25,19 @@ def test_lint_detects_broken_markdown_link(tmp_path: Path) -> None:
     assert any(issue.code == "BROKEN_MARKDOWN_LINK" for issue in report.issues)
 
 
+def test_lint_prunes_frontend_dependencies_and_disposable_evidence(tmp_path: Path) -> None:
+    from alifelm.docs_lint import _markdown_files
+
+    canonical = tmp_path / "docs" / "observatory" / "README.md"
+    canonical.parent.mkdir(parents=True)
+    canonical.write_text("# Canonical observation docs\n", encoding="utf-8")
+    for name in ("observatory/node_modules/package", ".observatory-cache/sealed", "observatory/test-results"):
+        generated = tmp_path / name / "README.md"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("[vendor link](not-distributed.md)\n", encoding="utf-8")
+    assert _markdown_files(tmp_path) == (canonical,)
+
+
 def test_lint_detects_archive_registration_and_bootstrap_owner(tmp_path: Path) -> None:
     architecture = tmp_path / "architecture"
     views = architecture / "views"

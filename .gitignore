@@ -16,3 +16,8 @@ build/
 .cas/
 .alifelm-cas-memory/
 runtime-data/
+.observatory-cache/
+observatory/node_modules/
+observatory/test-results/
+observatory/playwright-report/
+observatory/.env.local
