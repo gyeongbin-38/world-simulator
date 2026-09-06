@@ -58,6 +58,15 @@ from .live_runtime import (
 )
 from .profile import ModelProfile
 from .peft_runtime import PeftTransformersLoader
+from .score_selector import (
+    SCORE_SELECTOR_ACTION_ORDER,
+    SCORE_SELECTOR_V1_DOMAIN,
+    SCORE_SELECTOR_V1_TEMPERATURE,
+    ScoreSelectorDecision,
+    score_selector_probabilities,
+    score_selector_seed_material,
+    select_score_action,
+)
 from .motor_diagnostics import (
     GROUNDING_TREATMENT_VERSION,
     SELECTOR_CODES,
@@ -142,6 +151,13 @@ __all__ = [
     "DeploymentPaths",
     "SmokePreflightError",
     "verify_static_deployment",
+    "SCORE_SELECTOR_ACTION_ORDER",
+    "SCORE_SELECTOR_V1_DOMAIN",
+    "SCORE_SELECTOR_V1_TEMPERATURE",
+    "ScoreSelectorDecision",
+    "score_selector_probabilities",
+    "score_selector_seed_material",
+    "select_score_action",
     "GROUNDING_TREATMENT_VERSION",
     "SELECTOR_CODES",
     "SELECTOR_GENERATED_OBJECT_PREFIX",
