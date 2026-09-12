@@ -1,0 +1,12 @@
+{
+  "execution_id": "EXP-STIG-001-R2",
+  "scientific_config_sha256": "ced53388e77bde3f6ae21bc42972f61309a13815c34d41b115cf227d10f5256f",
+  "prior_planned_digest": "efc8a9c46c0b182aa812af60cb4e337868ac6938e997dc4b0664d9027f97ef1b",
+  "prior_failure_sha256": "4a32fb3f620f597f2cf4b30fb3dc36d98e264649d8716b7ae02ad55c9a64e69c",
+  "prior_status": "INCOMPLETE_INVALID",
+  "request_timeout_seconds": 900,
+  "model_load_timeout_seconds": 600,
+  "maximum_operational_replications": 1,
+  "reuse_previous_responses": false,
+  "scientific_treatment_changes": false
+}

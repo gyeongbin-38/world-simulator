@@ -1,0 +1,41 @@
+{
+  "experiment_id": "EXP-STIG-002",
+  "version": "1.0.0",
+  "title": "Instrumental Persistence",
+  "purpose": "Test voluntary creation and reuse of persistent traces when traces reduce objectively checkable exploration cost.",
+  "conditions": ["A", "B", "C"],
+  "treatments": {
+    "A": "MESSAGE ONLY: WAIT, SEND, INSPECT, SUBMIT; no persistent traces or world mutation.",
+    "B": "PERSISTENT TRACE: WAIT, SEND, INSPECT, SUBMIT, TRACE, REUSE; committed traces remain visible to later agents.",
+    "C": "CAUSAL WORLD: B plus validated COMMIT of known facts into canonical world state."
+  },
+  "agents": ["X17", "X29", "X43"],
+  "worlds_per_condition": 1,
+  "ticks": 2,
+  "opportunities": 18,
+  "objective": {
+    "facts": {"F1": "amber", "F2": "cedar", "F3": "violet"},
+    "objectives": {
+      "X17": ["F1", "F2"],
+      "X29": ["F1", "F3"],
+      "X43": ["F2", "F3"]
+    },
+    "initial_private_knowledge": {
+      "X17": ["F1"],
+      "X29": ["F3"],
+      "X43": ["F2"]
+    },
+    "independent_solution": "An agent may inspect missing facts at exploration cost 1 and submit the exact objective answer."
+  },
+  "pre_registration": {
+    "P0": "No spontaneous TRACE bootstrap even when persistence has instrumental value.",
+    "P1": "At least one voluntary committed TRACE bootstrap occurs.",
+    "P2": "A later agent voluntarily REUSEs a committed trace.",
+    "P3": "Reuse measurably improves correctness, exploration cost, or duplicated exploration versus message-only.",
+    "P4": "P3 replicates across heterogeneous models/worlds."
+  },
+  "action_boundary": "R4 grounded affordance: only currently executable actions and visible opaque identifiers enter the grammar; Gateway/kernel remains authoritative.",
+  "model_policy": "Local llama.cpp completion, deterministic temperature 0/top_k 1/top_p 1/min_p 0/repeat penalty 1, n_predict 128, no retries, fallback, repair, or Astra.",
+  "pilot_stop_rule": "18 total real-model opportunities; no larger run unless this pilot produces a spontaneous committed TRACE or another scientifically justified signal.",
+  "status": "PILOT_PREREGISTERED"
+}

@@ -33,6 +33,7 @@ Each active document owns one bounded question. Do not duplicate its detailed ru
 
 | Document | Owns |
 |---|---|
+| `../docs/research/world/EXP-STIG-001.md` | EXP-STIG-001 persistent environmental traces, stigmergy, shared registers |
 | `../docs/DOCS_POLICY.md` | repository documentation/context loading |
 | `../docs/observatory/SPRITES.md` | non-causal sprite identity and visual inheritance modes |
 | `decisions/ADR-300-001-self-send-addressing.md` | EXP-000 SEND target law and self-addressing prohibition |

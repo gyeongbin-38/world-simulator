@@ -1,0 +1,18 @@
+{
+  "action_affordance_policy_id": "EXP-STIG-001-R4-GROUNDED-AFFORDANCE-V1",
+  "affordance_builder_sha256": "be396919df6072255383893b0d005c4a9c28968eb15a860654a6fc24feebe0a1",
+  "execution_id": "EXP-STIG-001-R4",
+  "generation_policy_unchanged": true,
+  "maximum_operational_replications": 1,
+  "model_load_timeout_seconds": 600,
+  "prior_r3_manifest_digest": "2e51e173c99a7bfa0acd9760f8f5da2ee2f323f9a08fb91073e769fc2a7b09c9",
+  "prior_r3_result_sha256": "8650d80c8e111da7d6d473be4dd8f9c1dbf4d5aac72605913a7f22a6092145be",
+  "qualification_manifest_digest": "9655afd9f87883fb746270db709acac0350c6c2457c302ccfe666f51334e4bcb",
+  "qualification_manifest_sha256": "2536ed28df54a6ae957bcd82dc797d8cdf8ffd26766200169d9176a481f4fcf3",
+  "qualification_status": "PASS",
+  "request_timeout_seconds": 900,
+  "reuse_previous_responses": false,
+  "scientific_config_sha256": "ced53388e77bde3f6ae21bc42972f61309a13815c34d41b115cf227d10f5256f",
+  "scientific_treatment_changes": false,
+  "treatment_definitions_unchanged": true
+}

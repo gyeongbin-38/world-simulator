@@ -1,0 +1,27 @@
+{
+  "experiment_id": "EXP-STIG-001",
+  "version": "1.0.0",
+  "conditions": ["A", "B", "C"],
+  "agents": ["X17", "X29", "X43"],
+  "registers": ["K17", "K29", "K43"],
+  "blocks": [1701, 2901, 4301],
+  "ticks": 4,
+  "model_assignment": [[0, 1, 0], [1, 0, 0], [0, 0, 1]],
+  "models": [
+    {"repo": "allenai/OLMo-2-0425-1B-Instruct", "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e", "runtime_repo": "allenai/OLMo-2-0425-1B-Instruct-GGUF", "runtime_revision": "62f8c199538474c3e33ed5d7e0580abd66686a27", "sha256": "4a180742923d27d2434e53062b21f508257a5ee15abda398a3db13385e33d6e6", "quantization": "Q8_0", "adapter": null},
+    {"repo": "VillanovaAI/Villanova-2B-2603", "revision": "c80659f69c9943120d50f2d96f62851ed22b9be5", "runtime_repo": "VillanovaAI/Villanova-2B-2603-GGUF", "runtime_revision": "37a2e83b330f47986d153428903705fae2a23e8f", "sha256": "eb0865b1cd939a2f73114523b099376230c03bed9b1fa6dfbb02283dff98577e", "quantization": "Q8_0", "adapter": null}
+  ],
+  "generation": {"temperature": 0.0, "top_k": 1, "top_p": 1.0, "min_p": 0.0, "repeat_penalty": 1.0, "n_predict": 128, "cache_prompt": false, "stream": false},
+  "runtime": {"context": 4096, "gpu_layers": 12, "threads": 4, "parallel": 1, "request_timeout_seconds": 300},
+  "body_limit": 256,
+  "trace_limit": 36,
+  "interface": "STIG_STRICT_JSON_V1",
+  "teacher_LM": false,
+  "retries": false,
+  "fallback": false,
+  "repair": false,
+  "reproduction": false,
+  "heredity": false,
+  "counterfactual_selection": "FIRST_EXPOSURE_PER_OBSERVER_PER_WORLD",
+  "interpretation": {"positive_difference_all_blocks": true, "S1_requires_attributable_chain": true, "S2_requires_attributable_register_change": true, "S3_observer_models": 2, "S3_blocks": 2}
+}

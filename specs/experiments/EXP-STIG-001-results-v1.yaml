@@ -1,0 +1,31 @@
+{
+  "experiment_id": "EXP-STIG-001",
+  "execution_id": "EXP-STIG-001-R2",
+  "status": "COMPLETE_OBSERVATIONAL_S0_WITH_CODEC_LIMITATION",
+  "scientific_config": "specs/experiments/EXP-STIG-001-v1.yaml",
+  "scientific_config_sha256": "ced53388e77bde3f6ae21bc42972f61309a13815c34d41b115cf227d10f5256f",
+  "operational_amendment": "specs/experiments/EXP-STIG-001-execution-r2.yaml",
+  "evidence_root": "E:/WORLD/AI_CACHE/evidence/EXP_STIG_001_R2",
+  "planned_manifest_digest": "bd84243807dababaf32b2f41484041f514a0b2157ca0b5c05b98c9d40bfb475b",
+  "result_manifest_digest": "ebb1b7d4b40fd25b5bdc7e8647e3b607be0ce5564ae21a69ab276feffbd1fa8e",
+  "observer_analysis_sha256": "668ed2e631caa9f328a205ff61f1800c68f592e14e9c121115da0a25d2d9e060",
+  "execution_git_commit": "b799f29c2db689bcac92db5eba3bae030349b022",
+  "model_artifacts": [
+    {"family": "OLMo", "sha256": "4a180742923d27d2434e53062b21f508257a5ee15abda398a3db13385e33d6e6", "quantization": "Q8_0"},
+    {"family": "Villanova", "sha256": "eb0865b1cd939a2f73114523b099376230c03bed9b1fa6dfbb02283dff98577e", "quantization": "Q8_0"}
+  ],
+  "cohort": {"blocks": [1701, 2901, 4301], "conditions": ["A", "B", "C"], "agents": ["X17", "X29", "X43"], "ticks": 4, "opportunities_per_condition": 36, "primary_requests": 108},
+  "conditions": {
+    "A_MESSAGE_ONLY": {"opportunities": 36, "accepted": 0, "rejected": 36, "foreign_environment_uses": 0, "register_changes": 0},
+    "B_PERSISTENT_TRACE": {"opportunities": 36, "accepted": 0, "rejected": 36, "foreign_environment_uses": 0, "register_changes": 0},
+    "C_CAUSAL_WORLD": {"opportunities": 36, "accepted": 0, "rejected": 36, "foreign_environment_uses": 0, "register_changes": 0}
+  },
+  "action_observations": {"accepted_actions": {}, "rejection_count": 108, "rejection_pattern": "JSON_EXTRA_DATA_AFTER_MODEL_COMPLETION", "voluntary_wait_count": null},
+  "stigmergy": {"counterfactual_exposures": 0, "stable_repeats": 0, "attributable_chains": 0, "third_agent_reuse": 0, "interpretation": "S0", "claim": "no demonstrated effect; not equivalence"},
+  "paired_differences": [{"block": 1701, "B_minus_A_use_rate": 0.0, "C_minus_B_use_rate": 0.0}, {"block": 2901, "B_minus_A_use_rate": 0.0, "C_minus_B_use_rate": 0.0}, {"block": 4301, "B_minus_A_use_rate": 0.0, "C_minus_B_use_rate": 0.0}],
+  "costs": {"prompt_tokens": 21036, "generated_tokens": 13824, "requests": 108, "wall_seconds": 11009.314746899996, "model_load_seconds": 331.46206649998203, "by_condition": {"A": {"prompt_tokens": 6120, "generated_tokens": 4608, "request_seconds": 3339.068861500011}, "B": {"prompt_tokens": 6972, "generated_tokens": 4608, "request_seconds": 3710.7506789003965}, "C": {"prompt_tokens": 7944, "generated_tokens": 4608, "request_seconds": 3449.5508882995928}}},
+  "historical_censored_run": {"evidence_root": "E:/WORLD/AI_CACHE/evidence/EXP_STIG_001_V1", "status": "CENSORED_NO_SCIENTIFIC_RESULT", "planned_manifest_digest": "efc8a9c46c0b182aa812af60cb4e337868ac6938e997dc4b0664d9027f97ef1b", "complete_responses": 12, "commits": 0, "action_contents_scored": false},
+  "validity": {"deterministic_validation": "PASS", "replay_audit": "PASS", "independent_notebook_audit": "PASS", "raw_text_in_canonical_state": false, "retries": false, "fallback": false, "repair": false, "teacher_lm": false},
+  "interpretation_limits": ["All 108 model proposals were rejected by strict JSON parsing; B/C trace channels never received an accepted trace.", "S0 is a bounded no-demonstrated-effect result, not evidence that persistent traces lack value.", "Codec/model-output competence is an assay limitation; no voluntary WAIT or inactivity was observed.", "Four ticks cannot establish specialization, general utility, or population effects.", "The censored V1 execution is not pooled with R2."],
+  "source_integrity": "All frozen protocol and source hashes are bound in planned.json and source-archive.json; EXP-000 and Campfire were not modified."
+}

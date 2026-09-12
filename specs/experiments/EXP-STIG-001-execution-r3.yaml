@@ -1,0 +1,22 @@
+{
+  "constraint_policy_hashes": {
+    "A": "f74226baecb7fa9ed11229a581c434b2692682bb0740dc5aab32f7861ab271bf",
+    "B": "c32fe5bcbc1c1464f654b184924de32660c8a051af2ee578f37f0fec382bd4b0",
+    "C": "16eb28a0635244312897c21404e580944a74cdbc6a1be9aa8a268cc089148864"
+  },
+  "constraint_policy_id": "EXP-STIG-001-R3-ACTION-GRAMMAR-V1",
+  "execution_id": "EXP-STIG-001-R3",
+  "generation_policy_unchanged": true,
+  "maximum_operational_replications": 1,
+  "model_load_timeout_seconds": 600,
+  "prior_r2_manifest_digest": "ebb1b7d4b40fd25b5bdc7e8647e3b607be0ce5564ae21a69ab276feffbd1fa8e",
+  "prior_r2_result_sha256": "3f62d9ed2506062ffc76b2010092eb6f567b8c76af47bea11f7c8dde3c5069a0",
+  "qualification_manifest_digest": "77a903ce5086d5636c430ce4e21ad481f591034c5614de3a71318c0ce4333600",
+  "qualification_manifest_sha256": "d0ad5d79710352b80e19f74f6b34c82195412381b6c45fe2692940ab9a074787",
+  "qualification_status": "PASS",
+  "request_timeout_seconds": 900,
+  "reuse_previous_responses": false,
+  "scientific_config_sha256": "ced53388e77bde3f6ae21bc42972f61309a13815c34d41b115cf227d10f5256f",
+  "scientific_treatment_changes": false,
+  "treatment_definitions_unchanged": true
+}
