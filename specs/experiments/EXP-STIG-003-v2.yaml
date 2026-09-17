@@ -1,0 +1,65 @@
+{
+  "experiment_id": "EXP-STIG-003",
+  "version": "2.0.0",
+  "title": "Persistence-Necessary Retention",
+  "supersedes": "EXP-STIG-003-v1. The v1 pilot (36/36 committed, zero failures) produced P0: models persisted only already-known facts and every SUBMIT echoed the answer-field description. v2 removes two instrument defects without changing the necessity structure: TRACE binds only ephemeral scan-covered facts, and SUBMIT is grammar-constrained to the objective answer skeleton so schema-description echoes cannot be emitted. Model cohort, seeds, world law, and stop rules are unchanged.",
+  "purpose": "Test whether agents voluntarily commit a transient observation into a persistent environmental channel when persistence is the only self-sufficient route to objective completion.",
+  "conditions": ["A", "B", "C"],
+  "treatments": {
+    "A": "MESSAGE ONLY: WAIT, SEND, INSPECT, SUBMIT; no environmental persistence channel.",
+    "B": "PERSISTENT TRACE: A plus TRACE and grounded REUSE; committed traces remain visible to later ticks.",
+    "C": "CAUSAL WORLD: B plus validated COMMIT of known or currently scanned facts into canonical world state."
+  },
+  "agents": ["X17", "X29", "X43"],
+  "worlds_per_condition": 1,
+  "ticks": 4,
+  "submission_tick": 3,
+  "opportunities": 36,
+  "objective": {
+    "facts": {"F1": "amber", "F2": "cedar", "F3": "violet", "F4": "umber", "F5": "onyx", "F6": "maple"},
+    "objectives": {
+      "X17": {"id": "OBJ-X17", "fact_ids": ["F1", "F2"], "answer_format": "F1=value|F2=value"},
+      "X29": {"id": "OBJ-X29", "fact_ids": ["F3", "F4"], "answer_format": "F3=value|F4=value"},
+      "X43": {"id": "OBJ-X43", "fact_ids": ["F5", "F6"], "answer_format": "F5=value|F6=value"}
+    },
+    "initial_private_knowledge": {"X17": ["F1"], "X29": ["F3"], "X43": ["F5"]},
+    "scannable_fact_ids": {"X17": ["F2"], "X29": ["F4"], "X43": ["F6"]},
+    "dependency": "Each missing fact is scannable only by its needer and is in no other agent's knowledge, objective, or scan set; no peer can supply it.",
+    "independent_solution": "INSPECT the missing fact, carry its value through a committed persistent channel, then SUBMIT the exact objective answer inside the submission window."
+  },
+  "scan_law": {
+    "grant": "An accepted INSPECT costs one exploration unit and writes a private scan visible to that actor from the next tick.",
+    "expiry": "Scans never persist into the submission window: they are removed when tick 3 is committed into existence and are absent from every tick-3 context.",
+    "inspect_window": "INSPECT is afforded only while the following tick precedes the submission tick and no active scan covers the fact.",
+    "capture": "TRACE may bind only a currently active scan's fact_id with its exact value and is not afforded without one; COMMIT may bind any known or scanned fact as in v1. The kernel still validates TRACE/COMMIT over known-or-scanned facts; the narrowed TRACE grammar only restricts proposals.",
+    "visibility": "Scans are private to the scanning actor; no peer ever observes them."
+  },
+  "submission_law": {
+    "window_tick": 3,
+    "window_actions": ["WAIT", "SUBMIT"],
+    "early_submit": "SUBMIT is never afforded before the window; a parser-valid early SUBMIT is an affordance rejection, not a commitment.",
+    "answer_grammar": "The SUBMIT answer is grammar-constrained to the actor's objective skeleton (e.g. F1=<word>|F2=<word>) with lowercase word slots; the affordance descriptor carries the concrete answer_format. Structure is enforced by the grammar; correctness still requires the right values.",
+    "scoring": "SUBMIT is scored by exact match against the objective answer."
+  },
+  "provenance_classes": {
+    "persistent_knowledge": "value was in the actor's persistent knowledge at tick 3; for a missing fact this is reachable only via REUSE of a committed trace",
+    "environmental_trace": "value was absent from knowledge and present via a committed trace at tick 3",
+    "environmental_world_state": "value was absent from knowledge and present via a committed C world_state entry at tick 3",
+    "peer_relay": "value arrived only via a peer SEND message returning the actor's own earlier scan",
+    "unexplained": "value was correct but absent from knowledge, traces, world_state, and messages at tick 3"
+  },
+  "environmental_provenance": ["persistent_knowledge", "environmental_trace", "environmental_world_state"],
+  "pre_registration": {
+    "P0": "No committed TRACE or COMMIT captures a scanned objective fact; instrumental necessity alone still yields no bootstrap.",
+    "P1": "At least one voluntary committed TRACE or COMMIT captures a scanned objective fact.",
+    "P2": "At least one voluntary REUSE of a committed trace occurs.",
+    "P3": "At least one correct terminal SUBMIT whose missing objective facts all carry environmental provenance (trace, world_state, or REUSE-internalized trace content), established by mechanical provenance audit without re-inference.",
+    "P4": "P1 and P3 each replicate across both model families."
+  },
+  "control_boundary": "Condition A has no environmental persistence channel, so a correct terminal A submission can arise only via peer relay; relay completions are counted separately and never toward P3. A correct A submission with unexplained provenance voids the affected world pending evidence audit rather than supporting any claim.",
+  "verified_completion": "A correct terminal SUBMIT is additionally verified when every objective fact is in the actor's persistent knowledge at tick 3; reported alongside raw correctness.",
+  "action_boundary": "Grounded affordance: only currently executable actions and visible opaque identifiers enter the grammar; Gateway/kernel validation remains authoritative.",
+  "model_policy": "Local llama.cpp completion, deterministic temperature 0/top_k 1/top_p 1/min_p 0/repeat penalty 1, n_predict 128, no retries, fallback, repair, or Astra.",
+  "pilot_stop_rule": "36 total real-model opportunities; no larger run unless this pilot produces a P1 event or another scientifically justified signal.",
+  "status": "PILOT_PREREGISTERED"
+}

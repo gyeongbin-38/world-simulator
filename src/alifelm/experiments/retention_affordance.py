@@ -13,8 +13,8 @@ from typing import Any
 
 from . import stigmergy as s
 
-POLICY_ID = "EXP-STIG-003-GROUNDED-AFFORDANCE-V1"
-BUILDER_VERSION = "retention-grounded-action-grammar-v1"
+POLICY_ID = "EXP-STIG-003-GROUNDED-AFFORDANCE-V2"
+BUILDER_VERSION = "retention-grounded-action-grammar-v2"
 ACTIONS = {
     "A": ("WAIT", "SEND", "INSPECT", "SUBMIT"),
     "B": ("WAIT", "SEND", "INSPECT", "SUBMIT", "TRACE", "REUSE"),
@@ -22,6 +22,7 @@ ACTIONS = {
 }
 
 _STRING = r'''jsonstring ::= "\"" ( [^"\\\x7F\x00-\x1F] | "\\" (["\\bfnrt] | "u" [0-9a-fA-F]{4}) )* "\""
+word ::= [a-z]{1,32}
 ws ::= | " " | "\n" [ \t]{0,20}
 '''
 
@@ -59,7 +60,8 @@ def _visible(state: dict, actor: str, *, remove_traces: bool) -> dict[str, Any]:
     if at_window:
         mechanics: dict[str, dict[str, Any]] = {
             "WAIT": {},
-            "SUBMIT": {"answer": "objective answer, text at most 256 characters"},
+            "SUBMIT": {"answer": objective["answer_format"],
+                       "fact_ids": list(objective["fact_ids"])},
         }
     else:
         mechanics = {
@@ -76,12 +78,12 @@ def _visible(state: dict, actor: str, *, remove_traces: bool) -> dict[str, Any]:
         if inspectable:
             mechanics["INSPECT"] = {"fact_ids": inspectable}
         if state["condition"] in ("B", "C"):
-            capturable = sorted(set(known) | set(scan))
-            mechanics["TRACE"] = {
-                "fact_ids": capturable,
-                "value": "must equal the known or scanned fact value",
-                "note": "text, at most 256 characters",
-            }
+            if scan:
+                mechanics["TRACE"] = {
+                    "fact_ids": sorted(scan),
+                    "value": "must equal the scanned fact value",
+                    "note": "text, at most 256 characters",
+                }
             if traces:
                 mechanics["REUSE"] = {"trace_ids": [trace["id"] for trace in traces]}
         if state["condition"] == "C":
@@ -131,7 +133,9 @@ def _payload_for(action: str, desc: dict[str, Any]) -> str:
             _alternatives(info["fact_ids"]) + ' ws "}"'
         )
     if action == "SUBMIT":
-        return '"{" ws "\\\"answer\\\"" ws ":" ws jsonstring ws "}"'
+        slots = ' "|" '.join(
+            json.dumps(fact + "=", ensure_ascii=True) + ' word' for fact in info["fact_ids"])
+        return '"{" ws "\\\"answer\\\"" ws ":" ws "\\"" ' + slots + ' "\\"" ws "}"'
     if action == "TRACE":
         return (
             '"{" ws "\\\"fact_id\\\"" ws ":" ws ' +

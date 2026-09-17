@@ -37,9 +37,9 @@ def test_initial_affordance_shape_and_window(tmp_path):
     assert x17["visible"]["field_scans"] == []
     assert x17["visible"]["submission_window_open"] is False
     assert x17["visible"]["submission_tick"] == 3
-    assert list(x17["actions"]) == ["WAIT", "SEND", "INSPECT", "TRACE"]
+    assert list(x17["actions"]) == ["WAIT", "SEND", "INSPECT"]
     assert x17["actions"]["INSPECT"]["fact_ids"] == ["F2"]
-    assert x17["actions"]["TRACE"]["fact_ids"] == ["F1"]
+    assert "TRACE" not in x17["actions"]
     assert "REUSE" not in x17["actions"]
     assert "SUBMIT" not in x17["actions"]
     assert "F2" in x17["grammar"]
@@ -55,7 +55,7 @@ def test_scan_is_ephemeral_and_captureable(tmp_path):
     _, desc = a.build(after, "X17")
     assert desc["visible"]["field_scans"] == [{"fact_id": "F2", "value": "cedar",
                                              "expires": "when the submission window opens"}]
-    assert desc["actions"]["TRACE"]["fact_ids"] == ["F1", "F2"]
+    assert desc["actions"]["TRACE"]["fact_ids"] == ["F2"]
     assert "INSPECT" not in desc["actions"]
     store.close()
 
@@ -92,6 +92,9 @@ def test_scan_expires_at_submission_window(tmp_path):
     assert desc["visible"]["submission_window_open"] is True
     assert desc["visible"]["field_scans"] == []
     assert list(desc["actions"]) == ["WAIT", "SUBMIT"]
+    assert desc["actions"]["SUBMIT"]["answer"] == "F1=value|F2=value"
+    assert desc["actions"]["SUBMIT"]["fact_ids"] == ["F1", "F2"]
+    assert "F1=" in desc["grammar"] and "F2=" in desc["grammar"]
     store.close()
 
 

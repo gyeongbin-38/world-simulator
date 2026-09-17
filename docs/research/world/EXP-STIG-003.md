@@ -94,11 +94,16 @@ backend faults abort and censor the run.
 
 ## Frozen design before any model forward
 
-specs/experiments/EXP-STIG-003-v1.yaml owns exact sizes, seeds, values,
-presentation and interpretation parameters; the execution overlay is
-specs/experiments/EXP-STIG-003-execution-pilot.yaml, digest-bound to the
-scientific configuration. The bounded pilot executes one world per condition,
-three agents, four ticks: 36 real-model opportunities.
+specs/experiments/EXP-STIG-003-v1.yaml owned exact sizes, seeds, values,
+presentation and interpretation parameters for the first pilot, whose
+execution overlay was specs/experiments/EXP-STIG-003-execution-pilot.yaml,
+digest-bound to the scientific configuration. The bounded pilot executed one
+world per condition, three agents, four ticks: 36 real-model opportunities.
+
+After the v1 pilot completed, specs/experiments/EXP-STIG-003-v2.yaml
+superseded it for subsequent runs with the execution overlay
+specs/experiments/EXP-STIG-003-execution-pilot-v2.yaml. The v1 record and
+evidence remain authoritative for the v1 configuration.
 
 Two locally resident distinct instruction-model families use unchanged pinned
 Q8 artifacts; per-condition assignment is [OLMo, Villanova, OLMo]. Greedy
@@ -143,6 +148,34 @@ Controls and classification:
   non-objective traces, foreign REUSE attempts, exploration cost, the full
   action funnel and per-model splits are all reported including zeros.
   Deterministic test agents never contribute to empirical metrics.
+
+## Version 2 amendment
+
+The v1 pilot completed as a bounded negative (P0). Two instrument defects
+were isolated from the behavioral record before any v2 inference:
+
+- TRACE and COMMIT admitted every currently held fact (persistent knowledge
+  union active scans), so "persist the ephemeral observation" was
+  indistinguishable from "persist something already durable". All four C
+  COMMITs bound already-known facts while scans were active.
+- The SUBMIT answer was a free-form field described as "objective answer,
+  text at most 256 characters". All six submissions emitted that descriptor
+  verbatim, so answer production was censored at the interface layer
+  regardless of what the actor knew.
+
+v2 changes the proposal surface only; world law, kernel validation, model
+cohort, seed schedule, sizes and stop rules are unchanged:
+
+- TRACE fact_ids are restricted to facts covered by an active scan, and
+  TRACE is not afforded without one. Any TRACE proposal is therefore a
+  retention act on an ephemeral observation by construction. COMMIT keeps
+  the v1 known-or-scanned domain, so in C the TRACE/COMMIT choice itself
+  measures targeting.
+- The SUBMIT answer is grammar-constrained to the actor's objective
+  skeleton (e.g. F1=<word>|F2=<word>) and the affordance descriptor carries
+  the concrete answer_format. Structure is enforced; values still come from
+  the model's context, and mechanical provenance classification is
+  unchanged.
 
 ## Stop rule
 
