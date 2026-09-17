@@ -1,0 +1,36 @@
+{
+  "experiment_id": "EXP-STIG-003",
+  "version": "3.0.0-run",
+  "title": "Persistence-Necessary Retention — authorized larger run",
+  "supersedes": "Execution parameters only; the EXP-STIG-003-v3 scientific configuration remains the world-law authority. The v3 pilot produced a P1 event (voluntary COMMIT of scanned F6=maple) and a P3 event (correct submission with environmental_world_state provenance), satisfying the preregistered stop-rule condition for a larger run. This document fixes the larger-run size and assignment before execution.",
+  "purpose": "Replicate the pilot signal across multiple worlds and both model families to test P4, and to measure the frequency of the TRACE channel under a larger affordance window.",
+  "conditions": ["A", "B", "C"],
+  "treatments": {
+    "A": "MESSAGE ONLY: WAIT, SEND, INSPECT, SUBMIT; no environmental persistence channel.",
+    "B": "PERSISTENT TRACE: A plus TRACE and grounded REUSE; committed traces remain visible to later ticks.",
+    "C": "CAUSAL WORLD: B plus validated COMMIT of known or currently scanned facts into canonical world state."
+  },
+  "agents": ["X17", "X29", "X43"],
+  "worlds_per_condition": 4,
+  "ticks": 4,
+  "submission_tick": 3,
+  "opportunities": 144,
+  "world_law": "Identical to EXP-STIG-003-v3: same objectives, initial knowledge, scannable sets, scan grant/expiry/inspect-window law, TRACE-over-scan-only capture, COMMIT known-or-scanned domain, submission window, value-grounded answer grammar, provenance classes, and verified-completion rule. Nothing about world mechanics is modified.",
+  "model_assignment": {
+    "per_world": [[0, 1, 0], [1, 0, 1], [0, 1, 0], [1, 0, 1]],
+    "note": "Alternating assignment gives each model family every objective type across the four worlds, so P4 replication is testable for both families and all agents."
+  },
+  "seeds": "SHA256(EXP-STIG-003-RUN-V3,condition,world,tick,actor) — a fresh schedule disjoint from the pilot; no pilot seed is reused.",
+  "pre_registration": {
+    "P0": "No committed TRACE or COMMIT captures a scanned objective fact across all 144 opportunities.",
+    "P1": "At least one voluntary committed TRACE or COMMIT captures a scanned objective fact.",
+    "P2": "At least one voluntary REUSE of a committed trace occurs.",
+    "P3": "At least one correct terminal SUBMIT whose missing objective facts all carry environmental provenance, established mechanically without re-inference.",
+    "P4": "P1 and P3 each replicate across both model families.",
+    "trace_channel": "Secondary measurement: TRACE selection frequency among the B/C opportunities where a scan is active; zero across the full window is a strong bounded negative for the trace channel under this cohort."
+  },
+  "control_boundary": "Under v3 answer law a correct A submission is impossible by construction; A remains the pure negative control.",
+  "action_boundary": "Grounded affordance: only currently executable actions and visible opaque identifiers enter the grammar; Gateway/kernel validation remains authoritative.",
+  "model_policy": "Local llama.cpp completion, deterministic temperature 0/top_k 1/top_p 1/min_p 0/repeat penalty 1, n_predict 128, no retries, fallback, repair, or Astra.",
+  "status": "RUN_PREREGISTERED"
+}

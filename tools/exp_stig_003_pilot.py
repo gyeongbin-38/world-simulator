@@ -29,21 +29,24 @@ from alifelm.experiments import retention_world as world
 from alifelm.persistence.cas import FileSystemArtifactStore
 import exp_stig_001_r3 as r3
 
-SPEC = ROOT / "specs/experiments/EXP-STIG-003-v3.yaml"
-PROFILE = ROOT / "specs/experiments/EXP-STIG-003-execution-pilot-v3.yaml"
-BOUND = [
-    SPEC, PROFILE, Path(__file__),
-    ROOT / "src/alifelm/experiments/retention_affordance.py",
-    ROOT / "src/alifelm/experiments/retention_world.py",
-    ROOT / "src/alifelm/experiments/stigmergy.py",
-    ROOT / "src/alifelm/persistence/cas.py",
-    ROOT / "src/alifelm/persistence/migrations.py",
-    ROOT / "tests/test_retention_persistence.py",
-    ROOT / "tests/test_instrumental_persistence.py",
-    ROOT / "tests/test_stigmergy.py",
-    ROOT / "tests/test_action_codec.py",
-    ROOT / "tests/test_action_affordance.py",
-]
+DEFAULT_SPEC = ROOT / "specs/experiments/EXP-STIG-003-v3.yaml"
+DEFAULT_PROFILE = ROOT / "specs/experiments/EXP-STIG-003-execution-pilot-v3.yaml"
+
+
+def bound_files(spec: Path, profile: Path) -> list[Path]:
+    return [
+        spec, profile, Path(__file__),
+        ROOT / "src/alifelm/experiments/retention_affordance.py",
+        ROOT / "src/alifelm/experiments/retention_world.py",
+        ROOT / "src/alifelm/experiments/stigmergy.py",
+        ROOT / "src/alifelm/persistence/cas.py",
+        ROOT / "src/alifelm/persistence/migrations.py",
+        ROOT / "tests/test_retention_persistence.py",
+        ROOT / "tests/test_instrumental_persistence.py",
+        ROOT / "tests/test_stigmergy.py",
+        ROOT / "tests/test_action_codec.py",
+        ROOT / "tests/test_action_affordance.py",
+    ]
 ENVIRONMENTAL = {"persistent_knowledge", "environmental_trace", "environmental_world_state"}
 SCAN_ONLY_VALUES = {world.FACTS[fact] for facts in world.SCANNABLE.values() for fact in facts}
 
@@ -56,8 +59,8 @@ def sha(path: Path) -> str:
     return h.hexdigest()
 
 
-def sources() -> dict[str, str]:
-    return {path.relative_to(ROOT).as_posix(): sha(path) for path in BOUND}
+def sources(spec: Path, profile: Path) -> dict[str, str]:
+    return {path.relative_to(ROOT).as_posix(): sha(path) for path in bound_files(spec, profile)}
 
 
 def write_new(path: Path, value) -> None:
@@ -82,18 +85,23 @@ def check_seal(value: dict) -> None:
         raise ValueError("manifest self-digest mismatch")
 
 
-def effective_config() -> dict:
-    config = json.loads(SPEC.read_bytes())
-    profile = json.loads(PROFILE.read_bytes())
-    if sha(SPEC) != profile["scientific_config_sha256"]:
+def effective_config(spec: Path, profile_path: Path) -> dict:
+    config = json.loads(spec.read_bytes())
+    profile = json.loads(profile_path.read_bytes())
+    if sha(spec) != profile["scientific_config_sha256"]:
         raise ValueError("scientific configuration hash mismatch")
-    if profile["execution_id"] != "EXP-STIG-003-PILOT-V3" or profile["pilot_opportunities"] != 36:
-        raise ValueError("pilot profile mismatch")
+    if not profile["execution_id"].startswith("EXP-STIG-003-") or not profile["execution_id"].endswith("-V3"):
+        raise ValueError("profile identity mismatch")
     if profile["conditions"] != ["A", "B", "C"] or profile["agents"] != list(world.AGENTS):
         raise ValueError("treatment/cohort mismatch")
-    if profile["worlds_per_condition"] != 1 or profile["ticks"] != 4 or profile["submission_tick"] != 3:
-        raise ValueError("pilot size mismatch")
-    if profile["model_assignment"] != [[0, 1, 0]]:
+    worlds = profile["worlds_per_condition"]
+    if not isinstance(worlds, int) or worlds < 1 or profile["ticks"] != 4 or profile["submission_tick"] != 3:
+        raise ValueError("size mismatch")
+    if profile["pilot_opportunities"] != worlds * 36:
+        raise ValueError("opportunity count mismatch")
+    if len(profile["model_assignment"]) != worlds or any(
+            len(row) != len(world.AGENTS) or sorted(set(row)) != [0, 1]
+            for row in profile["model_assignment"]):
         raise ValueError("heterogeneous assignment mismatch")
     expected_generation = {
         "temperature": 0.0, "top_k": 1, "top_p": 1.0, "min_p": 0.0,
@@ -223,9 +231,9 @@ def affordance_qualification() -> dict:
             "policy_id": afford.POLICY_ID, "builder_version": afford.BUILDER_VERSION}
 
 
-def validation_gate(output: Path) -> None:
-    config = effective_config()
-    frozen = sources()
+def validation_gate(output: Path, spec: Path, profile: Path) -> None:
+    config = effective_config(spec, profile)
+    frozen = sources(spec, profile)
     env = dict(os.environ, PYTHONPATH=str(ROOT / "src"))
     command = [sys.executable, "-m", "pytest", "tests/test_retention_persistence.py",
                "tests/test_instrumental_persistence.py", "tests/test_stigmergy.py",
@@ -233,7 +241,7 @@ def validation_gate(output: Path) -> None:
     run = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True)
     qualification = affordance_qualification()
     chains = capability_chain(output / "capability")
-    if run.returncode or qualification["status"] != "PASS" or chains["status"] != "PASS" or frozen != sources():
+    if run.returncode or qualification["status"] != "PASS" or chains["status"] != "PASS" or frozen != sources(spec, profile):
         raise RuntimeError("EXP-STIG-003 deterministic gate failed: " + run.stdout + run.stderr)
     write_new(output / "validation.json", seal({
         "status": "PASS", "phase": "DETERMINISTIC_FAULT_REPLAY_AND_AFFORDANCE_GATE",
@@ -245,8 +253,8 @@ def validation_gate(output: Path) -> None:
     print(json.dumps({"gate": "PASS", "tests": run.stdout.strip(), "affordance": "PASS"}), flush=True)
 
 
-def seed_for(condition: str, tick: int, actor: str) -> int:
-    return int(world.digest(["EXP-STIG-003-PILOT", condition, tick, actor])[:8], 16) & 0x7fffffff
+def seed_for(*parts) -> int:
+    return int(world.digest(list(parts))[:8], 16) & 0x7fffffff
 
 
 def _failure_kind(error: BaseException) -> str:
@@ -275,7 +283,8 @@ def _missing_of(actor: str) -> list[str]:
     return [fact for fact in world.OBJECTIVES[actor]["fact_ids"] if fact not in world.INITIAL_KNOWLEDGE[actor]]
 
 
-def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int, list[dict]], failures: dict[tuple[str, int, str], str]):
+def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int, list[dict]],
+              failures: dict[tuple[str, int, str], str], runs: dict[tuple[str, int], str]):
     counts = Counter()
     actions = Counter()
     observations = []
@@ -283,8 +292,7 @@ def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int,
     p1_models = set()
     p3_models = set()
     relay_messages = []
-    for condition in ("A", "B", "C"):
-        run_id = f"EXP-STIG-003-PILOT-V3-{condition}"
+    for (condition, _world_index), run_id in runs.items():
         state = world.initial_state(run_id, condition)
         for tick in range(4):
             jobs = {(j["run_id"], j["actor"]): j for j in jobs_by_tick[tick] if j["run_id"] == run_id}
@@ -363,9 +371,10 @@ def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int,
                 record["candidate"] = candidate
                 observations.append(record)
             state = json.loads(store.history(run_id)[tick]["state"])
-    counts["generation_opportunities"] = 36
-    counts["generation_completed"] = 36 - sum(v for k, v in counts.items() if k in {
-        "inference_timeout", "transport_runtime_failure", "model_load_failure"})
+    counts["generation_opportunities"] = 12 * len(runs)
+    counts["generation_completed"] = counts["generation_opportunities"] - sum(
+        v for k, v in counts.items() if k in {
+            "inference_timeout", "transport_runtime_failure", "model_load_failure"})
     return dict(counts), dict(actions), observations, submitted, p1_models, p3_models, relay_messages
 
 
@@ -373,8 +382,8 @@ def execute(args) -> None:
     output = args.output.resolve()
     validation = json.loads((output / "validation.json").read_bytes())
     check_seal(validation)
-    config = effective_config()
-    if validation["status"] != "PASS" or validation["sources"] != sources() or validation["config_digest"] != world.digest(config):
+    config = effective_config(args.spec, args.profile)
+    if validation["status"] != "PASS" or validation["sources"] != sources(args.spec, args.profile) or validation["config_digest"] != world.digest(config):
         raise ValueError("validation gate absent or stale")
     if any((output / name).exists() for name in ("planned.json", "world.sqlite", "result.json")):
         raise ValueError("evidence root already started; no resume/rerun permitted")
@@ -387,23 +396,29 @@ def execute(args) -> None:
             raise ValueError("model artifact differs from frozen profile")
     executable = args.server.resolve(strict=True)
     commit, dirty = _git_info()
+    worlds_n = config["profile"]["worlds_per_condition"]
+    seed_tag = config["profile"].get("seed_tag") or config["profile"]["execution_id"].rsplit("-", 1)[0]
     planned = seal({
         "experiment": world.VERSION, "execution_id": config["profile"]["execution_id"],
-        "scientific_config_sha256": sha(SPEC), "profile": config["profile"],
-        "sources": sources(), "git_commit": commit, "worktree": dirty,
+        "scientific_config_sha256": sha(args.spec), "profile": config["profile"],
+        "sources": sources(args.spec, args.profile), "git_commit": commit, "worktree": dirty,
         "models": model_info, "server": {"path": str(executable), "sha256": sha(executable)},
         "gpu": _gpu_info(), "python": sys.version, "platform": platform.platform(),
         "generation": config["profile"]["generation"], "constraint_transport": "llama.cpp_completion_grammar",
         "constraint_policy_id": afford.POLICY_ID, "builder_version": afford.BUILDER_VERSION,
-        "assignment": config["profile"]["model_assignment"], "seeds": "SHA256(EXP-STIG-003-PILOT,condition,tick,actor)",
-        "phase": "REAL_MODEL_PILOT_V3_36_OPPORTUNITIES", "large_run_authorized": False,
+        "assignment": config["profile"]["model_assignment"],
+        "seeds": f"SHA256({seed_tag},condition,tick,actor)" if worlds_n == 1
+                 else f"SHA256({seed_tag},condition,world,tick,actor)",
+        "phase": f"REAL_MODEL_{config['profile']['execution_id']}_{config['profile']['pilot_opportunities']}_OPPORTUNITIES",
+        "large_run_authorized": bool(config["profile"].get("large_run_authorized")),
     })
     write_new(output / "planned.json", planned)
     cas = FileSystemArtifactStore(output / "cas")
     store = world.RetentionStore(output / "world.sqlite", cas)
-    runs = {condition: f"EXP-STIG-003-PILOT-V3-{condition}" for condition in ("A", "B", "C")}
-    for condition, run_id in runs.items():
-        store.create(world.initial_state(run_id, condition))
+    runs = {(condition, w): f"{config['profile']['execution_id']}-{condition}" + (f"-{w}" if worlds_n > 1 else "")
+            for condition in ("A", "B", "C") for w in range(worlds_n)}
+    for run_id in runs.values():
+        store.create(world.initial_state(run_id, run_id.split("-")[-2] if worlds_n > 1 else run_id[-1]))
     jobs_by_tick = defaultdict(list)
     failures: dict[tuple[str, int, str], str] = {}
     costs, loads = [], []
@@ -411,13 +426,15 @@ def execute(args) -> None:
     try:
         for tick in range(4):
             jobs = []
-            for condition, run_id in runs.items():
+            for (condition, w), run_id in runs.items():
                 state = store.state(run_id)
                 for index, actor in enumerate(world.AGENTS):
                     prompt, desc = afford.build(state, actor)
+                    seed = (seed_for(seed_tag, condition, tick, actor) if worlds_n == 1
+                            else seed_for(seed_tag, condition, w, tick, actor))
                     jobs.append({"run_id": run_id, "condition": condition, "state": state, "actor": actor,
-                                 "model_index": config["profile"]["model_assignment"][0][index],
-                                 "seed": seed_for(condition, tick, actor), "prompt": prompt, "desc": desc})
+                                 "model_index": config["profile"]["model_assignment"][w][index],
+                                 "seed": seed, "prompt": prompt, "desc": desc})
                     jobs_by_tick[tick].append(jobs[-1])
             completed = defaultdict(list)
             for model_index, model_path in enumerate(model_files):
@@ -466,7 +483,7 @@ def execute(args) -> None:
                     if server is not None:
                         server.close()
             tick_observations = []
-            for condition, run_id in runs.items():
+            for run_id in runs.values():
                 after = store.commit(store.state(run_id), completed[run_id])
                 events = json.loads(store.history(run_id)[tick]["events"])
                 attempts = {a["actor"]: a for a in completed[run_id]}
@@ -478,7 +495,7 @@ def execute(args) -> None:
                                                    "world_hashes": {run_id: world.digest(store.replay(run_id)) for run_id in runs.values()}})
         store.db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
         counts, actions, observations, submissions, p1_models, p3_models, relay_messages = _classify(
-            output, store, jobs_by_tick, failures)
+            output, store, jobs_by_tick, failures, runs)
         metrics = {run_id: world.metrics(store, run_id) for run_id in runs.values()}
         result = {
             "status": "PILOT_COMPLETE", "planned_digest": planned["manifest_digest"],
@@ -495,10 +512,12 @@ def execute(args) -> None:
                                "P3": counts.get("environmental_completions", 0) > 0,
                                "P4": len(p1_models) == 2 and len(p3_models) == 2},
             "pilot_signal": counts.get("objective_persistence_acts", 0) > 0,
-            "large_run": "NOT_RUN_BY_PREREGISTERED_STOP_RULE",
+            "large_run": ("THIS_EXECUTION_IS_THE_AUTHORIZED_LARGER_RUN"
+                          if config["profile"].get("large_run_authorized")
+                          else "NOT_RUN_BY_PREREGISTERED_STOP_RULE"),
             "evidence_hashes": {},
-            "limits": ["pilot only: one world per condition", "three persistent identities, four ticks",
-                        "no population estimate or cross-world replication",
+            "limits": [f"{worlds_n} world(s) per condition, three persistent identities, four ticks",
+                        "bounded cross-world replication" if worlds_n > 1 else "no population estimate or cross-world replication",
                         "condition A can complete only via peer relay, which is counted separately",
                         "unexplained correct submissions void the affected world pending audit"],
         }
@@ -567,14 +586,18 @@ def main() -> None:
     modes.add_argument("--execute", action="store_true")
     modes.add_argument("--audit", action="store_true")
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
+    parser.add_argument("--profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--server", type=Path)
     parser.add_argument("--models", nargs=2, type=Path)
     parser.add_argument("--port", type=int, default=18873)
     args = parser.parse_args()
+    args.spec = args.spec.resolve()
+    args.profile = args.profile.resolve()
     if not args.output.is_absolute() or (os.name == "nt" and args.output.drive.upper() != "E:"):
         parser.error("explicit E: evidence path required on Windows; absolute path elsewhere")
     if args.validate_only:
-        validation_gate(args.output)
+        validation_gate(args.output, args.spec, args.profile)
     elif args.audit:
         audit(args.output)
     else:

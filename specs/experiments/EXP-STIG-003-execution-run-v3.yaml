@@ -1,0 +1,33 @@
+{
+  "execution_id": "EXP-STIG-003-RUN-V3",
+  "experiment_id": "EXP-STIG-003",
+  "qualification_status": "PASS",
+  "scientific_config_sha256": "42bc9c13368fd5cab8bb7592f3c50c41655f5bb1272485250fcf15da30cf3805",
+  "pilot_opportunities": 144,
+  "worlds_per_condition": 4,
+  "ticks": 4,
+  "submission_tick": 3,
+  "conditions": ["A", "B", "C"],
+  "agents": ["X17", "X29", "X43"],
+  "model_assignment": [[0, 1, 0], [1, 0, 1], [0, 1, 0], [1, 0, 1]],
+  "seed_tag": "EXP-STIG-003-RUN-V3",
+  "models": [
+    {"repo": "allenai/OLMo-2-0425-1B-Instruct", "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e", "runtime_repo": "allenai/OLMo-2-0425-1B-Instruct-GGUF", "runtime_revision": "62f8c199538474c3e33ed5d7e0580abd66686a27", "sha256": "4a180742923d27d2434e53062b21f508257a5ee15abda398a3db13385e33d6e6", "quantization": "Q8_0"},
+    {"repo": "VillanovaAI/Villanova-2B-2603", "revision": "c80659f69c9943120d50f2d96f62851ed22b9be5", "runtime_repo": "VillanovaAI/Villanova-2B-2603-GGUF", "runtime_revision": "37a2e83b330f47986d153428903705fae2a23e8f", "sha256": "eb0865b1cd939a2f73114523b099376230c03bed9b1fa6dfbb02283dff98577e", "quantization": "Q8_0"}
+  ],
+  "generation": {"temperature": 0.0, "top_k": 1, "top_p": 1.0, "min_p": 0.0, "repeat_penalty": 1.0, "n_predict": 128, "cache_prompt": false, "stream": false},
+  "runtime": {"context": 4096, "gpu_layers": 12, "threads": 4, "parallel": 1, "request_timeout_seconds": 900, "model_load_timeout_seconds": 600},
+  "retries": false,
+  "fallback": false,
+  "repair": false,
+  "large_run_authorized": true,
+  "authorized_by": "EXP-STIG-003-PILOT-V3 pilot_signal (P1 event) per the v3 stop rule; EXP-STIG-003-PILOT-V2 pilot_signal (P1 event) per the v2 stop rule",
+  "prior_evidence": {
+    "EXP_STIG_003_PILOT_V3_result_manifest_digest": "228dbc3e4e0a2830f858f0a9b799e2a54fba61c0082bd4d227506c5c8e0938eb",
+    "EXP_STIG_003_PILOT_V2_result_manifest_digest": "4fd490816e1c18434c914b1195a8387fcebf5bbf8236e49f96c6e5da54930b84",
+    "EXP_STIG_003_PILOT_result_manifest_digest": "867786a6e04e875f170a69516b4740ae04ad5574a9b60d6234a89c5af46dcbf5",
+    "EXP_STIG_002_PILOT_result_manifest_digest": "8732d3419be3746d0c57e79a3866fd1477de2bce57261a7c6fe38ae962849708"
+  },
+  "action_affordance_policy_id": "EXP-STIG-003-GROUNDED-AFFORDANCE-V3",
+  "builder_version": "retention-grounded-action-grammar-v3"
+}

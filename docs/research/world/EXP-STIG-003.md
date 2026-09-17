@@ -194,6 +194,21 @@ The pilot is bounded at 36 opportunities. No larger run is authorized unless
 at least one P1 event occurs or another scientifically justified signal is
 recorded in the sealed result receipt.
 
+## Authorized larger run (version 3.0.0-run)
+
+The v3 pilot recorded a P1 event (and a P3 event), so the stop rule admits a
+larger run. specs/experiments/EXP-STIG-003-run-v3.yaml fixes that run's size
+and assignment before execution; world law is unchanged from v3 and the v3
+scientific configuration remains the world-law authority. The run executes 4
+worlds per condition (144 opportunities) with alternating per-world model
+assignment [[0,1,0],[1,0,1],[0,1,0],[1,0,1]] so each model family covers every
+objective type, a fresh seed schedule disjoint from the pilot, and the same
+P0-P4 outcome definitions. A secondary preregistered measurement is the TRACE
+selection frequency across all opportunities where a scan is active; a zero
+across the full window is a strong bounded negative for the trace channel
+under this cohort. The run is a single replication study, not an iterated
+search; no further size increase is implied.
+
 ## Execution gate and durability
 
 Before real inference, deterministic validation must cover all conditions,

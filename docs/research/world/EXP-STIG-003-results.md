@@ -2,7 +2,7 @@
 
 ## Status
 
-**v1 PILOT COMPLETE (bounded negative). v2 PILOT COMPLETE with a P1 event. v3 PILOT COMPLETE with P1 and P3 events.** Each deterministic gate passed before model execution; each bounded pilot executed 36 real local-model opportunities. v3 produced a voluntary committed COMMIT of a scanned objective fact and a correct terminal submission carrying environmental provenance — the first complete environmental persistence chain observed in this program. The preregistered stop-rule condition for a larger run is met; no larger run has been executed or scheduled.
+**v1 PILOT COMPLETE (bounded negative). v2 PILOT COMPLETE with a P1 event. v3 PILOT COMPLETE with P1 and P3 events. AUTHORIZED LARGER RUN (v3, 4 worlds per condition, 144 opportunities) COMPLETE.** Each deterministic gate passed before model execution. v3 produced a voluntary committed COMMIT of a scanned objective fact and a correct terminal submission carrying environmental provenance — the first complete environmental persistence chain observed in this program. The preregistered stop-rule condition for a larger run was met, and the larger run replicated P1 and P3 under OLMo while P4 remained unmet: Villanova produced no persistence act in any world.
 
 This experiment is separate from EXP-STIG-001 R2/R3/R4 and EXP-STIG-002. Those records remain unchanged.
 
@@ -256,7 +256,7 @@ Action counts were INSPECT 8, SEND 10, COMMIT 4, SUBMIT 7, and WAIT 7. No TRACE 
 - **P2:** not observed and not testable: no committed trace existed.
 - **P3:** supported: X43's tick-3 submission was correct and its missing fact `F6` carried `environmental_world_state` provenance, established mechanically from recorded state.
 - **P4:** not met: P1 and P3 occurred only under OLMo; Villanova produced no persistence act.
-- **pilot_signal:** true — the stop-rule condition for a larger run is satisfied; none has been executed or scheduled.
+- **pilot_signal:** true — the stop-rule condition for a larger run is satisfied (the authorized run is recorded in the sections below).
 
 v3 is the first completed environmental persistence chain in this program: scan → voluntary COMMIT into world state → correct windowed submission with mechanically audited environmental provenance. The remaining gaps are channel selection (TRACE never chosen; world_state COMMIT carried the chain), reuse (no trace existed to reuse), and cross-family replication (Villanova produced none).
 
@@ -276,6 +276,87 @@ Completed run: `E:/WORLD/AI_CACHE/evidence/EXP_STIG_003_PILOT_V3`
 - planned manifest: `f646e9a12e4af41170ef2e7f43eab4fb7aaaadc627cea214a7935a5d7a8c2aff`
 - validation receipt: `983c5f9375c7b1d5e3173d81e6801ef673dc781af97e2a4b16a978d2f8bea377`
 - scientific configuration SHA-256: `b6762869733112df9fdde39a5b86701dfbebf47eeeda5d4138eca4fb7e4431a4`
+- final result: `result.json`
+- canonical state/event database: `world.sqlite`
+- CAS and per-tick observation/cost/load records: `cas/`, `tick-0.json` … `tick-3.json`, `observations.json`, `costs.json`, `loads.json`
+
+The completed result was re-audited from the SQLite replay, event records, CAS references, and evidence hashes: **PASS**.
+
+## Larger-run preregistration
+
+The v3 pilot's P1 event authorized a larger run under the preregistered stop rule. `specs/experiments/EXP-STIG-003-run-v3.yaml` fixed the run before any inference: 4 worlds per condition (144 opportunities), unchanged v3 world law, a fresh seed schedule disjoint from the pilot (`SHA256(EXP-STIG-003-RUN-V3,condition,world,tick,actor)`), and alternating per-world assignment `[[0,1,0],[1,0,1],[0,1,0],[1,0,1]]` so each model family covers every objective type. The same P0–P4 definitions apply, plus a preregistered secondary measurement of TRACE selection frequency across all active-scan windows. The run is a single replication study; no further size increase is implied.
+
+## Larger-run qualification
+
+Same deterministic suite and source freeze bound to `specs/experiments/EXP-STIG-003-run-v3.yaml` SHA-256 `42bc9c13368fd5cab8bb7592f3c50c41655f5bb1272485250fcf15da30cf3805`, executed against the generalized multi-world runner. Result: **81 passed**. The qualification receipt is `E:/WORLD/AI_CACHE/evidence/EXP_STIG_003_RUN_V3/validation.json`.
+
+## Larger-run execution
+
+- Model families: **2** (same pinned Q8 artifacts and llama.cpp runtime as all pilots)
+- Worlds: 4 per condition (12 run IDs `EXP-STIG-003-RUN-V3-{A,B,C}-{0..3}`)
+- Ticks: 4; terminal submission window at tick 3
+- Opportunities: 144 (36 per condition)
+- Retries/fallback/repair: none; Astra: not used
+- Per-model load: 72 jobs for each family
+
+## Larger-run action funnel
+
+| stage | count |
+|---|---:|
+| generation opportunities | 144 |
+| completed generations | 144 |
+| strict parser-valid candidates | 142 |
+| affordance-valid candidates | 142 |
+| Gateway-valid intents | 140 |
+| committed actions | 140 |
+| protocol rejection | 2 |
+| affordance rejection | 0 |
+| semantic rejection | 2 |
+| kernel conflict | 0 |
+| timeout | 0 |
+| model-load failure | 0 |
+| transport/runtime failure | 0 |
+
+The 2 protocol rejections were Villanova (as X17 in B-1 and B-3 at tick 1) emitting unterminated JSON. The 2 semantic rejections were OLMo (as X29 in C-1 and C-3 at tick 2) proposing `COMMIT F4` whose value was the descriptor placeholder text `"must equal the scanned fact value"` — correct scanned fact target, failed value binding — rejected by kernel value validation.
+
+Action counts were INSPECT 30, SEND 34, COMMIT 12, SUBMIT 28, and WAIT 38. **TRACE 0 and REUSE 0 across all 144 opportunities** — with 30 scans created, TRACE was afforded at every post-scan pre-window tick in B and C and was never selected, a strong bounded negative for the trace channel under this cohort. No relay messages carried scan-only values.
+
+## Larger-run treatment observations
+
+**A:** 48/48 opportunities; agents scanned at tick 0 in all four worlds; 10 SUBMITs at tick 3, all incorrect — missing-fact values were un-emittable by construction, so each answer filled the second slot with a knowledge value. No persistence channel exists in A.
+
+**B:** 48/48 opportunities; scans in all worlds; TRACE never selected; no traces existed so REUSE was never afforded; 10 SUBMITs, all incorrect.
+
+**C:** 48 opportunities, 46 committed (the 2 rejected COMMITs noted above); OLMo attempted scanned-fact persistence in **all four** C worlds — X43 committed `F6=maple` in C-0 and C-2 (after committing already-known `F5=onyx` at tick 1), while X29's `COMMIT F4` attempts in C-1 and C-3 were rejected for carrying descriptor text as the value. X17 (OLMo) additionally committed its already-known `F1=amber` twice in each of C-0 and C-2, and X29 (OLMo) committed already-known `F3=violet` once each in C-1 and C-3 — non-objective persistence as in earlier pilots. Villanova produced **zero** persistence acts in any world (its slots were X29 in C-0/C-2 and X17/X43 in C-1/C-3). At tick 3, X43 in C-0 and C-2 submitted `F5=onyx|F6=maple` — correct, with `F6` carrying `environmental_world_state` provenance — while other C submissions selected real visible values but mapped them to wrong slots. Canonical world state ended as `{F1: amber, F5: onyx, F6: maple}` in C-0/C-2 and `{F3: violet}` in C-1/C-3.
+
+## Larger-run preregistered results
+
+- **P0:** falsified: 2 committed COMMITs captured a scanned objective fact.
+- **P1:** supported and replicated: X43 (OLMo) committed scanned `F6=maple` into world state in 2 of 4 C worlds; OLMo additionally attempted scanned-fact COMMIT in the other 2 (rejected on value binding).
+- **P2:** not observed and not testable: no committed trace existed in any world.
+- **P3:** supported and replicated: 2 correct terminal submissions (X43, C-0 and C-2) each carried `environmental_world_state` provenance on the missing fact, established mechanically from recorded state.
+- **P4:** not met: P1 and P3 occurred only under OLMo; Villanova produced no persistence act and no correct submission in any world.
+- **TRACE channel (secondary measurement):** 0 selections across all active-scan affordance windows in B and C — the trace channel was never used even when it was the only persistence mechanism (B).
+- **pilot_signal:** true (redundant under the already-authorized run).
+
+The larger run confirms the pilot's signal is replicable under OLMo and sharpens the failure structure: (i) the trace channel is unused across a fourfold affordance window — models choose canonical COMMIT when available and nothing when only TRACE exists; (ii) OLMo's scanned-fact persistence intent replicated 4/4 in C but value binding succeeded only 2/4; (iii) the remaining correct-submission failures are fact→value slot-mapping errors over real visible values, not interface echo; (iv) Villanova shows no persistence behavior at all under this cohort and interface — P4 fails, so the result does not establish cross-family agentic retention.
+
+## Larger-run cost
+
+For all 144 model calls: 141,130 prompt bytes, 10,570 generated bytes, 40,316 prompt tokens, 3,990 generated tokens, and 1024.1 seconds wall time including 8 model loads. Median request latency was approximately 2.51 seconds.
+
+## Larger-run security and authority regression
+
+Same invariants held over all 140 committed actions: proposals only, deterministic validated commit boundary, same-tick isolation, agent-scoped visibility, CAS-backed artifacts, replay-verified metrics. The 4 rejected proposals (2 malformed JSON, 2 invalid COMMIT values) were recorded as events, never committed. No Campfire files were modified.
+
+## Larger-run evidence
+
+Completed run: `E:/WORLD/AI_CACHE/evidence/EXP_STIG_003_RUN_V3`
+
+- result manifest: `ad1f720dc38769014e5b9234a084e3d248854258cae176568fe44643215eb746`
+- planned manifest: `84b949c98bfa5137119bd459ea75baee7f3d1d88067e862fcf4506a9fe2dce42`
+- validation receipt: `fe11ef908e106adbf62144deaf5b61e8192850fafe107ce24989a448b578c46a`
+- scientific configuration SHA-256: `42bc9c13368fd5cab8bb7592f3c50c41655f5bb1272485250fcf15da30cf3805`
 - final result: `result.json`
 - canonical state/event database: `world.sqlite`
 - CAS and per-tick observation/cost/load records: `cas/`, `tick-0.json` … `tick-3.json`, `observations.json`, `costs.json`, `loads.json`
