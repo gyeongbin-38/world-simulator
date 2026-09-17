@@ -1,8 +1,0 @@
-research: EXP-STIG-005 authorized larger run, replicated dependent chain and first TRACE completion
-
-108 opportunities across 9 worlds with Latin-square 3-family assignment.
-P3o replicated (OLMo persisted F2, SmolLM3 bound correctly in C-2); first
-TRACE selection and completion in program history (OLMo, B-1,
-environmental_trace provenance); 3 correct submissions all environmental.
-Villanova replicated intent-without-binding (6 semantic rejections,
-zero committed persistence). P4 not met: P1o under OLMo only. Audit PASS.
