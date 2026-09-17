@@ -2,11 +2,12 @@
 
 ## Status
 
-PILOT COMPLETE — P1o, P3, and P3o recorded (first completed cross-agent
-stigmergic chain: OLMo persisted F2 for X17; SmolLM3 bound and submitted
-correctly). Audit PASS; sealed results live in
-docs/research/world/EXP-STIG-005-results.md. A Latin-square larger run is
-authorized by the stop rule but not yet executed.
+COMPLETE. The v1 pilot and the authorized 108-opportunity Latin-square
+larger run both executed, replayed, and audited PASS under this
+configuration; sealed results live in
+docs/research/world/EXP-STIG-005-results.md. P1o/P1s/P3/P3o supported
+(completed dependent chain: OLMo persists, SmolLM3 binds; first
+TRACE-channel completion observed); P2/P4 not met.
 
 This experiment extends EXP-STIG-004. The EXP-STIG-003 lineage (v1 bounded
 negative, v2 first P1, v3 first P3, authorized 144-opportunity run) and the

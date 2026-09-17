@@ -1,9 +1,0 @@
-research: EXP-STIG-005 cross-family cohort, first completed stigmergic chain
-
-Three-family pilot under unchanged EXP-STIG-004 world law: OLMo committed
-peer-needed F2 into world state and SmolLM3 bound it to a correct
-environmentally-provenanced submission (P1o + P3 + P3o). Villanova
-replicated its intent-without-binding profile in the self-serving arm.
-Runner generalized to N-model cohorts; Latin-square larger run
-preregistered. Gate 92 tests + affordance qualification PASS; pilot audit
-PASS.
