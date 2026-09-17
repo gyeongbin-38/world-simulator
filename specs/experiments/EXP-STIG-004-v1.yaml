@@ -1,0 +1,54 @@
+{
+  "experiment_id": "EXP-STIG-004",
+  "version": "1.0.0",
+  "title": "Stigmergic Persistence Dependence",
+  "extends": "EXP-STIG-003 (world law and v3 grounded answer surface are unchanged; only objectives, scannable sets, and objective/sensor visibility differ)",
+  "purpose": "Measure other-serving environmental persistence: whether an agent voluntarily persists a scanned fact that only a peer's objective needs, when environmental persistence is the sole route by which that value can enter the peer's answer options.",
+  "conditions": ["A", "B", "C"],
+  "treatments": {
+    "A": "MESSAGE ONLY: WAIT, SEND, INSPECT, SUBMIT; no environmental persistence channel.",
+    "B": "PERSISTENT TRACE: A plus TRACE and grounded REUSE; committed traces remain visible to later ticks.",
+    "C": "CAUSAL WORLD: B plus validated COMMIT of known or currently scanned facts into canonical world state."
+  },
+  "agents": ["X17", "X29", "X43"],
+  "facts": {"F1": "amber", "F2": "cedar", "F3": "violet", "F4": "umber", "F5": "onyx", "F6": "maple"},
+  "objectives": {
+    "X17": {"fact_ids": ["F1", "F2"], "answer_format": "F1=value|F2=value"},
+    "X29": {"fact_ids": ["F3", "F4"], "answer_format": "F3=value|F4=value"},
+    "X43": {"fact_ids": ["F5", "F6"], "answer_format": "F5=value|F6=value"}
+  },
+  "initial_knowledge": {"X17": {"F1": "amber"}, "X29": {"F3": "violet"}, "X43": {"F5": "onyx"}},
+  "scannable": {"X17": ["F4"], "X29": ["F2"], "X43": ["F6"]},
+  "dependence": "X17's missing F2 is scannable only by X29; X29's missing F4 is scannable only by X17; X43's F6 is self-scannable (self-serving control arm replicating the EXP-STIG-003 shape).",
+  "peer_visibility": {
+    "objectives": "every agent's objective fact_ids are visible to all agents (public objective board)",
+    "scannable": "every agent's scannable fact_ids are visible to all agents (sensor map)",
+    "not_visible": "no peer knowledge, scans, messages to others, or fact values beyond committed world state/traces are visible"
+  },
+  "worlds_per_condition": 1,
+  "ticks": 4,
+  "submission_tick": 3,
+  "opportunities": 36,
+  "scan_law": "INSPECT affords any fact in the actor's scannable set that the actor neither knows nor has already scanned, only while the following tick still precedes the submission window. A scan is private, grants the true fact value to the scanning actor only, appears at the next tick, and expires when the submission window opens.",
+  "trace_law": "TRACE captures a fact covered by an active scan (scan-covered facts only) into a committed trace visible from the next tick; TRACE is not afforded without an active scan.",
+  "commit_law": "In C, COMMIT validates a known or currently scanned fact value into canonical world state visible to all agents.",
+  "reuse_law": "REUSE internalizes a visible committed trace's fact into the actor's persistent knowledge.",
+  "submit_law": "SUBMIT is afforded only inside the submission window. Answer slots are grammar-constrained to the actor's objective skeleton with each value slot restricted to values visible at the window: persistent knowledge union committed trace values union, in C, committed world_state values. A value never persisted is un-emittable; message text contributes no options, so peer relay cannot produce a correct dependent-objective answer.",
+  "provenance_classes": ["persistent_knowledge", "environmental_trace", "environmental_world_state", "peer_relay", "unexplained"],
+  "pre_registration": {
+    "P0": "No committed TRACE or COMMIT captures any scanned fact across all 36 opportunities.",
+    "P1s": "At least one committed TRACE or COMMIT captures X43's scanned missing fact (self-serving replication arm).",
+    "P1o": "At least one committed TRACE or COMMIT captures a scanned fact needed by a peer (F4 by X17 or F2 by X29). Primary stigmergic measurement.",
+    "P2": "At least one voluntary REUSE of a committed trace occurs, self or foreign.",
+    "P3": "At least one correct terminal SUBMIT whose missing objective facts all carry environmental provenance, established mechanically without re-inference.",
+    "P3o": "A correct submission on a dependent objective (X17 or X29) with environmental provenance.",
+    "P4": "P1o occurs under both model families."
+  },
+  "pilot_stop_rule": "The pilot is bounded at 36 opportunities. No larger run is authorized unless at least one P1o event occurs or another scientifically justified signal is recorded in the sealed result receipt.",
+  "model_assignment": [[0, 1, 0]],
+  "seed_tag": "EXP-STIG-004-PILOT",
+  "seeds": "SHA256(EXP-STIG-004-PILOT,condition,tick,actor)",
+  "action_boundary": "Grounded affordance: only currently executable actions and visible opaque identifiers enter the grammar; Gateway/kernel validation remains authoritative.",
+  "model_policy": "Local llama.cpp completion, deterministic temperature 0/top_k 1/top_p 1/min_p 0/repeat penalty 1, n_predict 128, no retries, fallback, repair, or Astra.",
+  "status": "PREREGISTERED"
+}

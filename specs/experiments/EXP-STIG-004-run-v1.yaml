@@ -1,0 +1,38 @@
+{
+  "experiment_id": "EXP-STIG-004",
+  "version": "1.0.0-run",
+  "title": "Stigmergic Persistence Dependence — authorized larger run",
+  "supersedes": "Execution parameters only; the EXP-STIG-004-v1 scientific configuration remains the world-law authority. The v1 pilot produced a P1o event (X17/OLMo voluntary COMMIT of scanned F4=umber, a fact needed only by X29), satisfying the preregistered stop-rule condition for a larger run. This document fixes the larger-run size and assignment before execution.",
+  "purpose": "Replicate other-serving persistence across multiple worlds and both model families, and test whether the delivery half-chain can complete to a correct dependent-objective submission.",
+  "conditions": ["A", "B", "C"],
+  "treatments": {
+    "A": "MESSAGE ONLY: WAIT, SEND, INSPECT, SUBMIT; no environmental persistence channel.",
+    "B": "PERSISTENT TRACE: A plus TRACE and grounded REUSE; committed traces remain visible to later ticks.",
+    "C": "CAUSAL WORLD: B plus validated COMMIT of known or currently scanned facts into canonical world state."
+  },
+  "agents": ["X17", "X29", "X43"],
+  "worlds_per_condition": 4,
+  "ticks": 4,
+  "submission_tick": 3,
+  "opportunities": 144,
+  "world_law": "Identical to EXP-STIG-004-v1: same mutual dependence (X17's F2 scannable only by X29; X29's F4 scannable only by X17; X43 self-sufficient), public objective board and sensor map, scan grant/expiry/inspect-window law, TRACE-over-scan-only capture, COMMIT known-or-scanned domain, submission window, value-grounded answer grammar, provenance classes, and verified-completion rule. Nothing about world mechanics is modified.",
+  "model_assignment": {
+    "per_world": [[0, 1, 0], [1, 0, 1], [0, 1, 0], [1, 0, 1]],
+    "note": "Alternating assignment gives each model family both serving directions (X17 serves X29 via F4; X29 serves X17 via F2) and the self-serving X43 arm, so P4 replication is testable for other-serving persistence."
+  },
+  "seeds": "SHA256(EXP-STIG-004-RUN,condition,world,tick,actor) — a fresh schedule disjoint from the pilot; no pilot seed is reused.",
+  "pre_registration": {
+    "P0": "No committed TRACE or COMMIT captures any scanned fact across all 144 opportunities.",
+    "P1s": "At least one committed TRACE or COMMIT captures X43's scanned missing fact (self-serving replication arm).",
+    "P1o": "At least one committed TRACE or COMMIT captures a scanned fact needed by a peer (F4 by X17 or F2 by X29).",
+    "P2": "At least one voluntary REUSE of a committed trace occurs, self or foreign.",
+    "P3": "At least one correct terminal SUBMIT whose missing objective facts all carry environmental provenance, established mechanically without re-inference.",
+    "P3o": "A correct submission on a dependent objective (X17 or X29) with environmental provenance.",
+    "P4": "P1o occurs under both model families.",
+    "trace_channel": "Secondary measurement: TRACE selection frequency among the B/C opportunities where a scan is active; the pilot's zero extends the EXP-STIG-003 bounded negative."
+  },
+  "control_boundary": "Under v3 answer law a correct A submission is impossible by construction; A remains the pure negative control.",
+  "action_boundary": "Grounded affordance: only currently executable actions and visible opaque identifiers enter the grammar; Gateway/kernel validation remains authoritative.",
+  "model_policy": "Local llama.cpp completion, deterministic temperature 0/top_k 1/top_p 1/min_p 0/repeat penalty 1, n_predict 128, no retries, fallback, repair, or Astra.",
+  "status": "RUN_PREREGISTERED"
+}

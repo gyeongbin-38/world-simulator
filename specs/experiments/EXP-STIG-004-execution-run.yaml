@@ -1,0 +1,31 @@
+{
+  "execution_id": "EXP-STIG-004-RUN",
+  "experiment_id": "EXP-STIG-004",
+  "qualification_status": "PASS",
+  "scientific_config_sha256": "c540cda52d9855b0d9f042274b48a158df4bf687286355f0a8e628e4499aefce",
+  "pilot_opportunities": 144,
+  "worlds_per_condition": 4,
+  "ticks": 4,
+  "submission_tick": 3,
+  "conditions": ["A", "B", "C"],
+  "agents": ["X17", "X29", "X43"],
+  "model_assignment": [[0, 1, 0], [1, 0, 1], [0, 1, 0], [1, 0, 1]],
+  "seed_tag": "EXP-STIG-004-RUN",
+  "models": [
+    {"repo": "allenai/OLMo-2-0425-1B-Instruct", "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e", "runtime_repo": "allenai/OLMo-2-0425-1B-Instruct-GGUF", "runtime_revision": "62f8c199538474c3e33ed5d7e0580abd66686a27", "sha256": "4a180742923d27d2434e53062b21f508257a5ee15abda398a3db13385e33d6e6", "quantization": "Q8_0"},
+    {"repo": "VillanovaAI/Villanova-2B-2603", "revision": "c80659f69c9943120d50f2d96f62851ed22b9be5", "runtime_repo": "VillanovaAI/Villanova-2B-2603-GGUF", "runtime_revision": "37a2e83b330f47986d153428903705fae2a23e8f", "sha256": "eb0865b1cd939a2f73114523b099376230c03bed9b1fa6dfbb02283dff98577e", "quantization": "Q8_0"}
+  ],
+  "generation": {"temperature": 0.0, "top_k": 1, "top_p": 1.0, "min_p": 0.0, "repeat_penalty": 1.0, "n_predict": 128, "cache_prompt": false, "stream": false},
+  "runtime": {"context": 4096, "gpu_layers": 12, "threads": 4, "parallel": 1, "request_timeout_seconds": 900, "model_load_timeout_seconds": 600},
+  "retries": false,
+  "fallback": false,
+  "repair": false,
+  "large_run_authorized": true,
+  "authorized_by": "EXP-STIG-004-PILOT pilot_signal (P1o event) per the v1 stop rule",
+  "prior_evidence": {
+    "EXP_STIG_004_PILOT_result_manifest_digest": "7614388010d4ee92dcf8dfc153eec941a0ba1729d3471ab3596cc596fd1ecd1f",
+    "EXP_STIG_003_RUN_V3_result_manifest_digest": "ad1f720dc38769014e5b9234a084e3d248854258cae176568fe44643215eb746"
+  },
+  "action_affordance_policy_id": "EXP-STIG-004-GROUNDED-AFFORDANCE-V1",
+  "builder_version": "retention-stigmergic-grammar-v1"
+}

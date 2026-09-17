@@ -30,6 +30,25 @@ OBJECTIVES = {
 INITIAL_KNOWLEDGE = {"X17": {"F1": FACTS["F1"]}, "X29": {"F3": FACTS["F3"]}, "X43": {"F5": FACTS["F5"]}}
 SCANNABLE = {"X17": ["F2"], "X29": ["F4"], "X43": ["F6"]}
 
+WORLDS = {
+    "EXP-STIG-003": {
+        "version": VERSION,
+        "objectives": OBJECTIVES,
+        "initial_knowledge": INITIAL_KNOWLEDGE,
+        "scannable": SCANNABLE,
+    },
+    "EXP-STIG-004": {
+        "version": "EXP-STIG-004/1.0.0",
+        "objectives": OBJECTIVES,
+        "initial_knowledge": INITIAL_KNOWLEDGE,
+        "scannable": {"X17": ["F4"], "X29": ["F2"], "X43": ["F6"]},
+        "peer_objectives_visible": True,
+        "inspect_scope": "scannable",
+        "affordance_policy": "EXP-STIG-004-GROUNDED-AFFORDANCE-V1",
+        "builder_version": "retention-stigmergic-grammar-v1",
+    },
+}
+
 
 def encode(value: Any) -> bytes:
     return base.encode(value)
@@ -43,20 +62,21 @@ def _expected_answer(state: dict, actor: str) -> str:
     return "|".join(f"{fact}={state['hidden_facts'][fact]}" for fact in state["objectives"][actor]["fact_ids"])
 
 
-def initial_state(run_id: str, condition: str) -> dict:
+def initial_state(run_id: str, condition: str, world_id: str = "EXP-STIG-003") -> dict:
     if condition not in afford.ACTIONS:
         raise ValueError("unknown condition")
-    return {
+    spec = WORLDS[world_id]
+    state = {
         "run_id": run_id,
         "condition": condition,
         "tick": 0,
         "ticks": TICKS,
         "submission_tick": SUBMISSION_TICK,
         "agents": list(AGENTS),
-        "objectives": json.loads(json.dumps(OBJECTIVES)),
+        "objectives": json.loads(json.dumps(spec["objectives"])),
         "hidden_facts": dict(FACTS),
-        "knowledge": json.loads(json.dumps(INITIAL_KNOWLEDGE)),
-        "scannable": json.loads(json.dumps(SCANNABLE)),
+        "knowledge": json.loads(json.dumps(spec["initial_knowledge"])),
+        "scannable": json.loads(json.dumps(spec["scannable"])),
         "scans": {actor: {} for actor in AGENTS},
         "exploration_cost": {actor: 0 for actor in AGENTS},
         "messages": [],
@@ -64,6 +84,17 @@ def initial_state(run_id: str, condition: str) -> dict:
         "submissions": [],
         "world_state": {},
     }
+    if world_id != "EXP-STIG-003":
+        state.update({
+            "world_id": world_id,
+            "version": spec["version"],
+            "initial_knowledge": json.loads(json.dumps(spec["initial_knowledge"])),
+            "peer_objectives_visible": bool(spec.get("peer_objectives_visible")),
+            "inspect_scope": spec.get("inspect_scope", "missing"),
+            "affordance_policy": spec.get("affordance_policy", afford.POLICY_ID),
+            "builder_version": spec.get("builder_version", afford.BUILDER_VERSION),
+        })
+    return state
 
 
 def _unique(pairs):
@@ -147,7 +178,7 @@ def attempt(state: dict, actor: str, model: str, seed: int, prompt: bytes,
         "context_ref": context_ref,
         "raw_ref": raw_ref,
         "response_ref": response_ref,
-        "opportunity": digest([VERSION, state["run_id"], state["tick"], actor]),
+        "opportunity": digest([state.get("version", VERSION), state["run_id"], state["tick"], actor]),
         "state_hash": digest(state),
         "condition": state["condition"],
         "affordance_ref": base.put(cas, encode(desc)),
@@ -195,7 +226,7 @@ def plan(state: dict, attempts: list[dict], cas) -> tuple[dict, list[dict]]:
         core = {key: value for key, value in item.items() if key != "attempt_id"}
         if digest(core) != item["attempt_id"] or item["state_hash"] != digest(state):
             raise ValueError("attempt identity mismatch")
-        if item["opportunity"] != digest([VERSION, state["run_id"], state["tick"], actor]):
+        if item["opportunity"] != digest([state.get("version", VERSION), state["run_id"], state["tick"], actor]):
             raise ValueError("opportunity mismatch")
         event = {
             "actor": actor,
@@ -324,7 +355,7 @@ class RetentionStore:
 
     def commit(self, before, attempts, fault=None):
         request = {"before": digest(before), "attempts": sorted(attempts, key=lambda x: x["actor"])}
-        commit_id = digest([VERSION, before["run_id"], before["tick"], request])
+        commit_id = digest([before.get("version", VERSION), before["run_id"], before["tick"], request])
         after, events = plan(before, request["attempts"], self.cas)
         if fault:
             fault.check("BEFORE_TRANSACTION")
@@ -363,7 +394,7 @@ class RetentionStore:
             request = json.loads(entry["request"])
             if entry["tick"] != state["tick"] or request["before"] != digest(state):
                 raise ValueError("replay boundary mismatch")
-            if entry["id"] != digest([VERSION, run_id, state["tick"], request]):
+            if entry["id"] != digest([state.get("version", VERSION), run_id, state["tick"], request]):
                 raise ValueError("commit identity mismatch")
             after, events = plan(state, request["attempts"], self.cas)
             if encode(after) != entry["state"] or digest(after) != entry["hash"] or encode(events) != entry["events"]:
@@ -384,8 +415,9 @@ def metrics(store: RetentionStore, run_id: str) -> dict:
     submissions = final["submissions"]
     correct = sum(bool(item["correct"]) for item in submissions)
     verified = sum(bool(item.get("verified")) for item in submissions)
-    missing_of = {actor: [fact for fact in OBJECTIVES[actor]["fact_ids"]
-                          if fact not in INITIAL_KNOWLEDGE[actor]] for actor in AGENTS}
+    initial_knowledge = final.get("initial_knowledge") or INITIAL_KNOWLEDGE
+    missing_of = {actor: [fact for fact in final["objectives"][actor]["fact_ids"]
+                          if fact not in initial_knowledge[actor]] for actor in AGENTS}
     persistence_acts = sum(
         event["action"] in ("TRACE", "COMMIT")
         and event.get("fact_id") in missing_of[event["actor"]]

@@ -44,11 +44,32 @@ def bound_files(spec: Path, profile: Path) -> list[Path]:
         ROOT / "tests/test_retention_persistence.py",
         ROOT / "tests/test_instrumental_persistence.py",
         ROOT / "tests/test_stigmergy.py",
+        ROOT / "tests/test_stigmergic_persistence.py",
         ROOT / "tests/test_action_codec.py",
         ROOT / "tests/test_action_affordance.py",
     ]
 ENVIRONMENTAL = {"persistent_knowledge", "environmental_trace", "environmental_world_state"}
-SCAN_ONLY_VALUES = {world.FACTS[fact] for facts in world.SCANNABLE.values() for fact in facts}
+
+
+def scan_only_values(world_id: str) -> set[str]:
+    return {world.FACTS[fact] for facts in world.WORLDS[world_id]["scannable"].values() for fact in facts}
+
+
+def _missing_of(actor: str, world_id: str) -> list[str]:
+    spec = world.WORLDS[world_id]
+    return [fact for fact in spec["objectives"][actor]["fact_ids"]
+            if fact not in spec["initial_knowledge"][actor]]
+
+
+def _peer_missing(actor: str, world_id: str) -> set[str]:
+    return {fact for peer in world.AGENTS if peer != actor
+            for fact in _missing_of(peer, world_id)}
+
+
+def _dependent_actors(world_id: str) -> set[str]:
+    spec = world.WORLDS[world_id]
+    return {actor for actor in world.AGENTS
+            if not set(_missing_of(actor, world_id)) <= set(spec["scannable"][actor])}
 
 
 def sha(path: Path) -> str:
@@ -85,12 +106,12 @@ def check_seal(value: dict) -> None:
         raise ValueError("manifest self-digest mismatch")
 
 
-def effective_config(spec: Path, profile_path: Path) -> dict:
+def effective_config(spec: Path, profile_path: Path, world_id: str) -> dict:
     config = json.loads(spec.read_bytes())
     profile = json.loads(profile_path.read_bytes())
     if sha(spec) != profile["scientific_config_sha256"]:
         raise ValueError("scientific configuration hash mismatch")
-    if not profile["execution_id"].startswith("EXP-STIG-003-") or not profile["execution_id"].endswith("-V3"):
+    if not profile["execution_id"].startswith(world_id + "-"):
         raise ValueError("profile identity mismatch")
     if profile["conditions"] != ["A", "B", "C"] or profile["agents"] != list(world.AGENTS):
         raise ValueError("treatment/cohort mismatch")
@@ -116,22 +137,53 @@ def effective_config(spec: Path, profile_path: Path) -> dict:
     return config
 
 
-def _fixture_attempts(state: dict, cas, overrides: dict[str, bytes] | None = None) -> list[dict]:
+def _fixture_attempts(state: dict, cas, overrides: dict[str, bytes] | None = None,
+                      fillers: dict[str, bytes] | None = None) -> list[dict]:
     overrides = overrides or {}
+    fillers = fillers or {}
     items = []
     for actor in world.AGENTS:
         prompt, desc = afford.build(state, actor)
         items.append(world.attempt(
             state, actor, "CAPABILITY_FIXTURE", 1, prompt, desc,
-            overrides.get(actor, world.encode({"action": "WAIT", "payload": {}})),
+            overrides.get(actor, fillers.get(actor, world.encode({"action": "WAIT", "payload": {}}))),
             {"tokens": [], "fixture": True}, cas,
         ))
     return items
 
 
-def capability_chain(work: Path) -> dict:
-    """One full INSPECT -> TRACE -> REUSE -> SUBMIT chain per persistent treatment."""
+def capability_chain(work: Path, world_id: str) -> dict:
+    """One full persistence chain per persistent treatment; cross-agent for EXP-STIG-004."""
     chains = []
+    if world_id == "EXP-STIG-004":
+        for condition in ("B", "C"):
+            cas = FileSystemArtifactStore(work / f"capability-{condition}" / "cas")
+            store = world.RetentionStore(work / f"capability-{condition}" / "world.sqlite", cas)
+            try:
+                state = world.initial_state("QUAL-004-CHAIN-" + condition, condition, world_id)
+                store.create(state)
+                current = store.commit(state, _fixture_attempts(state, cas, {"X17": world.encode(
+                    {"action": "INSPECT", "payload": {"fact_id": "F4"}})}))
+                if condition == "B":
+                    current = store.commit(current, _fixture_attempts(current, cas, {"X17": world.encode(
+                        {"action": "TRACE", "payload": {"fact_id": "F4", "value": "umber", "note": "fixture"}})}))
+                    current = store.commit(current, _fixture_attempts(current, cas, {"X29": world.encode(
+                        {"action": "REUSE", "payload": {"trace_id": current["traces"][0]["id"]}})}))
+                else:
+                    current = store.commit(current, _fixture_attempts(current, cas, {"X17": world.encode(
+                        {"action": "COMMIT", "payload": {"fact_id": "F4", "value": "umber"}})}))
+                    current = store.commit(current, _fixture_attempts(current, cas))
+                current = store.commit(current, _fixture_attempts(current, cas, {"X29": world.encode(
+                    {"action": "SUBMIT", "payload": {"answer": "F3=violet|F4=umber"}})}))
+                submission = current["submissions"][-1]
+                assert submission["correct"] is True
+                assert submission["verified"] is (condition == "B")
+                assert store.replay(state["run_id"]) == current
+                chains.append({"condition": condition, "status": "PASS",
+                               "cross_agent": "X17->X29"})
+            finally:
+                store.close()
+        return {"status": "PASS", "chains": chains}
     for condition in ("B", "C"):
         cas = FileSystemArtifactStore(work / f"capability-{condition}" / "cas")
         store = world.RetentionStore(work / f"capability-{condition}" / "world.sqlite", cas)
@@ -155,11 +207,14 @@ def capability_chain(work: Path) -> dict:
     return {"status": "PASS", "chains": chains}
 
 
-def affordance_qualification() -> dict:
+def affordance_qualification(world_id: str) -> dict:
     """Check conditional language and references without model behavior."""
+    scan_fact = "F2" if world_id == "EXP-STIG-003" else "F4"
+    scan_value = world.FACTS[scan_fact]
     records = []
     for condition in ("A", "B", "C"):
-        state = world.initial_state("QUAL-003-" + condition, condition)
+        state = world.initial_state("QUAL-004-" + condition if world_id != "EXP-STIG-003"
+                                    else "QUAL-003-" + condition, condition, world_id)
         desc = afford.affordance(state, "X17")
         records.append({"state": condition + "_initial", "actions": list(desc["actions"]),
                         "refs": desc["visible_refs"], "grammar_sha256": desc["grammar_sha256"]})
@@ -168,16 +223,24 @@ def affordance_qualification() -> dict:
         assert "TRACE" not in desc["actions"]
         assert "INSPECT" in desc["actions"]
         assert "TCTRL" not in desc["grammar"]
+        assert desc["actions"]["INSPECT"]["fact_ids"] == [scan_fact]
+        if world_id == "EXP-STIG-004":
+            peer_obj = desc["visible"]["peer_objectives"]
+            assert {p["agent"] for p in peer_obj} == {"X29", "X43"}
+            assert next(p for p in peer_obj if p["agent"] == "X29")["scannable"] == ["F2"]
+            assert next(p for p in peer_obj if p["agent"] == "X29")["fact_ids"] == ["F3", "F4"]
+        else:
+            assert "peer_objectives" not in desc["visible"]
         scanned = copy.deepcopy(state)
-        scanned["scans"]["X17"]["F2"] = "cedar"
+        scanned["scans"]["X17"][scan_fact] = scan_value
         scan_desc = afford.affordance(scanned, "X17")
         if condition in ("B", "C"):
-            assert scan_desc["actions"]["TRACE"]["fact_ids"] == ["F2"]
+            assert scan_desc["actions"]["TRACE"]["fact_ids"] == [scan_fact]
         else:
             assert "TRACE" not in scan_desc["actions"]
         if condition == "C":
-            assert scan_desc["actions"]["COMMIT"]["fact_ids"] == ["F1", "F2"]
-            afford.validate_candidate({"action": "COMMIT", "payload": {"fact_id": "F2", "value": "cedar"}}, scan_desc)
+            assert scan_desc["actions"]["COMMIT"]["fact_ids"] == ["F1", scan_fact]
+            afford.validate_candidate({"action": "COMMIT", "payload": {"fact_id": scan_fact, "value": scan_value}}, scan_desc)
         records.append({"state": condition + "_active_scan", "actions": list(scan_desc["actions"]),
                         "refs": scan_desc["visible_refs"], "grammar_sha256": scan_desc["grammar_sha256"]})
         controlled = copy.deepcopy(state)
@@ -228,26 +291,28 @@ def affordance_qualification() -> dict:
     else:
         raise AssertionError("unknown authority field accepted")
     return {"status": "PASS", "states": records,
-            "policy_id": afford.POLICY_ID, "builder_version": afford.BUILDER_VERSION}
+            "policy_id": world.WORLDS[world_id].get("affordance_policy", afford.POLICY_ID),
+            "builder_version": world.WORLDS[world_id].get("builder_version", afford.BUILDER_VERSION)}
 
 
-def validation_gate(output: Path, spec: Path, profile: Path) -> None:
-    config = effective_config(spec, profile)
+def validation_gate(output: Path, spec: Path, profile: Path, world_id: str) -> None:
+    config = effective_config(spec, profile, world_id)
     frozen = sources(spec, profile)
     env = dict(os.environ, PYTHONPATH=str(ROOT / "src"))
     command = [sys.executable, "-m", "pytest", "tests/test_retention_persistence.py",
                "tests/test_instrumental_persistence.py", "tests/test_stigmergy.py",
+               "tests/test_stigmergic_persistence.py",
                "tests/test_action_codec.py", "tests/test_action_affordance.py", "-q"]
     run = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True)
-    qualification = affordance_qualification()
-    chains = capability_chain(output / "capability")
+    qualification = affordance_qualification(world_id)
+    chains = capability_chain(output / "capability", world_id)
     if run.returncode or qualification["status"] != "PASS" or chains["status"] != "PASS" or frozen != sources(spec, profile):
         raise RuntimeError("EXP-STIG-003 deterministic gate failed: " + run.stdout + run.stderr)
     write_new(output / "validation.json", seal({
         "status": "PASS", "phase": "DETERMINISTIC_FAULT_REPLAY_AND_AFFORDANCE_GATE",
         "sources": frozen, "config_digest": world.digest(config), "qualification": qualification,
         "capability": chains,
-        "command": "python -m pytest tests/test_retention_persistence.py tests/test_instrumental_persistence.py tests/test_stigmergy.py tests/test_action_codec.py tests/test_action_affordance.py -q",
+        "command": "python -m pytest tests/test_retention_persistence.py tests/test_instrumental_persistence.py tests/test_stigmergy.py tests/test_stigmergic_persistence.py tests/test_action_codec.py tests/test_action_affordance.py -q",
         "stdout": run.stdout, "stderr": run.stderr, "python": sys.version,
     }))
     print(json.dumps({"gate": "PASS", "tests": run.stdout.strip(), "affordance": "PASS"}), flush=True)
@@ -279,21 +344,21 @@ def _git_info() -> tuple[str, str]:
         return "UNAVAILABLE", repr(error)
 
 
-def _missing_of(actor: str) -> list[str]:
-    return [fact for fact in world.OBJECTIVES[actor]["fact_ids"] if fact not in world.INITIAL_KNOWLEDGE[actor]]
-
-
 def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int, list[dict]],
-              failures: dict[tuple[str, int, str], str], runs: dict[tuple[str, int], str]):
+              failures: dict[tuple[str, int, str], str], runs: dict[tuple[str, int], str],
+              world_id: str):
     counts = Counter()
     actions = Counter()
     observations = []
     submitted = []
     p1_models = set()
+    p1o_models = set()
     p3_models = set()
+    p3o_models = set()
     relay_messages = []
+    dependent = _dependent_actors(world_id)
     for (condition, _world_index), run_id in runs.items():
-        state = world.initial_state(run_id, condition)
+        state = world.initial_state(run_id, condition, world_id)
         for tick in range(4):
             jobs = {(j["run_id"], j["actor"]): j for j in jobs_by_tick[tick] if j["run_id"] == run_id}
             for actor in world.AGENTS:
@@ -332,14 +397,18 @@ def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int,
                     counts["gateway_valid_intents"] += 1
                     counts["committed_actions"] += 1
                     model_index = jobs[(run_id, actor)]["model_index"]
-                    if action in ("TRACE", "COMMIT") and event.get("fact_id") in _missing_of(actor):
+                    if action in ("TRACE", "COMMIT") and event.get("fact_id") in _missing_of(actor, world_id):
                         counts["objective_persistence_acts"] += 1
                         p1_models.add(model_index)
+                    if (action in ("TRACE", "COMMIT") and event.get("fact_id") in _peer_missing(actor, world_id)
+                            and event.get("fact_id") not in _missing_of(actor, world_id)):
+                        counts["other_persistence_acts"] += 1
+                        p1o_models.add(model_index)
                     if action == "REUSE":
                         counts["trace_reuse"] += 1
                     if action == "INSPECT":
                         counts["scans_created"] += 1
-                    if action == "SEND" and any(value in candidate["payload"]["body"] for value in SCAN_ONLY_VALUES):
+                    if action == "SEND" and any(value in candidate["payload"]["body"] for value in scan_only_values(world_id)):
                         relay_messages.append({"run_id": run_id, "tick": tick, "actor": actor,
                                                "target": candidate["payload"]["target"]})
                         counts["relay_messages"] += 1
@@ -360,6 +429,9 @@ def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int,
                             if entry["environmental"]:
                                 counts["environmental_completions"] += 1
                                 p3_models.add(model_index)
+                                if actor in dependent:
+                                    counts["dependent_completions"] += 1
+                                    p3o_models.add(model_index)
                             if "unexplained" in provenance.values():
                                 counts["unexplained_correct_submissions"] += 1
                 else:
@@ -375,14 +447,15 @@ def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int,
     counts["generation_completed"] = counts["generation_opportunities"] - sum(
         v for k, v in counts.items() if k in {
             "inference_timeout", "transport_runtime_failure", "model_load_failure"})
-    return dict(counts), dict(actions), observations, submitted, p1_models, p3_models, relay_messages
+    return (dict(counts), dict(actions), observations, submitted,
+            p1_models, p1o_models, p3_models, p3o_models, relay_messages)
 
 
 def execute(args) -> None:
     output = args.output.resolve()
     validation = json.loads((output / "validation.json").read_bytes())
     check_seal(validation)
-    config = effective_config(args.spec, args.profile)
+    config = effective_config(args.spec, args.profile, args.world)
     if validation["status"] != "PASS" or validation["sources"] != sources(args.spec, args.profile) or validation["config_digest"] != world.digest(config):
         raise ValueError("validation gate absent or stale")
     if any((output / name).exists() for name in ("planned.json", "world.sqlite", "result.json")):
@@ -405,7 +478,8 @@ def execute(args) -> None:
         "models": model_info, "server": {"path": str(executable), "sha256": sha(executable)},
         "gpu": _gpu_info(), "python": sys.version, "platform": platform.platform(),
         "generation": config["profile"]["generation"], "constraint_transport": "llama.cpp_completion_grammar",
-        "constraint_policy_id": afford.POLICY_ID, "builder_version": afford.BUILDER_VERSION,
+        "constraint_policy_id": world.WORLDS[args.world].get("affordance_policy", afford.POLICY_ID),
+        "builder_version": world.WORLDS[args.world].get("builder_version", afford.BUILDER_VERSION),
         "assignment": config["profile"]["model_assignment"],
         "seeds": f"SHA256({seed_tag},condition,tick,actor)" if worlds_n == 1
                  else f"SHA256({seed_tag},condition,world,tick,actor)",
@@ -418,7 +492,8 @@ def execute(args) -> None:
     runs = {(condition, w): f"{config['profile']['execution_id']}-{condition}" + (f"-{w}" if worlds_n > 1 else "")
             for condition in ("A", "B", "C") for w in range(worlds_n)}
     for run_id in runs.values():
-        store.create(world.initial_state(run_id, run_id.split("-")[-2] if worlds_n > 1 else run_id[-1]))
+        store.create(world.initial_state(
+            run_id, run_id.split("-")[-2] if worlds_n > 1 else run_id[-1], args.world))
     jobs_by_tick = defaultdict(list)
     failures: dict[tuple[str, int, str], str] = {}
     costs, loads = [], []
@@ -494,8 +569,9 @@ def execute(args) -> None:
             write_new(output / f"tick-{tick}.json", {"tick": tick, "observations": tick_observations,
                                                    "world_hashes": {run_id: world.digest(store.replay(run_id)) for run_id in runs.values()}})
         store.db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
-        counts, actions, observations, submissions, p1_models, p3_models, relay_messages = _classify(
-            output, store, jobs_by_tick, failures, runs)
+        (counts, actions, observations, submissions, p1_models, p1o_models,
+         p3_models, p3o_models, relay_messages) = _classify(
+            output, store, jobs_by_tick, failures, runs, args.world)
         metrics = {run_id: world.metrics(store, run_id) for run_id in runs.values()}
         result = {
             "status": "PILOT_COMPLETE", "planned_digest": planned["manifest_digest"],
@@ -506,12 +582,23 @@ def execute(args) -> None:
             "tokens_generated": sum(c["timings"].get("predicted_n", 0) for c in costs),
             "prompt_bytes": sum(c["prompt_bytes"] for c in costs), "raw_bytes": sum(c["raw_bytes"] for c in costs),
             "wall_seconds": time.monotonic() - started,
-            "pre_registered": {"P0": counts.get("objective_persistence_acts", 0) == 0,
-                               "P1": counts.get("objective_persistence_acts", 0) > 0,
-                               "P2": counts.get("trace_reuse", 0) > 0,
-                               "P3": counts.get("environmental_completions", 0) > 0,
-                               "P4": len(p1_models) == 2 and len(p3_models) == 2},
-            "pilot_signal": counts.get("objective_persistence_acts", 0) > 0,
+            "pre_registered": ({"P0": counts.get("objective_persistence_acts", 0) == 0
+                                           and counts.get("other_persistence_acts", 0) == 0,
+                                "P1s": counts.get("objective_persistence_acts", 0) > 0,
+                                "P1o": counts.get("other_persistence_acts", 0) > 0,
+                                "P2": counts.get("trace_reuse", 0) > 0,
+                                "P3": counts.get("environmental_completions", 0) > 0,
+                                "P3o": counts.get("dependent_completions", 0) > 0,
+                                "P4": len(p1o_models) == 2}
+                               if args.world == "EXP-STIG-004" else
+                               {"P0": counts.get("objective_persistence_acts", 0) == 0,
+                                "P1": counts.get("objective_persistence_acts", 0) > 0,
+                                "P2": counts.get("trace_reuse", 0) > 0,
+                                "P3": counts.get("environmental_completions", 0) > 0,
+                                "P4": len(p1_models) == 2 and len(p3_models) == 2}),
+            "pilot_signal": (counts.get("other_persistence_acts", 0) > 0
+                             if args.world == "EXP-STIG-004"
+                             else counts.get("objective_persistence_acts", 0) > 0),
             "large_run": ("THIS_EXECUTION_IS_THE_AUTHORIZED_LARGER_RUN"
                           if config["profile"].get("large_run_authorized")
                           else "NOT_RUN_BY_PREREGISTERED_STOP_RULE"),
@@ -588,6 +675,7 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
     parser.add_argument("--profile", type=Path, default=DEFAULT_PROFILE)
+    parser.add_argument("--world", choices=sorted(world.WORLDS), default="EXP-STIG-003")
     parser.add_argument("--server", type=Path)
     parser.add_argument("--models", nargs=2, type=Path)
     parser.add_argument("--port", type=int, default=18873)
@@ -597,7 +685,7 @@ def main() -> None:
     if not args.output.is_absolute() or (os.name == "nt" and args.output.drive.upper() != "E:"):
         parser.error("explicit E: evidence path required on Windows; absolute path elsewhere")
     if args.validate_only:
-        validation_gate(args.output, args.spec, args.profile)
+        validation_gate(args.output, args.spec, args.profile, args.world)
     elif args.audit:
         audit(args.output)
     else:
