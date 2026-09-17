@@ -1,7 +1,7 @@
 {
   "execution_id": "EXP-STIG-003-PILOT",
   "experiment_id": "EXP-STIG-003",
-  "qualification_status": "PENDING",
+  "qualification_status": "PASS",
   "scientific_config_sha256": "928aac4eb166c3c32f9318d9c4a9e136880f9b05a59ec9e60a054cbcdaacb884",
   "pilot_opportunities": 36,
   "worlds_per_condition": 1,
