@@ -1,0 +1,31 @@
+{
+  "execution_id": "EXP-STIG-003-PILOT",
+  "experiment_id": "EXP-STIG-003",
+  "qualification_status": "PENDING",
+  "scientific_config_sha256": "928aac4eb166c3c32f9318d9c4a9e136880f9b05a59ec9e60a054cbcdaacb884",
+  "pilot_opportunities": 36,
+  "worlds_per_condition": 1,
+  "ticks": 4,
+  "submission_tick": 3,
+  "conditions": ["A", "B", "C"],
+  "agents": ["X17", "X29", "X43"],
+  "model_assignment": [[0, 1, 0]],
+  "models": [
+    {"repo": "allenai/OLMo-2-0425-1B-Instruct", "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e", "runtime_repo": "allenai/OLMo-2-0425-1B-Instruct-GGUF", "runtime_revision": "62f8c199538474c3e33ed5d7e0580abd66686a27", "sha256": "4a180742923d27d2434e53062b21f508257a5ee15abda398a3db13385e33d6e6", "quantization": "Q8_0"},
+    {"repo": "VillanovaAI/Villanova-2B-2603", "revision": "c80659f69c9943120d50f2d96f62851ed22b9be5", "runtime_repo": "VillanovaAI/Villanova-2B-2603-GGUF", "runtime_revision": "37a2e83b330f47986d153428903705fae2a23e8f", "sha256": "eb0865b1cd939a2f73114523b099376230c03bed9b1fa6dfbb02283dff98577e", "quantization": "Q8_0"}
+  ],
+  "generation": {"temperature": 0.0, "top_k": 1, "top_p": 1.0, "min_p": 0.0, "repeat_penalty": 1.0, "n_predict": 128, "cache_prompt": false, "stream": false},
+  "runtime": {"context": 4096, "gpu_layers": 12, "threads": 4, "parallel": 1, "request_timeout_seconds": 900, "model_load_timeout_seconds": 600},
+  "retries": false,
+  "fallback": false,
+  "repair": false,
+  "large_run_authorized": false,
+  "prior_evidence": {
+    "EXP_STIG_002_PILOT_result_manifest_digest": "8732d3419be3746d0c57e79a3866fd1477de2bce57261a7c6fe38ae962849708",
+    "EXP_STIG_001_R4_result_sha256": "37d720a2cd3283c5432ae882ecc35b81605a6f021a7ac6a652e77cbea121173d",
+    "EXP_STIG_001_R3_manifest_digest": "2e51e173c99a7bfa0acd9760f8f5da2ee2f323f9a08fb91073e769fc2a7b09c9",
+    "EXP_STIG_001_R2_manifest_digest": "ebb1b7d4b40fd25b5bdc7e8647e3b607be0ce5564ae21a69ab276feffbd1fa8e"
+  },
+  "action_affordance_policy_id": "EXP-STIG-003-GROUNDED-AFFORDANCE-V1",
+  "builder_version": "retention-grounded-action-grammar-v1"
+}
