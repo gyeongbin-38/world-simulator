@@ -13,8 +13,8 @@ from typing import Any
 
 from . import stigmergy as s
 
-POLICY_ID = "EXP-STIG-003-GROUNDED-AFFORDANCE-V2"
-BUILDER_VERSION = "retention-grounded-action-grammar-v2"
+POLICY_ID = "EXP-STIG-003-GROUNDED-AFFORDANCE-V3"
+BUILDER_VERSION = "retention-grounded-action-grammar-v3"
 ACTIONS = {
     "A": ("WAIT", "SEND", "INSPECT", "SUBMIT"),
     "B": ("WAIT", "SEND", "INSPECT", "SUBMIT", "TRACE", "REUSE"),
@@ -22,7 +22,6 @@ ACTIONS = {
 }
 
 _STRING = r'''jsonstring ::= "\"" ( [^"\\\x7F\x00-\x1F] | "\\" (["\\bfnrt] | "u" [0-9a-fA-F]{4}) )* "\""
-word ::= [a-z]{1,32}
 ws ::= | " " | "\n" [ \t]{0,20}
 '''
 
@@ -58,10 +57,15 @@ def _visible(state: dict, actor: str, *, remove_traces: bool) -> dict[str, Any]:
         for trace in state["traces"]
     ]
     if at_window:
+        visible_values = sorted(
+            set(known.values())
+            | {trace["value"] for trace in traces}
+            | (set(state["world_state"].values()) if state["condition"] == "C" else set()))
         mechanics: dict[str, dict[str, Any]] = {
             "WAIT": {},
             "SUBMIT": {"answer": objective["answer_format"],
-                       "fact_ids": list(objective["fact_ids"])},
+                       "fact_ids": list(objective["fact_ids"]),
+                       "values": visible_values},
         }
     else:
         mechanics = {
@@ -133,8 +137,11 @@ def _payload_for(action: str, desc: dict[str, Any]) -> str:
             _alternatives(info["fact_ids"]) + ' ws "}"'
         )
     if action == "SUBMIT":
+        options = "(" + " | ".join(
+            json.dumps(value, ensure_ascii=True) for value in info["values"]) + ")"
         slots = ' "|" '.join(
-            json.dumps(fact + "=", ensure_ascii=True) + ' word' for fact in info["fact_ids"])
+            json.dumps(fact + "=", ensure_ascii=True) + ' ' + options
+            for fact in info["fact_ids"])
         return '"{" ws "\\\"answer\\\"" ws ":" ws "\\"" ' + slots + ' "\\"" ws "}"'
     if action == "TRACE":
         return (

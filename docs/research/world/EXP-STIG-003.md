@@ -101,9 +101,11 @@ digest-bound to the scientific configuration. The bounded pilot executed one
 world per condition, three agents, four ticks: 36 real-model opportunities.
 
 After the v1 pilot completed, specs/experiments/EXP-STIG-003-v2.yaml
-superseded it for subsequent runs with the execution overlay
-specs/experiments/EXP-STIG-003-execution-pilot-v2.yaml. The v1 record and
-evidence remain authoritative for the v1 configuration.
+superseded it with the execution overlay
+specs/experiments/EXP-STIG-003-execution-pilot-v2.yaml; after the v2 pilot
+completed, specs/experiments/EXP-STIG-003-v3.yaml superseded it with
+specs/experiments/EXP-STIG-003-execution-pilot-v3.yaml. Each version's record
+and evidence remain authoritative for its own configuration.
 
 Two locally resident distinct instruction-model families use unchanged pinned
 Q8 artifacts; per-condition assignment is [OLMo, Villanova, OLMo]. Greedy
@@ -176,6 +178,15 @@ cohort, seed schedule, sizes and stop rules are unchanged:
   the concrete answer_format. Structure is enforced; values still come from
   the model's context, and mechanical provenance classification is
   unchanged.
+
+The v2 pilot completed with a P1 event but all submissions echoed the
+template tokens. v3 then grammar-grounded each answer slot to the fact
+values actually visible to the actor at the submission window (persistent
+knowledge union committed trace values union, in C, committed world_state
+values): an unpersisted missing fact's value is un-emittable, so slot
+correctness and provenance coincide by construction, and the peer-relay
+route can no longer produce a correct answer (A becomes a pure negative
+control). All other mechanics are unchanged from v2.
 
 ## Stop rule
 

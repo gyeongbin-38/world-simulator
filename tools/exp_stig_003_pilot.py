@@ -29,8 +29,8 @@ from alifelm.experiments import retention_world as world
 from alifelm.persistence.cas import FileSystemArtifactStore
 import exp_stig_001_r3 as r3
 
-SPEC = ROOT / "specs/experiments/EXP-STIG-003-v2.yaml"
-PROFILE = ROOT / "specs/experiments/EXP-STIG-003-execution-pilot-v2.yaml"
+SPEC = ROOT / "specs/experiments/EXP-STIG-003-v3.yaml"
+PROFILE = ROOT / "specs/experiments/EXP-STIG-003-execution-pilot-v3.yaml"
 BOUND = [
     SPEC, PROFILE, Path(__file__),
     ROOT / "src/alifelm/experiments/retention_affordance.py",
@@ -87,7 +87,7 @@ def effective_config() -> dict:
     profile = json.loads(PROFILE.read_bytes())
     if sha(SPEC) != profile["scientific_config_sha256"]:
         raise ValueError("scientific configuration hash mismatch")
-    if profile["execution_id"] != "EXP-STIG-003-PILOT-V2" or profile["pilot_opportunities"] != 36:
+    if profile["execution_id"] != "EXP-STIG-003-PILOT-V3" or profile["pilot_opportunities"] != 36:
         raise ValueError("pilot profile mismatch")
     if profile["conditions"] != ["A", "B", "C"] or profile["agents"] != list(world.AGENTS):
         raise ValueError("treatment/cohort mismatch")
@@ -195,7 +195,8 @@ def affordance_qualification() -> dict:
         window_desc = afford.affordance(windowed, "X17")
         assert list(window_desc["actions"]) == ["WAIT", "SUBMIT"]
         assert window_desc["actions"]["SUBMIT"]["answer"] == "F1=value|F2=value"
-        assert "F1=" in window_desc["grammar"] and "jsonstring" not in window_desc["grammar"].split("submitpayload")[1]
+        assert window_desc["actions"]["SUBMIT"]["values"] == ["amber"]
+        assert '"amber"' in window_desc["grammar"] and '"cedar"' not in window_desc["grammar"]
         afford.validate_candidate({"action": "SUBMIT", "payload": {"answer": "F1=amber|F2=cedar"}}, window_desc)
         try:
             afford.validate_candidate({"action": "INSPECT", "payload": {"fact_id": "F2"}}, window_desc)
@@ -283,7 +284,7 @@ def _classify(output: Path, store: world.RetentionStore, jobs_by_tick: dict[int,
     p3_models = set()
     relay_messages = []
     for condition in ("A", "B", "C"):
-        run_id = f"EXP-STIG-003-PILOT-V2-{condition}"
+        run_id = f"EXP-STIG-003-PILOT-V3-{condition}"
         state = world.initial_state(run_id, condition)
         for tick in range(4):
             jobs = {(j["run_id"], j["actor"]): j for j in jobs_by_tick[tick] if j["run_id"] == run_id}
@@ -395,12 +396,12 @@ def execute(args) -> None:
         "generation": config["profile"]["generation"], "constraint_transport": "llama.cpp_completion_grammar",
         "constraint_policy_id": afford.POLICY_ID, "builder_version": afford.BUILDER_VERSION,
         "assignment": config["profile"]["model_assignment"], "seeds": "SHA256(EXP-STIG-003-PILOT,condition,tick,actor)",
-        "phase": "REAL_MODEL_PILOT_V2_36_OPPORTUNITIES", "large_run_authorized": False,
+        "phase": "REAL_MODEL_PILOT_V3_36_OPPORTUNITIES", "large_run_authorized": False,
     })
     write_new(output / "planned.json", planned)
     cas = FileSystemArtifactStore(output / "cas")
     store = world.RetentionStore(output / "world.sqlite", cas)
-    runs = {condition: f"EXP-STIG-003-PILOT-V2-{condition}" for condition in ("A", "B", "C")}
+    runs = {condition: f"EXP-STIG-003-PILOT-V3-{condition}" for condition in ("A", "B", "C")}
     for condition, run_id in runs.items():
         store.create(world.initial_state(run_id, condition))
     jobs_by_tick = defaultdict(list)

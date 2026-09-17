@@ -94,7 +94,8 @@ def test_scan_expires_at_submission_window(tmp_path):
     assert list(desc["actions"]) == ["WAIT", "SUBMIT"]
     assert desc["actions"]["SUBMIT"]["answer"] == "F1=value|F2=value"
     assert desc["actions"]["SUBMIT"]["fact_ids"] == ["F1", "F2"]
-    assert "F1=" in desc["grammar"] and "F2=" in desc["grammar"]
+    assert desc["actions"]["SUBMIT"]["values"] == ["amber"]
+    assert '"amber"' in desc["grammar"] and '"cedar"' not in desc["grammar"]
     store.close()
 
 

@@ -2,19 +2,21 @@
 """EXP-STIG-003 interface-competence diagnostic probe. NOT scientific evidence.
 
 The v1 pilot censored answer production: all six SUBMITs echoed the
-answer-field description. Before any v2 inference this probe checks whether
+answer-field description, and v2 pilot submissions echoed the template
+tokens. Before any v3 inference this probe checks whether
 the pinned models can emit real objective values at the submission window when
 the required facts are fully visible, under two answer surfaces:
 
 - free:   the v1 free-text answer field ("objective answer, text at most 256
           characters" descriptor, unconstrained jsonstring grammar);
-- skel:   the v2 grammar-constrained objective skeleton (F1=<word>|F2=<word>).
+- v3:     the v3 skeleton grammar whose value slots are alternatives of the
+          fact values actually visible at the submission window.
 
 Each surface is paired with a context in which the missing fact F2=cedar is
 visible via committed world state (C) or a committed trace (B), plus one
-skeleton context where F2 is visible nowhere (hallucination check). If free
-echoes the descriptor and skel fills real values, the v2 skeleton is both
-necessary and sufficient at the interface layer.
+v3 context where F2 is visible nowhere (cedar is then absent from the grammar
+option set and un-emittable). If v3 selects the correct visible values, the
+binding link is instrumented; if it still echoes, the cohort floor applies.
 """
 from __future__ import annotations
 
@@ -80,9 +82,9 @@ def variants() -> list[dict]:
     items = []
     for name, condition, carrier, surface in (
             ("free_world_state", "C", "world_state", "free"),
-            ("skel_world_state", "C", "world_state", "skel"),
-            ("skel_trace", "B", "trace", "skel"),
-            ("skel_nocontent", "B", "none", "skel")):
+            ("v3_world_state", "C", "world_state", "v3"),
+            ("v3_trace", "B", "trace", "v3"),
+            ("v3_nocontent", "B", "none", "v3")):
         state = fixture_state(condition, carrier)
         desc = afford.affordance(state, "X17")
         if surface == "free":
