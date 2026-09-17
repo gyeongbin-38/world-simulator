@@ -40,6 +40,17 @@ def test_legacy_world_state_is_byte_identical():
     assert state["scannable"] == {"X17": ["F2"], "X29": ["F4"], "X43": ["F6"]}
 
 
+def test_stig005_world_law_parity_with_stig004():
+    for condition in ("A", "B", "C"):
+        five = w.initial_state("parity-005", condition, "EXP-STIG-005")
+        four = w.initial_state("parity-005", condition, "EXP-STIG-004")
+        five.pop("world_id"); five.pop("version")
+        four.pop("world_id"); four.pop("version")
+        assert w.digest(five) == w.digest(four)
+        assert five["peer_objectives_visible"] is True
+        assert five["scannable"] == {"X17": ["F4"], "X29": ["F2"], "X43": ["F6"]}
+
+
 def test_stig004_scannable_dependence_and_public_board(tmp_path):
     store, state = setup(tmp_path, "B")
     assert state["world_id"] == WORLD

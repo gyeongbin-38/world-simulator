@@ -120,8 +120,11 @@ def effective_config(spec: Path, profile_path: Path, world_id: str) -> dict:
         raise ValueError("size mismatch")
     if profile["pilot_opportunities"] != worlds * 36:
         raise ValueError("opportunity count mismatch")
+    n_models = len(profile["models"])
     if len(profile["model_assignment"]) != worlds or any(
-            len(row) != len(world.AGENTS) or sorted(set(row)) != [0, 1]
+            len(row) != len(world.AGENTS)
+            or any(index < 0 or index >= n_models for index in row)
+            or len(set(row)) != min(len(world.AGENTS), n_models)
             for row in profile["model_assignment"]):
         raise ValueError("heterogeneous assignment mismatch")
     expected_generation = {
@@ -155,7 +158,7 @@ def _fixture_attempts(state: dict, cas, overrides: dict[str, bytes] | None = Non
 def capability_chain(work: Path, world_id: str) -> dict:
     """One full persistence chain per persistent treatment; cross-agent for EXP-STIG-004."""
     chains = []
-    if world_id == "EXP-STIG-004":
+    if world_id != "EXP-STIG-003":
         for condition in ("B", "C"):
             cas = FileSystemArtifactStore(work / f"capability-{condition}" / "cas")
             store = world.RetentionStore(work / f"capability-{condition}" / "world.sqlite", cas)
@@ -224,7 +227,7 @@ def affordance_qualification(world_id: str) -> dict:
         assert "INSPECT" in desc["actions"]
         assert "TCTRL" not in desc["grammar"]
         assert desc["actions"]["INSPECT"]["fact_ids"] == [scan_fact]
-        if world_id == "EXP-STIG-004":
+        if world_id != "EXP-STIG-003":
             peer_obj = desc["visible"]["peer_objectives"]
             assert {p["agent"] for p in peer_obj} == {"X29", "X43"}
             assert next(p for p in peer_obj if p["agent"] == "X29")["scannable"] == ["F2"]
@@ -461,8 +464,9 @@ def execute(args) -> None:
     if any((output / name).exists() for name in ("planned.json", "world.sqlite", "result.json")):
         raise ValueError("evidence root already started; no resume/rerun permitted")
     model_files = [path.resolve(strict=True) for path in args.models]
-    if len(model_files) != 2 or len(set(model_files)) != 2:
-        raise ValueError("exactly two heterogeneous model artifacts required")
+    expected_models = len(config["profile"]["models"])
+    if len(model_files) != expected_models or len(set(model_files)) != expected_models:
+        raise ValueError("model artifacts must match the frozen profile cohort")
     model_info = [{"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size} for path in model_files]
     for actual, expected in zip(model_info, config["profile"]["models"], strict=True):
         if actual["sha256"] != expected["sha256"]:
@@ -589,15 +593,15 @@ def execute(args) -> None:
                                 "P2": counts.get("trace_reuse", 0) > 0,
                                 "P3": counts.get("environmental_completions", 0) > 0,
                                 "P3o": counts.get("dependent_completions", 0) > 0,
-                                "P4": len(p1o_models) == 2}
-                               if args.world == "EXP-STIG-004" else
+                                "P4": len(p1o_models) >= 2}
+                               if args.world != "EXP-STIG-003" else
                                {"P0": counts.get("objective_persistence_acts", 0) == 0,
                                 "P1": counts.get("objective_persistence_acts", 0) > 0,
                                 "P2": counts.get("trace_reuse", 0) > 0,
                                 "P3": counts.get("environmental_completions", 0) > 0,
                                 "P4": len(p1_models) == 2 and len(p3_models) == 2}),
             "pilot_signal": (counts.get("other_persistence_acts", 0) > 0
-                             if args.world == "EXP-STIG-004"
+                             if args.world != "EXP-STIG-003"
                              else counts.get("objective_persistence_acts", 0) > 0),
             "large_run": ("THIS_EXECUTION_IS_THE_AUTHORIZED_LARGER_RUN"
                           if config["profile"].get("large_run_authorized")
@@ -677,7 +681,7 @@ def main() -> None:
     parser.add_argument("--profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--world", choices=sorted(world.WORLDS), default="EXP-STIG-003")
     parser.add_argument("--server", type=Path)
-    parser.add_argument("--models", nargs=2, type=Path)
+    parser.add_argument("--models", nargs="+", type=Path)
     parser.add_argument("--port", type=int, default=18873)
     args = parser.parse_args()
     args.spec = args.spec.resolve()
@@ -690,7 +694,7 @@ def main() -> None:
         audit(args.output)
     else:
         if not args.server or not args.models:
-            parser.error("execute requires --server and two --models")
+            parser.error("execute requires --server and --models")
         execute(args)
 
 

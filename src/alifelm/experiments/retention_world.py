@@ -47,6 +47,18 @@ WORLDS = {
         "affordance_policy": "EXP-STIG-004-GROUNDED-AFFORDANCE-V1",
         "builder_version": "retention-stigmergic-grammar-v1",
     },
+    # EXP-STIG-005 reuses the EXP-STIG-004 world law unchanged; the experiment
+    # differs only in model cohort (three families) and assignment coverage.
+    "EXP-STIG-005": {
+        "version": "EXP-STIG-005/1.0.0",
+        "objectives": OBJECTIVES,
+        "initial_knowledge": INITIAL_KNOWLEDGE,
+        "scannable": {"X17": ["F4"], "X29": ["F2"], "X43": ["F6"]},
+        "peer_objectives_visible": True,
+        "inspect_scope": "scannable",
+        "affordance_policy": "EXP-STIG-004-GROUNDED-AFFORDANCE-V1",
+        "builder_version": "retention-stigmergic-grammar-v1",
+    },
 }
 
 

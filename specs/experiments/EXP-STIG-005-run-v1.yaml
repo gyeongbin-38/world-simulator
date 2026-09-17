@@ -1,0 +1,32 @@
+{
+  "experiment_id": "EXP-STIG-005",
+  "version": "1.0.0-run",
+  "title": "Cross-Family Stigmergic Persistence Cohort — authorized larger run",
+  "extends": "EXP-STIG-005-v1 (world law, dependence structure, visibility, grounded answer surface, and outcome definitions are unchanged; only scale, seed schedule, and per-world assignment differ)",
+  "authorization": "The v1 pilot sealed P1o and P3o events; the preregistered stop rule admits one larger replication run. This document fixes that run's size and assignment before execution.",
+  "purpose": "Estimate replication of the pilot's findings across worlds: OLMo other-serving persistence, the completed dependent chain under the extended cohort, SmolLM3's binding and serving behavior across roles, Villanova's intent-without-binding profile in the self-serving arm, and TRACE selection under sole-channel necessity.",
+  "conditions": ["A", "B", "C"],
+  "world_law": "Identical to EXP-STIG-004/005 v1: same agents, facts, objectives, initial knowledge, scannable sets, public objective board and sensor map, scan expiry, terminal submission window at tick 3, and value-grounded answer grammar.",
+  "worlds_per_condition": 3,
+  "ticks": 4,
+  "submission_tick": 3,
+  "opportunities": 108,
+  "model_assignment": [[0, 1, 2], [1, 2, 0], [2, 0, 1]],
+  "assignment_rationale": "Latin square: across the three worlds each family occupies each role once per condition — serving via F4 (X17), serving via F2 (X29), and self-serving (X43) — giving balanced per-family, per-role coverage in both directions of the mutual dependence.",
+  "seed_tag": "EXP-STIG-005-RUN",
+  "seeds": "SHA256(EXP-STIG-005-RUN,condition,world,tick,actor)",
+  "pre_registration": {
+    "P0": "No committed TRACE or COMMIT captures any scanned fact across all 108 opportunities.",
+    "P1s": "At least one committed TRACE or COMMIT captures X43's scanned missing fact.",
+    "P1o": "At least one committed TRACE or COMMIT captures a scanned fact needed by a peer (F4 by X17 or F2 by X29).",
+    "P2": "At least one voluntary REUSE of a committed trace occurs, self or foreign.",
+    "P3": "At least one correct terminal SUBMIT whose missing objective facts all carry environmental provenance, established mechanically without re-inference.",
+    "P3o": "A correct submission on a dependent objective (X17 or X29) with environmental provenance.",
+    "P4": "P1o occurs under at least two distinct model families."
+  },
+  "secondary_measurements": "TRACE selection frequency across all active-scan windows; per-family, per-role persistence and binding breakdowns; rejection counts by kind and family.",
+  "stop_rule": "This run is a single replication study, not an iterated search. No further size increase is implied by any outcome.",
+  "action_boundary": "Grounded affordance: only currently executable actions and visible opaque identifiers enter the grammar; Gateway/kernel validation remains authoritative.",
+  "model_policy": "Local llama.cpp completion, deterministic temperature 0/top_k 1/top_p 1/min_p 0/repeat penalty 1, n_predict 128, no retries, fallback, repair, or Astra. Same mechanical renderer for all three models.",
+  "status": "PREREGISTERED"
+}
