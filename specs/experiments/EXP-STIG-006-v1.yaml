@@ -1,0 +1,65 @@
+{
+  "experiment_id": "EXP-STIG-006",
+  "version": "1.0.0",
+  "title": "REUSE-Necessary Stigmergic Read Path",
+  "extends": "EXP-STIG-005 (world law identical except the trace read law: raw trace values no longer enter submission-window answer options; a trace's value reaches the grammar only through REUSE-internalized knowledge)",
+  "purpose": "EXP-STIG-005 showed committed trace values entering window options directly, making REUSE structurally pointless and P2 unmeasurable. This study makes internalization necessary: under B, a peer-carried value can reach a dependent objective only through scan -> TRACE -> foreign REUSE -> SUBMIT. It measures whether any family uses the stigmergic read path, including SmolLM3 which binds but never scans.",
+  "conditions": ["A", "B", "C"],
+  "treatments": {
+    "A": "MESSAGE ONLY: WAIT, SEND, INSPECT, SUBMIT; no environmental persistence channel.",
+    "B": "PERSISTENT TRACE: A plus TRACE and grounded REUSE; committed traces remain visible to later ticks; their values reach the window only via REUSE.",
+    "C": "CAUSAL WORLD: B plus validated COMMIT of known or scanned facts into canonical world state; world_state values enter window options directly."
+  },
+  "agents": ["X17", "X29", "X43"],
+  "facts": {"F1": "amber", "F2": "cedar", "F3": "violet", "F4": "umber", "F5": "onyx", "F6": "maple"},
+  "objectives": {
+    "X17": {"fact_ids": ["F1", "F2"], "answer_format": "F1=value|F2=value"},
+    "X29": {"fact_ids": ["F3", "F4"], "answer_format": "F3=value|F4=value"},
+    "X43": {"fact_ids": ["F5", "F6"], "answer_format": "F5=value|F6=value"}
+  },
+  "initial_knowledge": {"X17": {"F1": "amber"}, "X29": {"F3": "violet"}, "X43": {"F5": "onyx"}},
+  "scannable": {"X17": ["F4"], "X29": ["F2"], "X43": ["F6"]},
+  "dependence": "Identical to EXP-STIG-004/005: X17's missing F2 is scannable only by X29; X29's missing F4 is scannable only by X17; X43's F6 is self-scannable.",
+  "peer_visibility": {
+    "objectives": "every agent's objective fact_ids are visible to all agents (public objective board)",
+    "scannable": "every agent's scannable fact_ids are visible to all agents (sensor map)",
+    "traces": "committed traces remain visible data (id, creator, fact_id, value, note); the value is seen but not emittable until internalized",
+    "not_visible": "no peer knowledge, scans, messages to others, or fact values beyond committed world state/traces are visible"
+  },
+  "worlds_per_condition": 1,
+  "ticks": 4,
+  "submission_tick": 3,
+  "opportunities": 36,
+  "scan_law": "INSPECT affords any fact in the actor's scannable set that the actor neither knows nor has already scanned, only while the following tick still precedes the submission window. A scan is private, grants the true fact value to the scanning actor only, appears at the next tick, and expires when the submission window opens.",
+  "trace_law": "TRACE captures a fact covered by an active scan (scan-covered facts only) into a committed trace visible from the next tick; TRACE is not afforded without an active scan.",
+  "trace_read_law": "A committed trace's value does not enter submission-window answer options directly. It reaches the grammar only after an actor internalizes it via REUSE, which places the fact into that actor's persistent knowledge. This is the sole law change from EXP-STIG-005.",
+  "commit_law": "In C, COMMIT validates a known or currently scanned fact value into canonical world state visible to all agents; world_state values enter window options directly.",
+  "reuse_law": "REUSE internalizes a visible committed trace's fact into the actor's persistent knowledge.",
+  "submit_law": "SUBMIT is afforded only inside the submission window. Answer slots are grammar-constrained to the actor's objective skeleton with each value slot restricted to values visible at the window: persistent knowledge union, in C, committed world_state values. A value never persisted and never internalized is un-emittable; message text contributes no options.",
+  "provenance_classes": ["persistent_knowledge", "environmental_trace", "environmental_world_state", "peer_relay", "unexplained"],
+  "model_cohort": {
+    "size": 3,
+    "families": [
+      "index 0: OLMo-2-0425-1B-Instruct (Q8_0)",
+      "index 1: Villanova-2B-2603 (Q8_0)",
+      "index 2: SmolLM3-3B (Q4_K_M) — capacity/quantization confound disclosed"
+    ]
+  },
+  "model_assignment": [[2, 0, 1]],
+  "assignment_rationale": "Same shape as EXP-STIG-005 pilot: X17=SmolLM3 (needing role; its dependent answer requires foreign REUSE in B), X29=OLMo (serving role), X43=Villanova (self-serving arm).",
+  "pre_registration": {
+    "P0": "No committed TRACE or COMMIT captures any scanned fact across all 36 opportunities.",
+    "P1s": "At least one committed TRACE or COMMIT captures X43's scanned missing fact.",
+    "P1o": "At least one committed TRACE or COMMIT captures a scanned fact needed by a peer (F4 by X17 or F2 by X29).",
+    "P2": "At least one voluntary REUSE of a committed trace occurs, self or foreign. Primary measurement under the new read law.",
+    "P3": "At least one correct terminal SUBMIT whose missing objective facts all carry environmental provenance, established mechanically without re-inference.",
+    "P3o": "A correct submission on a dependent objective (X17 or X29) with environmental provenance; in B this requires foreign REUSE — the complete stigmergic write-read chain.",
+    "P4": "P1o occurs under at least two distinct model families."
+  },
+  "pilot_stop_rule": "The pilot is bounded at 36 opportunities. A larger run is authorized only if at least one P2 or P1o event occurs, any P3/P3o event occurs, or another scientifically justified signal is recorded in the sealed result receipt.",
+  "seed_tag": "EXP-STIG-006-PILOT",
+  "seeds": "SHA256(EXP-STIG-006-PILOT,condition,tick,actor)",
+  "action_boundary": "Grounded affordance: only currently executable actions and visible opaque identifiers enter the grammar; Gateway/kernel validation remains authoritative.",
+  "model_policy": "Local llama.cpp completion, deterministic temperature 0/top_k 1/top_p 1/min_p 0/repeat penalty 1, n_predict 128, no retries, fallback, repair, or Astra. Same mechanical renderer for all three models with no system instruction, chat template, or history replay.",
+  "status": "PREREGISTERED"
+}

@@ -59,6 +59,20 @@ WORLDS = {
         "affordance_policy": "EXP-STIG-004-GROUNDED-AFFORDANCE-V1",
         "builder_version": "retention-stigmergic-grammar-v1",
     },
+    # EXP-STIG-006 keeps the EXP-STIG-005 dependence structure but removes
+    # raw trace values from window answer options: a trace's value reaches
+    # the submission grammar only through persistent knowledge (REUSE).
+    "EXP-STIG-006": {
+        "version": "EXP-STIG-006/1.0.0",
+        "objectives": OBJECTIVES,
+        "initial_knowledge": INITIAL_KNOWLEDGE,
+        "scannable": {"X17": ["F4"], "X29": ["F2"], "X43": ["F6"]},
+        "peer_objectives_visible": True,
+        "inspect_scope": "scannable",
+        "trace_direct_read": False,
+        "affordance_policy": "EXP-STIG-004-GROUNDED-AFFORDANCE-V1",
+        "builder_version": "retention-stigmergic-grammar-v1",
+    },
 }
 
 
@@ -106,6 +120,8 @@ def initial_state(run_id: str, condition: str, world_id: str = "EXP-STIG-003") -
             "affordance_policy": spec.get("affordance_policy", afford.POLICY_ID),
             "builder_version": spec.get("builder_version", afford.BUILDER_VERSION),
         })
+        if "trace_direct_read" in spec:
+            state["trace_direct_read"] = spec["trace_direct_read"]
     return state
 
 

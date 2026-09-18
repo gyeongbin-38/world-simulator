@@ -51,6 +51,18 @@ def test_stig005_world_law_parity_with_stig004():
         assert five["scannable"] == {"X17": ["F4"], "X29": ["F2"], "X43": ["F6"]}
 
 
+def test_stig006_world_law_parity_with_stig004():
+    for condition in ("A", "B", "C"):
+        six = w.initial_state("parity-006", condition, "EXP-STIG-006")
+        four = w.initial_state("parity-006", condition, "EXP-STIG-004")
+        six.pop("world_id"); six.pop("version"); six.pop("trace_direct_read")
+        four.pop("world_id"); four.pop("version")
+        assert w.digest(six) == w.digest(four)
+        # 004/005 states carry no trace_direct_read field: sealed evidence
+        # replays byte-identically.
+        assert "trace_direct_read" not in four
+
+
 def test_stig004_scannable_dependence_and_public_board(tmp_path):
     store, state = setup(tmp_path, "B")
     assert state["world_id"] == WORLD
@@ -168,6 +180,50 @@ def test_window_boundary_still_holds(tmp_path):
     _, desc = a.build(windowed, "X17")
     assert list(desc["actions"]) == ["WAIT", "SUBMIT"]
     assert desc["actions"]["SUBMIT"]["values"] == ["amber"]
+    store.close()
+
+
+def test_stig006_trace_value_requires_reuse(tmp_path):
+    cas = FileSystemArtifactStore(tmp_path / "cas")
+    store = w.RetentionStore(tmp_path / "world.sqlite", cas)
+    state = w.initial_state("test-006-B", "B", "EXP-STIG-006")
+    store.create(state)
+    assert state["trace_direct_read"] is False
+    after = store.commit(state, attempts(store, state, {"X17": raw("INSPECT", fact_id="F4")}))
+    traced = store.commit(after, attempts(store, after, {"X17": raw("TRACE", fact_id="F4", value="umber", note="for-x29")}))
+    trace_id = traced["traces"][0]["id"]
+    # The trace is visible data but its value is not emittable before REUSE.
+    windowed = dict(traced)
+    windowed["tick"] = traced["submission_tick"]
+    _, desc = a.build(windowed, "X29")
+    assert '"umber"' not in desc["grammar"]
+    assert desc["actions"]["SUBMIT"]["values"] == ["violet"]
+    # After foreign REUSE the value enters through persistent knowledge.
+    reused = store.commit(traced, attempts(store, traced, {"X29": raw("REUSE", trace_id=trace_id)}))
+    assert reused["knowledge"]["X29"]["F4"] == "umber"
+    submitted = store.commit(reused, attempts(store, reused, {
+        "X29": raw("SUBMIT", answer="F3=violet|F4=umber")}))
+    submission = submitted["submissions"][-1]
+    assert submission["correct"] is True and submission["verified"] is True
+    # F4 is internalized knowledge at submission time, so the missing-fact
+    # provenance map is empty; the verified flag marks the internalization.
+    assert submission["provenance"] == {}
+    store.close()
+
+
+def test_stig006_world_state_still_direct(tmp_path):
+    cas = FileSystemArtifactStore(tmp_path / "cas")
+    store = w.RetentionStore(tmp_path / "world.sqlite", cas)
+    state = w.initial_state("test-006-C", "C", "EXP-STIG-006")
+    store.create(state)
+    committed = store.commit(state, attempts(store, state, {
+        "X17": raw("INSPECT", fact_id="F4"), "X29": raw("INSPECT", fact_id="F2")}))
+    committed = store.commit(committed, attempts(store, committed, {
+        "X29": raw("COMMIT", fact_id="F2", value="cedar")}))
+    windowed = dict(committed)
+    windowed["tick"] = committed["submission_tick"]
+    _, desc = a.build(windowed, "X17")
+    assert '"cedar"' in desc["grammar"]
     store.close()
 
 

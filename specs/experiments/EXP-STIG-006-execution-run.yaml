@@ -1,0 +1,31 @@
+{
+  "execution_id": "EXP-STIG-006-RUN",
+  "experiment_id": "EXP-STIG-006",
+  "qualification_status": "PASS",
+  "scientific_config_sha256": "d81a54b9b2d8b8dab1f37698af548653c187d3595737db00e6b342e1fc878b4f",
+  "pilot_opportunities": 108,
+  "worlds_per_condition": 3,
+  "ticks": 4,
+  "submission_tick": 3,
+  "conditions": ["A", "B", "C"],
+  "agents": ["X17", "X29", "X43"],
+  "model_assignment": [[0, 1, 2], [1, 2, 0], [2, 0, 1]],
+  "seed_tag": "EXP-STIG-006-RUN",
+  "models": [
+    {"repo": "allenai/OLMo-2-0425-1B-Instruct", "revision": "48d788eca847d4d7548f375ad03d3c9312f6139e", "runtime_repo": "allenai/OLMo-2-0425-1B-Instruct-GGUF", "runtime_revision": "62f8c199538474c3e33ed5d7e0580abd66686a27", "sha256": "4a180742923d27d2434e53062b21f508257a5ee15abda398a3db13385e33d6e6", "quantization": "Q8_0"},
+    {"repo": "VillanovaAI/Villanova-2B-2603", "revision": "c80659f69c9943120d50f2d96f62851ed22b9be5", "runtime_repo": "VillanovaAI/Villanova-2B-2603-GGUF", "runtime_revision": "37a2e83b330f47986d153428903705fae2a23e8f", "sha256": "eb0865b1cd939a2f73114523b099376230c03bed9b1fa6dfbb02283dff98577e", "quantization": "Q8_0"},
+    {"repo": "HuggingFaceTB/SmolLM3-3B", "revision": "a07cc9a04f16550a088caea529712d1d335b0ac1", "runtime_repo": "ggml-org/SmolLM3-3B-GGUF", "runtime_revision": "4965cb60b150737b68a0408c36aeefb65078f894", "sha256": "8334b850b7bd46238c16b0c550df2138f0889bf433809008cc17a8b05761863e", "quantization": "Q4_K_M"}
+  ],
+  "generation": {"temperature": 0.0, "top_k": 1, "top_p": 1.0, "min_p": 0.0, "repeat_penalty": 1.0, "n_predict": 128, "cache_prompt": false, "stream": false},
+  "runtime": {"context": 4096, "gpu_layers": 12, "threads": 4, "parallel": 1, "request_timeout_seconds": 900, "model_load_timeout_seconds": 600},
+  "retries": false,
+  "fallback": false,
+  "repair": false,
+  "large_run_authorized": true,
+  "prior_evidence": {
+    "EXP_STIG_006_PILOT_result_manifest_digest": "ef82402cfab197940f292f10846605352eeb38d226c61414fb7d934709711d93",
+    "EXP_STIG_005_RUN_result_manifest_digest": "ea16d9e424e03482118f29c59b71d773a215f54fd1d83a267f48bcc33fd695d1"
+  },
+  "action_affordance_policy_id": "EXP-STIG-004-GROUNDED-AFFORDANCE-V1",
+  "builder_version": "retention-stigmergic-grammar-v1"
+}
