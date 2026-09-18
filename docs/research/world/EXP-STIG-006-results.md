@@ -2,7 +2,7 @@
 
 ## Status
 
-**v1 PILOT COMPLETE.** The deterministic gate passed before model execution; the bounded pilot executed 36 real local-model opportunities across three model families. The world_state completion chain replicated identically to EXP-STIG-005 (P1o + P3 + P3o under the same serve-bind split), while the REUSE-necessary trace read path was never reached — no model wrote a trace. The preregistered stop-rule condition is met.
+**v1 LARGER RUN COMPLETE.** The deterministic gate passed before model execution; the bounded pilot executed 36 real local-model opportunities and the preregistered stop rule authorized the larger run, which executed 108 opportunities under the Latin-square cohort assignment `[[0,1,2],[1,2,0],[2,0,1]]`. The world_state completion chain replicated again (P1s + P1o + P3 + P3o under the same OLMo-serve / SmolLM3-bind split). Under the REUSE-necessary law the trace read path was still never completed: TRACE was selected once — the first selection under this law — but was rejected for a descriptor-echo value, and REUSE was never selected.
 
 This experiment is separate from EXP-STIG-001/002/003/004/005. Those records remain unchanged.
 
@@ -85,3 +85,92 @@ Completed run: `E:/WORLD/AI_CACHE/evidence/EXP_STIG_006_PILOT`
 - CAS and per-tick observation/cost/load records: `cas/`, `tick-0.json` … `tick-3.json`, `observations.json`, `costs.json`, `loads.json`
 
 The completed result was re-audited from the SQLite replay, event records, CAS references, and evidence hashes: **PASS**.
+
+## Larger run
+
+The preregistered stop rule was met by the pilot (P1o + P3o events), authorizing the larger run. `specs/experiments/EXP-STIG-006-run-v1.yaml` froze 3 worlds per condition with the Latin-square cohort assignment `[[0,1,2],[1,2,0],[2,0,1]]` — each family serves each role once per condition — bound by `specs/experiments/EXP-STIG-006-execution-run.yaml` (`scientific_config_sha256: d81a54b9…`, seed tag `EXP-STIG-006-RUN`, `large_run_authorized: true`). Gate before execution: **95 passed**, affordance qualification PASS. 108 generation opportunities, no retries/repair/fallback/Astra.
+
+## Run action funnel
+
+| stage | count |
+|---|---:|
+| generation opportunities | 108 |
+| completed generations | 108 |
+| strict parser-valid candidates | 106 |
+| affordance-valid candidates | 106 |
+| Gateway-valid intents | 102 |
+| committed actions | 102 |
+| protocol rejection | 2 |
+| affordance rejection | 0 |
+| semantic rejection | 4 |
+| kernel conflict | 0 |
+| timeout | 0 |
+| model-load failure | 0 |
+| transport/runtime failure | 0 |
+
+Rejections: two Villanova unterminated-JSON outputs (B-0 t1 X29, B-2 t1 X43); four semantic rejections — three Villanova COMMITs with descriptor-echo values (C-0 t2 X29 `F3`, C-2 t0/t1 X43 `F5`) and **one OLMo TRACE with a descriptor-echo value** (B-1 t2 X43 `F6`).
+
+Action counts (committed): INSPECT 15, SEND 43, COMMIT 9, SUBMIT 27, WAIT 11, TRACE 0, REUSE 0. TRACE was *selected* once (the rejected attempt above) — the first TRACE selection under the REUSE-necessary law — but no trace was ever committed, so no trace existed for REUSE to internalize.
+
+## Run per-world summary
+
+| world | actions | persistence | correct |
+|---|---|---|---|
+| A-0 | INSPECT 2, SEND 6, SUBMIT 3, WAIT 1 | none | 0 |
+| A-1 | INSPECT 2, SEND 5, SUBMIT 3, WAIT 2 | none | 0 |
+| A-2 | INSPECT 2, SEND 5, SUBMIT 3, WAIT 2 | none | 0 |
+| B-0 | INSPECT 2, SEND 6, SUBMIT 3 | none | 0 |
+| B-1 | INSPECT 2, SEND 6, SUBMIT 3 | TRACE attempt rejected | 0 |
+| B-2 | INSPECT 2, SEND 6, SUBMIT 3 | none | 0 |
+| C-0 | COMMIT 2, INSPECT 1, SEND 3, SUBMIT 3, WAIT 2 | X17 `F4=umber` (other) | 0 |
+| C-1 | COMMIT 2, INSPECT 1, SEND 3, SUBMIT 3, WAIT 3 | X43 `F6=maple` (self) | 1 |
+| C-2 | COMMIT 2, INSPECT 1, SEND 3, SUBMIT 3, WAIT 1 | X29 `F2=cedar` (other) + `F3` (base) | 1 |
+
+Committed persistence (5 acts, all OLMo):
+
+- C-0 t1/t2 X17 (OLMo): `COMMIT F4=umber` — scanned fact needed by X29; X29's submission carried `F4: environmental_world_state` provenance but was incorrect.
+- C-1 t1/t2 X43 (OLMo): `COMMIT F6=maple` — self-serving; X43 then submitted correctly (self chain complete).
+- C-2 t1 X29 (OLMo): `COMMIT F2=cedar` — scanned fact needed by X17, plus base-fact `F3=violet` at t2; X17's submission was correct (dependent chain complete).
+
+## Run model-family split
+
+| family | INSPECT | SEND | SUBMIT | COMMIT | WAIT | TRACE/REUSE | committed persistence |
+|---|---:|---:|---:|---:|---:|---:|---|
+| OLMo | 9 | 11 | 9 | 6 | 0 | 1 TRACE attempt / 0 | 5 (all) |
+| Villanova | 6 | 5 | 9 | 0 | 11 | 0/0 | 0 |
+| SmolLM3 | 0 | 27 | 9 | 0 | 0 | 0/0 | 0 |
+
+Same capability split as EXP-STIG-005, now under three full rotations: OLMo is the sole persister (self and other-serving, both directions), SmolLM3 is the binder (never scanned, never persisted, correct when served), Villanova shows intent-without-binding (scans, attempts COMMIT, descriptor-echo values rejected; also both protocol rejections).
+
+## Run preregistered results
+
+- **P0:** falsified — committed COMMITs captured scanned facts.
+- **P1s:** supported — X43 (OLMo) committed scanned `F6=maple` in C-1.
+- **P1o:** supported — X17 committed `F4=umber` for X29 (C-0); X29 committed `F2=cedar` for X17 (C-2). Both directions, OLMo only.
+- **P2:** not observed — REUSE was never selected. TRACE was selected once (B-1, OLMo) but rejected for a descriptor-echo value, so no committed trace ever existed to internalize.
+- **P3:** supported — two correct submissions with environmental provenance (C-1 X43/OLMo self chain; C-2 X17/SmolLM3 dependent chain).
+- **P3o:** supported — X17/SmolLM3 bound `F2=cedar` served by X29/OLMo (C-2), `environmental_world_state` provenance. Third dependent completion across the program (EXP-STIG-005 pilot + run, now 006).
+- **P4:** not met — all committed persistence under OLMo only.
+
+## Run interpretation
+
+The REUSE-necessary law answered its question with a sharper negative than the pilot: even when internalization is the *only* way a trace value can reach an answer, the read path still cannot be measured because the write side does not activate — one TRACE selection in 108 opportunities (plus one in the pilot makes two selections in the entire program history), rejected on the same fact→value binding failure seen elsewhere. The bottleneck is confirmed upstream of REUSE: it is trace *writing*, specifically value-binding inside the write action.
+
+Meanwhile the world_state path replicated for a third consecutive design: the OLMo-serve / SmolLM3-bind division of labor completed a dependent chain in C-2 and a self-serving chain in C-1. The capability split — OLMo writes, SmolLM3 binds, Villanova intends without binding — is now stable across pilot + run under all three Latin-square rotations.
+
+## Run cost
+
+108 requests: 132,251 prompt bytes, 2,724 generated tokens, 37,461 prompt tokens, 1,520.0 s wall time including 12 model loads (~14.1 s/request median including loads).
+
+## Run security and authority regression
+
+Same invariants held over all 102 committed actions: proposals only, deterministic validated commit boundary, same-tick isolation, agent-scoped visibility, CAS-backed artifacts, replay-verified metrics. All 6 rejected proposals were recorded as events, never committed. The REUSE-necessary window law was verified by the capability fixture pre-execution.
+
+## Run evidence
+
+Completed run: `E:/WORLD/AI_CACHE/evidence/EXP_STIG_006_RUN`
+
+- result manifest: `6e0cbb64fddc0648538d91781085313ed90d1cc6127a0940805ec01c858db196`
+- planned manifest: `e04849ba032ae45319506badd6a863843bb39fa804b3c355328b8b367056fddb`
+- audit: **PASS** (SQLite replay, event records, CAS references, evidence hashes)
+- canonical state/event database: `world.sqlite`; per-tick observations/costs/loads sealed in `result.json` evidence hashes

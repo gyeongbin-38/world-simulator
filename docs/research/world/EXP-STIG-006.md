@@ -2,7 +2,10 @@
 
 ## Status
 
-PREREGISTERED DRAFT. No model forward has run under this configuration.
+EXECUTED — pilot (36 opportunities) and authorized larger run (108
+opportunities, 3 worlds/condition, Latin-square `[[0,1,2],[1,2,0],[2,0,1]]`)
+both complete with audit PASS. Findings are recorded in
+`docs/research/world/EXP-STIG-006-results.md`.
 
 This experiment extends EXP-STIG-005. The EXP-STIG-003/004/005 lineages
 remain authoritative for their own evidence.
