@@ -1,0 +1,67 @@
+{
+  "spec_schema_version": "1.0.0",
+  "execution_id": "F0_AB_EXECUTION_V1",
+  "experiment_id": "F0_FOUNDATION_AB_V1",
+  "experiment_spec": "specs/experiments/F0-foundation-ab-v1.yaml",
+  "status": "PENDING_RESOURCE_GATE",
+  "execution_authorized": false,
+  "authorization_condition": "f0_foundation_ab_gate.py must re-pass on the execution hardware with safe headroom for BOTH treatments before any optimizer step; the GTX 1050 record (A PASS / B oversubscription FAIL) does not authorize this execution",
+  "evidence_root": "E:/WORLD/AI_CACHE/evidence/F0_FOUNDATION_AB_V1",
+  "run_layout": {
+    "run_dir_template": "{evidence_root}/runs/{treatment}_s{seed_index}",
+    "treatments": ["A_NF4_QLORA", "B_BF16_LORA"],
+    "seed_indices": [0, 1, 2],
+    "paired_order": "identical between treatments per frozen spec"
+  },
+  "step_sequence": [
+    {
+      "step": "resource_gate",
+      "command": "python tools/f0_foundation_ab_gate.py --execute ...",
+      "required": "BOTH treatments PASS on the actual device",
+      "evidence": "gate manifest digest recorded before training"
+    },
+    {
+      "step": "train",
+      "command": "python tools/f0_foundation_ab_train.py --treatment {treatment} --seed-index {i} --output {run_dir}",
+      "count": 6,
+      "evidence": "{run_dir}/manifest.json + adapter artifacts, write-once"
+    },
+    {
+      "step": "eval",
+      "command": "python tools/f0_foundation_ab_eval.py --run-dir {run_dir} --suites integrity,serialization,retention,neutrality",
+      "count": 6,
+      "evidence": "{run_dir}/eval/eval_manifest.json + summaries.json + per-suite records"
+    },
+    {
+      "step": "compare",
+      "command": "python tools/f0_foundation_ab_eval.py --compare {run_dirs...} --output {evidence_root}/compare_report.json",
+      "verdict": "RESEARCH_CALL_NOT_AUTOMATED - descriptive paired report only"
+    },
+    {
+      "step": "founder_gates",
+      "command": "python tools/f0_foundation_ab_eval.py --run-dir {selected_run_dir} --suites founder_c0_v2,founder_c20_v1",
+      "condition": "only after a candidate is selected by the compare report review; post-selection only; never feeds the A/B choice"
+    },
+    {
+      "step": "motor_autonomous",
+      "command": "requires a new A0-v2 spec binding the selected candidate adapter_sha256; A0 v1 is frozen to FA-v1 identity and must not be retroactively changed",
+      "condition": "BLOCKED until A0-v2 is authored with the real candidate digest"
+    },
+    {
+      "step": "founder_freeze",
+      "command": "python tools/f0_founder_freeze.py --c0-manifest ... --c20-manifest ... --motor-manifest ... --autonomous-manifest ... --adapter-sha256 {selected} --output {evidence_root}/founder_freeze_record.json",
+      "schema": "specs/experiments/founder-freeze-record-v1.yaml",
+      "note": "FOUNDER_REJECTED records are still committed"
+    }
+  ],
+  "fail_closed_rules": [
+    "no optimizer step before the resource gate re-passes on the execution device",
+    "no CPU or asymmetric fallback anywhere in the chain",
+    "training manifest TRAIN_ABORT prevents evaluation of that run",
+    "any digest/spec/identity drift aborts before model calls",
+    "founder suites are opt-in and post-selection only"
+  ],
+  "sealed_from": [
+    "FOUNDATION_ADAPTER_SELECTION"
+  ]
+}
