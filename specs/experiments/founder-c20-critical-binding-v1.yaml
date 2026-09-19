@@ -1,0 +1,42 @@
+{
+  "spec_schema_version": "1.0.0",
+  "binding_id": "FOUNDER_C20_CRITICAL_BINDING_V1",
+  "status": "FROZEN",
+  "admission_id": "FOUNDER_MODEL_ADMISSION_V1",
+  "admission_spec": "specs/experiments/founder-model-admission.yaml",
+  "corpus_id": "FOUNDER_C20_V1",
+  "corpus_version": "1.0.0",
+  "corpus_artifact": "E:/WORLD/AI_CACHE/evidence/i05r6c/validated_context.json",
+  "corpus_artifact_sha256": "35338d7c1a0ab7d330775316bcd220f55530c3d98d60d4990ee3189e9fa322b1",
+  "role": "TAG_TO_CATEGORY_BINDING",
+  "purpose": "Bind the admission spec role-level critical_core_probe_tags to the corpus-native category field so the C20 critical-core set is pre-registered rather than interpreted at evaluation time.",
+  "tag_bindings": {
+    "SELF_IDENTITY": ["peer"],
+    "PEER_IDENTITY_REFERENCE": ["peer"],
+    "TARGET_REFERENCE": ["proposal_direction"],
+    "INCOMING_PROPOSAL_OWNERSHIP": ["incoming_proposal", "reference"],
+    "OUTGOING_PROPOSAL_OWNERSHIP": ["proposal_direction"],
+    "PROPOSAL_DIRECTION": ["proposal_direction"],
+    "PROPOSAL_TARGET": ["proposal_direction"],
+    "REPRODUCTION_PROPOSAL_HANDLE_GROUNDING": ["reference"]
+  },
+  "critical_category_union": [
+    "peer",
+    "incoming_proposal",
+    "proposal_direction",
+    "reference"
+  ],
+  "binding_notes": [
+    "SELF_IDENTITY has no dedicated corpus probe; self-vs-peer discrimination is exercised only inside peer-directory probes where SELF appears as a choice. Bound nominally to peer so every declared critical tag is covered; it adds no category beyond the union.",
+    "TARGET_REFERENCE binds to proposal_direction: the corpus target-handle probe (target of the outgoing proposal) is categorized proposal_direction.",
+    "INCOMING_PROPOSAL_OWNERSHIP spans incoming_proposal (listed-handle identification) and reference (proposer-handle binding)."
+  ],
+  "sealed_from": [
+    "TRAIN",
+    "DEV",
+    "HYPERPARAMETER_SELECTION",
+    "PROMPT_TUNING",
+    "FOUNDATION_ADAPTER_SELECTION"
+  ],
+  "post_selection_only": true
+}

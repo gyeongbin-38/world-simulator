@@ -11,6 +11,10 @@ does not cover:
   frozen noninferiority rule (RAW_RETENTION_BASELINE_V1 comparison).
 - ``neutrality``: F0_NEUTRALITY_SUITE_V2 closed-set channels via the frozen
   teacher-forced candidate scorer, plus the predeclared review-for flags.
+- ``founder_c0_v2`` / ``founder_c20_v1`` (opt-in): the post-selection
+  one-shot founder admission gates.  These corpora are sealed from
+  FOUNDATION_ADAPTER_SELECTION; they are never part of the default suite
+  set and never feed the paired A/B comparison.
 
 The tool is fail-closed: spec, suite, sentinel, dataset, tokenizer, and
 adapter digests are verified before any model call; evidence is written once.
@@ -84,6 +88,13 @@ NEUTRALITY_SUITE_PATH = Path(
 RAW_RETENTION_PATH = Path(
     "E:/WORLD/AI_CACHE/evidence/f0-raw-baselines-v1/retention_raw.jsonl"
 )
+C0V2_SPEC_PATH = REPOSITORY_ROOT / "specs/experiments/founder-c0-v2.yaml"
+C20_ARTIFACT_PATH = Path(
+    "E:/WORLD/AI_CACHE/evidence/i05r6c/validated_context.json"
+)
+ADMISSION_SPEC_PATH = (
+    REPOSITORY_ROOT / "specs/experiments/founder-model-admission.yaml"
+)
 
 SENTINEL_ID = "F0_NEUTRAL_RETENTION_SENTINEL_V1"
 SENTINEL_SHA256 = (
@@ -103,6 +114,37 @@ EVAL_SPLITS = trainer.EVAL_SPLITS
 SERIALIZATION_FAMILY = "ALREADY_SELECTED_ACTION_SERIALIZATION"
 
 ALL_SUITES = ("integrity", "serialization", "retention", "neutrality")
+
+# Post-selection one-shot founder admission gates.  These corpora are sealed
+# from FOUNDATION_ADAPTER_SELECTION: they must never feed the A/B choice and
+# are therefore opt-in only, never part of the default suite set.
+FOUNDER_SUITES = ("founder_c0_v2", "founder_c20_v1")
+
+C0V2_CORPUS_ID = "FOUNDER_C0_V2"
+C0V2_CORPUS_SHA256 = (
+    "05d07269265de5eb75a141a16543543adfebb8c01fccab23857f75b797069340"
+)
+C20_CORPUS_ID = "FOUNDER_C20_V1"
+C20_ARTIFACT_SHA256 = (
+    "35338d7c1a0ab7d330775316bcd220f55530c3d98d60d4990ee3189e9fa322b1"
+)
+C20_PROBE_COUNT = 20
+C20_OVERALL_MINIMUM = 0.90
+C20_BINDING_SPEC_PATH = (
+    REPOSITORY_ROOT / "specs/experiments/founder-c20-critical-binding-v1.yaml"
+)
+C20_BINDING_ID = "FOUNDER_C20_CRITICAL_BINDING_V1"
+
+# Pinned critical-category union for FOUNDER_C20_V1.  The admission spec lists
+# role-level tags rather than corpus field values; the frozen binding spec
+# (``founder-c20-critical-binding-v1.yaml``) records the tag->category mapping
+# and the tool requires its union to equal this pinned set exactly.
+C20_CRITICAL_CATEGORIES = (
+    "peer",
+    "incoming_proposal",
+    "proposal_direction",
+    "reference",
+)
 
 
 class EvalAbort(RuntimeError):
@@ -227,6 +269,288 @@ def _neutrality_audit() -> dict[str, Any]:
     }
 
 
+def _founder_c0_audit() -> dict[str, Any]:
+    """Verify the frozen FOUNDER_C0_V2 corpus identity and digest law."""
+
+    spec = _read_json(C0V2_SPEC_PATH)
+    if spec.get("corpus_id") != C0V2_CORPUS_ID or spec.get("status") != "FROZEN":
+        raise EvalAbort("FOUNDER_C0_V2 corpus identity mismatch")
+    law = spec.get("corpus_digest_law") or {}
+    payload = {field: spec[field] for field in law.get("payload_fields", ())}
+    digest = hashlib.sha256(
+        (
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+        ).encode("utf-8")
+    ).hexdigest()
+    if digest != C0V2_CORPUS_SHA256 or spec.get("corpus_sha256") != (
+        C0V2_CORPUS_SHA256
+    ):
+        raise EvalAbort("FOUNDER_C0_V2 corpus digest mismatch")
+    scoring = spec.get("scoring") or {}
+    if (
+        scoring.get("factual_correct_minimum") != 9
+        or scoring.get("reference_structure_valid_required") != 10
+        or scoring.get("malformed_maximum") != 0
+        or scoring.get("critical_core_accuracy_required") != 1.0
+        or scoring.get("critical_core_error_policy")
+        != "FAIL_REGARDLESS_OF_AGGREGATE"
+    ):
+        raise EvalAbort("FOUNDER_C0_V2 scoring law drifted")
+    probes = {str(probe["id"]): probe for probe in spec.get("probes", ())}
+    order = [str(probe_id) for probe_id in spec.get("probe_order", ())]
+    if len(probes) != 10 or sorted(order) != sorted(probes):
+        raise EvalAbort("FOUNDER_C0_V2 probe set or order mismatch")
+    if "FOUNDATION_ADAPTER_SELECTION" not in (spec.get("sealed_from") or ()):
+        raise EvalAbort("FOUNDER_C0_V2 selection firewall missing")
+    return {
+        "corpus_id": C0V2_CORPUS_ID,
+        "corpus_sha256": C0V2_CORPUS_SHA256,
+        "probe_order": order,
+        "probes": probes,
+        "scoring": scoring,
+    }
+
+
+def _founder_c20_audit() -> dict[str, Any]:
+    """Verify the frozen FOUNDER_C20_V1 source artifact and admission rule."""
+
+    admission = _read_json(ADMISSION_SPEC_PATH)
+    c20 = (admission.get("C20") or {})
+    if c20.get("corpus_id") != C20_CORPUS_ID:
+        raise EvalAbort("FOUNDER_C20_V1 admission identity mismatch")
+    if c20.get("source_artifact_sha256") != C20_ARTIFACT_SHA256:
+        raise EvalAbort("FOUNDER_C20_V1 admission artifact digest drifted")
+    if c20.get("probe_count") != C20_PROBE_COUNT:
+        raise EvalAbort("FOUNDER_C20_V1 probe count drifted")
+    if str(c20.get("overall_factual_accuracy_minimum")) != "0.90":
+        raise EvalAbort("FOUNDER_C20_V1 accuracy minimum drifted")
+    if str(c20.get("critical_core_accuracy_required")) != "1.00":
+        raise EvalAbort("FOUNDER_C20_V1 critical rule drifted")
+
+    binding = _read_json(C20_BINDING_SPEC_PATH)
+    if (
+        binding.get("binding_id") != C20_BINDING_ID
+        or binding.get("status") != "FROZEN"
+        or binding.get("admission_id") != admission.get("admission_id")
+        or binding.get("corpus_id") != C20_CORPUS_ID
+        or binding.get("corpus_artifact_sha256") != C20_ARTIFACT_SHA256
+    ):
+        raise EvalAbort("FOUNDER_C20 critical binding identity mismatch")
+    if "FOUNDATION_ADAPTER_SELECTION" not in (
+        binding.get("sealed_from") or ()
+    ):
+        raise EvalAbort("FOUNDER_C20 binding selection firewall missing")
+    tag_bindings = binding.get("tag_bindings") or {}
+    spec_tags = [str(tag) for tag in c20.get("critical_core_probe_tags", ())]
+    if sorted(tag_bindings) != sorted(spec_tags):
+        raise EvalAbort("FOUNDER_C20 binding does not cover declared tags")
+    bound = {
+        str(category)
+        for categories in tag_bindings.values()
+        for category in categories
+    }
+    declared_union = {
+        str(category)
+        for category in binding.get("critical_category_union", ())
+    }
+    if bound != declared_union or declared_union != set(
+        C20_CRITICAL_CATEGORIES
+    ):
+        raise EvalAbort("FOUNDER_C20 binding category union drifted")
+
+    artifact_digest = gate.sha256_file(C20_ARTIFACT_PATH)
+    if artifact_digest != C20_ARTIFACT_SHA256:
+        raise EvalAbort("FOUNDER_C20_V1 artifact digest mismatch")
+    corpus = _read_json(C20_ARTIFACT_PATH)
+    probes = corpus.get("probes") or []
+    if len(probes) != C20_PROBE_COUNT:
+        raise EvalAbort("FOUNDER_C20_V1 artifact probe count mismatch")
+    corpus_categories = {str(probe["category"]) for probe in probes}
+    if not bound <= corpus_categories:
+        raise EvalAbort("FOUNDER_C20 binding references unknown categories")
+    order = [str(probe["id"]) for probe in probes]
+    mapping_basis = "; ".join(
+        f"{tag}->{','.join(str(category) for category in categories)}"
+        for tag, categories in sorted(tag_bindings.items())
+    )
+    return {
+        "corpus_id": C20_CORPUS_ID,
+        "artifact_sha256": artifact_digest,
+        "probe_order": order,
+        "probes": {str(probe["id"]): probe for probe in probes},
+        "overall_minimum": C20_OVERALL_MINIMUM,
+        "critical_categories": C20_CRITICAL_CATEGORIES,
+        "critical_mapping_basis": mapping_basis,
+        "binding_id": C20_BINDING_ID,
+        "binding_sha256": gate.sha256_file(C20_BINDING_SPEC_PATH),
+    }
+
+
+def _render_founder_probe(probe: Mapping[str, Any]) -> str:
+    """Render one founder probe with the v1 raw_context byte format."""
+
+    facts = "\n".join(str(fact) for fact in probe["visible_facts"])
+    choices = "\n".join(f"- {choice}" for choice in probe["choices"])
+    return (
+        f"Visible facts:\n{facts}\n"
+        f"Question: {probe['question']}\n"
+        f"Choices:\n{choices}"
+    )
+
+
+def _founder_c0_suite(
+    runtime: TransformersModelRuntime,
+    corpus: Mapping[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for probe_id in corpus["probe_order"]:
+        probe = corpus["probes"][probe_id]
+        options = [str(choice) for choice in probe["choices"]]
+        scores = score_foundation_candidates(
+            runtime,
+            rendered_input=_render_founder_probe(probe),
+            candidates=options,
+        )
+        predicted = scores[0].candidate
+        expected = str(probe["expected"])
+        exact = predicted == expected
+        critical = bool(probe["critical_core"])
+        rows.append(
+            {
+                "probe_id": probe_id,
+                "semantic_family": str(probe["semantic_family"]),
+                "critical_core": critical,
+                "options": options,
+                "predicted": predicted,
+                "expected": expected,
+                "exact_match": exact,
+                "reference_structure_valid": predicted in options,
+                "malformed": False,
+            }
+        )
+    summary = _founder_c0_summary(rows, corpus["scoring"])
+    summary["corpus_sha256"] = corpus["corpus_sha256"]
+    return rows, summary
+
+
+def _founder_c0_summary(
+    rows: list[Mapping[str, Any]], scoring: Mapping[str, Any]
+) -> dict[str, Any]:
+    total = len(rows)
+    factual = sum(int(row["exact_match"]) for row in rows)
+    critical_rows = [row for row in rows if row["critical_core"]]
+    critical_correct = sum(int(row["exact_match"]) for row in critical_rows)
+    critical_rate = (
+        critical_correct / len(critical_rows) if critical_rows else 0.0
+    )
+    verdict = (
+        factual >= int(scoring["factual_correct_minimum"])
+        and critical_rate == float(scoring["critical_core_accuracy_required"])
+        and all(row["reference_structure_valid"] for row in rows)
+    )
+    return {
+        "corpus_id": C0V2_CORPUS_ID,
+        "transport": "TEACHER_FORCED_MEAN_TOKEN_LOG_PROBABILITY",
+        "selection_input": False,
+        "post_selection_only": True,
+        "probe_count": total,
+        "factual_correct": factual,
+        "factual_correct_minimum": int(scoring["factual_correct_minimum"]),
+        "reference_structure_valid": sum(
+            int(row["reference_structure_valid"]) for row in rows
+        ),
+        "malformed": 0,
+        "critical_core_correct": critical_correct,
+        "critical_core_total": len(critical_rows),
+        "critical_core_accuracy": critical_rate,
+        "verdict": "ADMISSION_PASS" if verdict else "ADMISSION_FAIL",
+        "scoring_law": dict(scoring),
+    }
+
+
+def _founder_c20_suite(
+    runtime: TransformersModelRuntime,
+    corpus: Mapping[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for probe_id in corpus["probe_order"]:
+        probe = corpus["probes"][probe_id]
+        options = [str(choice) for choice in probe["choices"]]
+        scores = score_foundation_candidates(
+            runtime,
+            rendered_input=_render_founder_probe(probe),
+            candidates=options,
+        )
+        predicted = scores[0].candidate
+        expected = str(probe["expected"])
+        exact = predicted == expected
+        critical = str(probe["category"]) in corpus["critical_categories"]
+        rows.append(
+            {
+                "probe_id": probe_id,
+                "category": str(probe["category"]),
+                "critical_core": critical,
+                "options": options,
+                "predicted": predicted,
+                "expected": expected,
+                "exact_match": exact,
+                "reference_structure_valid": predicted in options,
+                "malformed": False,
+            }
+        )
+    summary = _founder_c20_summary(
+        rows,
+        critical_categories=corpus["critical_categories"],
+        mapping_basis=corpus["critical_mapping_basis"],
+    )
+    summary["artifact_sha256"] = corpus["artifact_sha256"]
+    summary["binding_id"] = corpus["binding_id"]
+    summary["binding_sha256"] = corpus["binding_sha256"]
+    return rows, summary
+
+
+def _founder_c20_summary(
+    rows: list[Mapping[str, Any]],
+    *,
+    critical_categories: tuple[str, ...],
+    mapping_basis: str,
+) -> dict[str, Any]:
+    total = len(rows)
+    factual = sum(int(row["exact_match"]) for row in rows)
+    critical_rows = [row for row in rows if row["critical_core"]]
+    critical_correct = sum(int(row["exact_match"]) for row in critical_rows)
+    overall_rate = factual / total if total else 0.0
+    critical_rate = (
+        critical_correct / len(critical_rows) if critical_rows else 0.0
+    )
+    verdict = (
+        overall_rate >= C20_OVERALL_MINIMUM
+        and critical_rate == 1.0
+        and all(row["reference_structure_valid"] for row in rows)
+    )
+    return {
+        "corpus_id": C20_CORPUS_ID,
+        "transport": "TEACHER_FORCED_MEAN_TOKEN_LOG_PROBABILITY",
+        "selection_input": False,
+        "post_selection_only": True,
+        "probe_count": total,
+        "factual_correct": factual,
+        "overall_factual_accuracy": overall_rate,
+        "overall_factual_accuracy_minimum": C20_OVERALL_MINIMUM,
+        "critical_core_correct": critical_correct,
+        "critical_core_total": len(critical_rows),
+        "critical_core_accuracy": critical_rate,
+        "critical_categories": list(critical_categories),
+        "critical_mapping_basis": mapping_basis,
+        "verdict": "ADMISSION_PASS" if verdict else "ADMISSION_FAIL",
+    }
+
+
 def _run_manifest(run_dir: Path) -> dict[str, Any]:
     manifest_path = run_dir / "manifest.json"
     if not manifest_path.is_file():
@@ -257,11 +581,15 @@ def validate_only() -> dict[str, Any]:
     sentinel = _sentinel_audit()
     neutrality = _neutrality_audit()
     dataset = gate._dataset_audit()
+    founder_c0 = _founder_c0_audit()
+    founder_c20 = _founder_c20_audit()
     checks = {
         "sentinel": True,
         "neutrality": True,
         "dataset": True,
         "raw_retention_cases": bool(sentinel["raw_family_scores"]),
+        "founder_c0_v2": True,
+        "founder_c20_v1": True,
     }
     return {
         "eval_id": EVAL_ID,
@@ -282,6 +610,20 @@ def validate_only() -> dict[str, Any]:
                 ),
             },
             "dataset": {"manifest_digest": dataset["manifest_digest"]},
+            "founder_c0_v2": {
+                "probe_count": len(founder_c0["probe_order"]),
+                "corpus_sha256": founder_c0["corpus_sha256"],
+                "post_selection_only": True,
+            },
+            "founder_c20_v1": {
+                "probe_count": len(founder_c20["probe_order"]),
+                "artifact_sha256": founder_c20["artifact_sha256"],
+                "critical_categories": list(
+                    founder_c20["critical_categories"]
+                ),
+                "binding_id": founder_c20["binding_id"],
+                "post_selection_only": True,
+            },
         },
     }
 
@@ -787,13 +1129,15 @@ def execute(
 ) -> dict[str, Any]:
     if not run_dir.is_dir():
         raise EvalAbort(f"run directory missing: {run_dir}")
-    unknown = set(suites) - set(ALL_SUITES)
+    unknown = set(suites) - set(ALL_SUITES) - set(FOUNDER_SUITES)
     if unknown:
         raise EvalAbort(f"unknown suites: {sorted(unknown)}")
 
     manifest = None if base_only else _run_manifest(run_dir)
     sentinel = _sentinel_audit()
     neutrality = _neutrality_audit()
+    founder_c0 = _founder_c0_audit() if "founder_c0_v2" in suites else None
+    founder_c20 = _founder_c20_audit() if "founder_c20_v1" in suites else None
     adapter_dir = None if base_only else run_dir / "adapter"
     runtime, profile, tokenizer_audit = _load_candidate(adapter_dir=adapter_dir)
 
@@ -824,6 +1168,20 @@ def execute(
         path = eval_dir / "neutrality.json"
         gate._write_new_evidence(path, {"records": rows})
         artifacts["neutrality"] = gate.sha256_file(path)
+    if "founder_c0_v2" in suites:
+        rows, summaries["founder_c0_v2"] = _founder_c0_suite(
+            runtime, founder_c0 or {}
+        )
+        path = eval_dir / "founder_c0_v2.json"
+        gate._write_new_evidence(path, {"records": rows})
+        artifacts["founder_c0_v2"] = gate.sha256_file(path)
+    if "founder_c20_v1" in suites:
+        rows, summaries["founder_c20_v1"] = _founder_c20_suite(
+            runtime, founder_c20 or {}
+        )
+        path = eval_dir / "founder_c20_v1.json"
+        gate._write_new_evidence(path, {"records": rows})
+        artifacts["founder_c20_v1"] = gate.sha256_file(path)
 
     summary_path = eval_dir / "summaries.json"
     gate._write_new_evidence(summary_path, summaries)
@@ -989,7 +1347,11 @@ def _parser() -> argparse.ArgumentParser:
         "--suites",
         type=str,
         default=",".join(ALL_SUITES),
-        help="comma-separated subset of integrity,serialization,retention,neutrality",
+        help=(
+            "comma-separated subset of integrity,serialization,retention,"
+            "neutrality; post-selection gates founder_c0_v2 and "
+            "founder_c20_v1 are opt-in only"
+        ),
     )
     parser.add_argument("--base-only", action="store_true")
     parser.add_argument(

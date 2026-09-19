@@ -254,6 +254,180 @@ def test_compare_pairs_seed_deltas(tmp_path: Path) -> None:
     assert deltas[1] == pytest.approx(0.04)
 
 
+def test_founder_c0_audit_verifies_digest_law_and_firewall() -> None:
+    module = _tool_module()
+    audit = module._founder_c0_audit()
+    assert audit["corpus_sha256"] == module.C0V2_CORPUS_SHA256
+    assert audit["probe_order"] == [
+        "VC00",
+        "VC02R",
+        "VC09",
+        "VC12",
+        "VC15",
+        "VC01",
+        "VC11",
+        "VC05",
+        "VC10",
+        "VC16",
+    ]
+    assert audit["scoring"]["critical_core_error_policy"] == (
+        "FAIL_REGARDLESS_OF_AGGREGATE"
+    )
+
+
+def test_founder_c20_audit_verifies_artifact_and_admission_rule() -> None:
+    module = _tool_module()
+    audit = module._founder_c20_audit()
+    assert audit["artifact_sha256"] == module.C20_ARTIFACT_SHA256
+    assert len(audit["probe_order"]) == 20
+    assert audit["overall_minimum"] == 0.90
+    assert audit["binding_id"] == "FOUNDER_C20_CRITICAL_BINDING_V1"
+    assert tuple(audit["critical_categories"]) == (
+        module.C20_CRITICAL_CATEGORIES
+    )
+    # Every admission-spec critical tag must be bound; SELF_IDENTITY binds
+    # nominally to peer (no dedicated self-identity probe exists).
+    for tag in (
+        "SELF_IDENTITY",
+        "PEER_IDENTITY_REFERENCE",
+        "TARGET_REFERENCE",
+        "INCOMING_PROPOSAL_OWNERSHIP",
+        "OUTGOING_PROPOSAL_OWNERSHIP",
+        "PROPOSAL_DIRECTION",
+        "PROPOSAL_TARGET",
+        "REPRODUCTION_PROPOSAL_HANDLE_GROUNDING",
+    ):
+        assert f"{tag}->" in audit["critical_mapping_basis"]
+
+
+def test_founder_probe_renderer_matches_v1_raw_context_bytes() -> None:
+    module = _tool_module()
+    probe = {
+        "visible_facts": [
+            "Own visible age: 4",
+            "Visible peer handles: P0, P1",
+        ],
+        "question": (
+            "Select the option exactly supported by the visible peer directory."
+        ),
+        "choices": ["P0", "P8", "SELF"],
+    }
+    rendered = module._render_founder_probe(probe)
+    assert rendered == (
+        "Visible facts:\n"
+        "Own visible age: 4\n"
+        "Visible peer handles: P0, P1\n"
+        "Question: Select the option exactly supported by the visible peer "
+        "directory.\n"
+        "Choices:\n"
+        "- P0\n"
+        "- P8\n"
+        "- SELF"
+    )
+
+
+def _c0_row(probe_id: str, critical: bool, exact: bool) -> dict:
+    return {
+        "probe_id": probe_id,
+        "critical_core": critical,
+        "exact_match": exact,
+        "reference_structure_valid": True,
+    }
+
+
+def test_founder_c0_scoring_law_critical_failure_dominates() -> None:
+    module = _tool_module()
+    scoring = {
+        "factual_correct_minimum": 9,
+        "reference_structure_valid_required": 10,
+        "malformed_maximum": 0,
+        "critical_core_accuracy_required": 1.0,
+    }
+    passing = [_c0_row(f"VC{i:02d}", i < 8, True) for i in range(10)]
+    assert module._founder_c0_summary(passing, scoring)["verdict"] == (
+        "ADMISSION_PASS"
+    )
+    # One critical miss -> FAIL regardless of 9/10 aggregate.
+    critical_miss = [dict(row) for row in passing]
+    critical_miss[0]["exact_match"] = False
+    assert module._founder_c0_summary(critical_miss, scoring)["verdict"] == (
+        "ADMISSION_FAIL"
+    )
+    # One non-critical miss -> 9 factual, critical 1.0 -> PASS.
+    noncritical_miss = [dict(row) for row in passing]
+    noncritical_miss[9]["exact_match"] = False
+    assert module._founder_c0_summary(noncritical_miss, scoring)[
+        "verdict"
+    ] == "ADMISSION_PASS"
+
+
+def _c20_row(category: str, exact: bool) -> dict:
+    return {
+        "category": category,
+        "critical_core": category in (
+            "peer",
+            "incoming_proposal",
+            "proposal_direction",
+            "reference",
+        ),
+        "exact_match": exact,
+        "reference_structure_valid": True,
+    }
+
+
+def test_founder_c20_scoring_law_and_category_mapping() -> None:
+    module = _tool_module()
+    # 20 probes: 11 critical categories + 9 non-critical, mirroring corpus.
+    categories = (
+        ["peer"] * 3
+        + ["incoming_proposal"] * 3
+        + ["proposal_direction"] * 3
+        + ["reference"] * 2
+        + ["message_sender"] * 2
+        + ["message_body"] * 2
+        + ["history"] * 3
+        + ["peer_count"] * 2
+    )
+    assert len(categories) == 20
+    kwargs = {
+        "critical_categories": module.C20_CRITICAL_CATEGORIES,
+        "mapping_basis": "test basis",
+    }
+    passing = [_c20_row(category, True) for category in categories]
+    summary = module._founder_c20_summary(passing, **kwargs)
+    assert summary["verdict"] == "ADMISSION_PASS"
+    assert summary["critical_core_total"] == 11
+    assert summary["critical_categories"] == list(
+        module.C20_CRITICAL_CATEGORIES
+    )
+    # Two non-critical misses -> 18/20 = 0.90 exactly -> PASS.
+    borderline = [dict(row) for row in passing]
+    borderline[11]["exact_match"] = False
+    borderline[12]["exact_match"] = False
+    assert module._founder_c20_summary(borderline, **kwargs)["verdict"] == (
+        "ADMISSION_PASS"
+    )
+    # A single critical miss -> FAIL even with 19/20.
+    critical_miss = [dict(row) for row in passing]
+    critical_miss[0]["exact_match"] = False
+    assert module._founder_c20_summary(critical_miss, **kwargs)[
+        "verdict"
+    ] == "ADMISSION_FAIL"
+
+
+def test_founder_suites_are_opt_in_and_never_in_defaults() -> None:
+    module = _tool_module()
+    assert not set(module.FOUNDER_SUITES) & set(module.ALL_SUITES)
+    assert set(module.FOUNDER_SUITES) == {
+        "founder_c0_v2",
+        "founder_c20_v1",
+    }
+    default_suites = module._parser().parse_args([]).suites
+    assert not any(
+        founder in default_suites for founder in module.FOUNDER_SUITES
+    )
+
+
 def test_generation_request_identity_uses_frozen_treatment() -> None:
     module = _tool_module()
     profile = module.ModelProfile(
