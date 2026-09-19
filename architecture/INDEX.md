@@ -39,6 +39,7 @@ Each active document owns one bounded question. Do not duplicate its detailed ru
 | `../docs/research/world/EXP-STIG-005.md` | EXP-STIG-005 cross-family stigmergic cohort: EXP-STIG-004 world law with a three-family model cohort |
 | `../docs/research/world/EXP-STIG-006.md` | EXP-STIG-006 REUSE-necessary stigmergic read path: trace values reach the window only via internalization |
 | `../docs/research/world/EXP-STIG-INTEGRATION.md` | EXP-STIG-001–006 track integration: consolidated supported claims, capability profiles, and open questions |
+| `../docs/research/world/WORLD_EXP000_SOAK_RESULT_V1.md` | EXP-000 durability/restart/replay soak result over the admitted LIVE durable path |
 | `../docs/DOCS_POLICY.md` | repository documentation/context loading |
 | `../docs/observatory/SPRITES.md` | non-causal sprite identity and visual inheritance modes |
 | `decisions/ADR-300-001-self-send-addressing.md` | EXP-000 SEND target law and self-addressing prohibition |
