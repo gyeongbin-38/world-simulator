@@ -1,0 +1,49 @@
+{
+  "spec_schema_version": "1.0.0",
+  "record_schema_id": "FOUNDER_FREEZE_RECORD_V1",
+  "status": "FROZEN",
+  "admission_id": "FOUNDER_MODEL_ADMISSION_V1",
+  "admission_spec": "specs/experiments/founder-model-admission.yaml",
+  "role": "TERMINAL_RESULT_RECORD_SCHEMA",
+  "purpose": "Pre-register the exact shape of the FOUNDER_FREEZE result record so the terminal admission step is committed against a fixed schema rather than improvised after gate evidence exists.",
+  "required_fields": {
+    "record_schema_id": "must equal FOUNDER_FREEZE_RECORD_V1",
+    "admission_id": "must equal FOUNDER_MODEL_ADMISSION_V1",
+    "candidate": {
+      "base_model_repo": "pinned base repository id",
+      "base_model_revision": "pinned base commit",
+      "base_checkpoint_sha256": "sha256 of the immutable base checkpoint",
+      "adapter_artifact_sha256": "sha256 of the admitted adapter artifact; null only if the admitted candidate is the unadapted base"
+    },
+    "gate_evidence": {
+      "C0": "sha256 of the eval_manifest.json for a founder_c0_v2 suite run whose summary verdict is ADMISSION_PASS",
+      "C20": "sha256 of the eval_manifest.json for a founder_c20_v1 suite run whose summary verdict is ADMISSION_PASS",
+      "MOTOR": "sha256 of the A0 protocol evidence manifest for the MOTOR gate",
+      "AUTONOMOUS": "sha256 of the A0 protocol evidence manifest for the AUTONOMOUS gate"
+    },
+    "verdict": "FOUNDER_ADMITTED or FOUNDER_REJECTED; never inferred - the record exists only after all four gate evidence digests are committed",
+    "recorded_at_utc": "ISO-8601 commit time",
+    "recorder": "tool or operator identity committing the record",
+    "environment": "package versions, platform, git state at record time"
+  },
+  "verification_rules": [
+    "every gate_evidence digest must resolve to an existing immutable evidence artifact written before the record",
+    "every referenced gate summary must carry verdict ADMISSION_PASS; a single FAIL makes the record FOUNDER_REJECTED and still requires the record",
+    "the record is write-once: a second record for the same admission_id is refused",
+    "the record does not mutate canonical runtime state and does not promote the adapter; promotion remains a separate decision",
+    "FOUNDER_REJECTED records are terminal for that candidate identity; a changed artifact constitutes a new candidate"
+  ],
+  "forbidden_interpretations": [
+    "behavioral_preference",
+    "social_desirability",
+    "mate_preference",
+    "fitness_score"
+  ],
+  "sealed_from": [
+    "TRAIN",
+    "DEV",
+    "HYPERPARAMETER_SELECTION",
+    "PROMPT_TUNING",
+    "FOUNDATION_ADAPTER_SELECTION"
+  ]
+}
